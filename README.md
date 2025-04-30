@@ -1,0 +1,26 @@
+# RDKit MCP Server
+
+MCP Server providing RDKit cheminformatics tools.
+
+## Installation
+
+```bash
+# Installation instructions will go here
+# Note: RDKit installation might require specific steps (e.g., via conda)
+pip install .
+```
+
+## Usage
+
+```bash
+python -m rdkit_mcp_server
+```
+
+This will start the server using STDIO transport by default.
+
+## Available Tools
+
+- `parse_molecule`: Parses a SMILES string and returns basic properties.
+- `draw_molecule`: Generates a PNG image of a molecule from SMILES and returns a file URI.
+- `compute_fingerprint`: Computes a molecular fingerprint (default: Morgan).
+- `tanimoto_similarity`: Calculates Tanimoto similarity between two molecules.
