@@ -1,6 +1,6 @@
 import os
 import logging
-from modelcontextprotocol.server.fastmcp import FastMCP
+from mcp.server.fastmcp import FastMCP
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -40,9 +40,8 @@ def main():
     logger.info(f"Starting RDKit MCP Server with transport: {transport}")
     if transport == "sse":
         logger.info(f"SSE transport selected. Listening on {host}:{port}")
-        mcp.run(transport="sse", host=host, port=port)
+        mcp.run(transport="sse")
     elif transport == "stdio":
-        logger.info("STDIO transport selected.")
         mcp.run(transport="stdio")
     else:
         logger.error(f"Unsupported transport type: {transport}. Defaulting to stdio.")
