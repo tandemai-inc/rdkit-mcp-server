@@ -65,13 +65,13 @@ async def parse_molecule(smiles: str) -> Dict[str, Union[str, int, float]]:
         # Calculate properties using RDKit (run in thread pool as they might block)
         atom_count = await asyncio.to_thread(mol.GetNumAtoms)
         heavy_atom_count = await asyncio.to_thread(mol.GetNumHeavyAtoms)
-        # formula = await asyncio.to_thread(Descriptors.MolFormula, mol)
+        formula = await asyncio.to_thread(AllChem.CalcMolFormula, mol)
         mol_weight = await asyncio.to_thread(Descriptors.MolWt, mol)
 
         return {
             "atom_count": atom_count,
             "heavy_atom_count": heavy_atom_count,
-            # "formula": formula,
+            "formula": formula,
             "molecular_weight": round(mol_weight, 4)
         }
     except Exception as e:
