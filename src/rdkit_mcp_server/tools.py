@@ -24,6 +24,8 @@ except ImportError:
     logger.warning("Pillow library not found. Molecule drawing to PNG will not work.")
     PILLOW_AVAILABLE = False
 
+OUTPUT_DIR = os.path.join(os.getcwd(), 'outputs')
+
 # Helper function to handle RDKit molecule loading and errors
 def _load_molecule(smiles: str) -> Optional[Chem.Mol]:
     """Loads a molecule from SMILES, returning None on failure."""
@@ -106,9 +108,8 @@ async def draw_molecule(smiles: str, width: int = 300, height: int = 300) -> Dic
         img = await asyncio.to_thread(Draw.MolToImage, mol, size=(width, height))
 
         # Save image to a temporary file
-        temp_dir = tempfile.gettempdir()
         file_name = f"rdkit_mol_{uuid.uuid4()}.png"
-        file_path = os.path.join(temp_dir, file_name)
+        file_path = os.path.join(OUTPUT_DIR, file_name)
 
         await asyncio.to_thread(img.save, file_path)
 
@@ -116,9 +117,9 @@ async def draw_molecule(smiles: str, width: int = 300, height: int = 300) -> Dic
         # Note: Standard file URI format is file:///path/to/file
         # On Windows, it might be file:///C:/path/to/file
         if os.name == 'nt': # Windows
-             file_uri = f"file:///{file_path.replace(os.sep, '/')}"
+            file_uri = f"file:///{file_path.replace(os.sep, '/')}"
         else: # POSIX (macOS, Linux)
-             file_uri = f"file://{file_path}"
+            file_uri = f"file://{file_path}"
 
 
         logger.info(f"Molecule image saved to: {file_path}")

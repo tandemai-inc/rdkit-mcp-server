@@ -7,6 +7,7 @@ if __name__=="__main__":
     OPENAI = 'openai'
     MCP = 'mcp'
 
+    # TODO: Set this with command line args
     client_to_use = OPENAI
 
     if client_to_use == OPENAI:
