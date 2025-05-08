@@ -105,7 +105,7 @@ async def draw_molecule(smiles: str, width: int = 300, height: int = 300, file_n
         # Generate image using RDKit (sync call, run in thread)
         img = await asyncio.to_thread(Draw.MolToImage, mol, size=(width, height))
 
-        # Save image to a temporary file
+        # Save image to file in output directory
         if not file_name:
             logger.warning("No file name provided. Using default naming convention.")
             file_name = f"rdkit_mol_{datetime.now()}.png"
