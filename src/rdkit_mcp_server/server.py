@@ -27,7 +27,7 @@ except Exception as e:
 def main():
     """Main function to run the MCP server."""
     # Determine transport method (default to stdio)
-    transport = os.getenv("MCP_TRANSPORT", "stdio").lower()
+    transport = os.getenv("MCP_TRANSPORT", "sse").lower()
     host = os.getenv("MCP_HOST", "127.0.0.1") # Default host for SSE
     port_str = os.getenv("MCP_PORT", "8000")  # Default port for SSE
 
