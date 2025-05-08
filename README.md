@@ -13,10 +13,14 @@ pip install .
 ## Usage
 
 ```bash
-python -m rdkit_mcp_server
+# Start server
+python run_server.py
+
+# Start client in another terminal window
+python run_client.py
 ```
 
-This will start the server using STDIO transport by default.
+This will start the server using SSE transport by default.
 
 ## Available Tools
 
