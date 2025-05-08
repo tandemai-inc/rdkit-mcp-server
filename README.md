@@ -17,6 +17,7 @@ pip install .
 python run_server.py
 
 # Start client in another terminal window
+export OPENAI_API_KEY="sk-proj-xxx"
 python run_client.py
 ```
 
