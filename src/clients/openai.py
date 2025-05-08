@@ -8,15 +8,20 @@ from agents.model_settings import ModelSettings
 async def run(mcp_server: MCPServer, prompt: str = None):
     prompt = prompt or ""
     agent = Agent(
-        name="Assistant",
+        name="RDKIT Agent",
         instructions="Use the tools to answer the questions.",
         mcp_servers=[mcp_server],
         model_settings=ModelSettings(tool_choice="required"),
     )
-    print(f"Running: {prompt}")
     result = await Runner.run(starting_agent=agent, input=prompt)
     print(result.final_output)
 
+MCP_URL = "http://localhost:8000"
+MCP_NAME = "RDKIT MCP Server"
+OPENAI_TRACE_URL = "https://platform.openai.com/traces/trace?trace_id={trace_id}"
+
+# Default prompt makes testing more convenient
+DEFAULT_PROMPT = 'Get basic properties of SMILES CC(=O)NC1=CC=C(C=C1)O'
 
 async def main():
     # Create a while loop that requests a prompt from a user, and then sends it to the agent to process
@@ -24,17 +29,18 @@ async def main():
         prompt = input("Enter a prompt (or 'exit' to quit): ")
         if prompt.lower() == "exit":
             break
-        # Create a new MCPServer instance
+        if not prompt:
+            prompt = DEFAULT_PROMPT
+        
         async with MCPServerSse(
-            name="SSE Python Server",
+            name=MCP_NAME,
             params={
-                "url": "http://localhost:8000/sse",
+                "url": MCP_URL,
             },
         ) as server:
             trace_id = gen_trace_id()
-            with trace(workflow_name="MCP Example", trace_id=trace_id):
-                print(f"View trace: https://platform.openai.com/traces/trace?trace_id={trace_id}\n")
+            with trace(workflow_name=prompt, trace_id=trace_id):
+                print(f"View trace: {OPENAI_TRACE_URL.format(trace_id)}\n")
                 await run(server, prompt)
-
 if __name__ == "__main__":
     asyncio.run(main())
