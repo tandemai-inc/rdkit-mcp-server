@@ -12,11 +12,13 @@ pip install .
 
 ## Usage
 
+### Start server
 ```bash
-# Start server
 python run_server.py
+```
 
-# Start client in another terminal
+### Start client in another terminal
+```bash
 export OPENAI_API_KEY="sk-proj-xxx"
 python run_client.py
 ```
