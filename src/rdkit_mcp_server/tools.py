@@ -79,7 +79,7 @@ async def parse_molecule(smiles: str) -> Dict[str, Union[str, int, float]]:
         return {"error": f"Error calculating properties: {e}"}
 
 @mcp.tool()
-async def draw_molecule(smiles: str, width: int = 300, height: int = 300) -> Dict[str, str]:
+async def draw_molecule(smiles: str, width: int = 300, height: int = 300, file_name=None) -> Dict[str, str]:
     """
     Generates a PNG image representation of a molecule from its SMILES string.
 
@@ -87,7 +87,7 @@ async def draw_molecule(smiles: str, width: int = 300, height: int = 300) -> Dic
         smiles: The SMILES representation of the molecule.
         width: The desired width of the image in pixels (default: 300).
         height: The desired height of the image in pixels (default: 300).
-
+        file_name: Optional name for the output file. Must be a .png format.
     Returns:
         A dictionary containing a 'file_uri' key with the file:// URI of the generated PNG image,
         or an 'error' key with an error message string if generation fails.
@@ -106,7 +106,9 @@ async def draw_molecule(smiles: str, width: int = 300, height: int = 300) -> Dic
         img = await asyncio.to_thread(Draw.MolToImage, mol, size=(width, height))
 
         # Save image to a temporary file
-        file_name = f"rdkit_mol_{datetime.now()}.png"
+        if not file_name:
+            logger.warning("No file name provided. Using default naming convention.")
+            file_name = f"rdkit_mol_{datetime.now()}.png"
         file_path = os.path.join(OUTPUT_DIR, file_name)
 
         await asyncio.to_thread(img.save, file_path)
