@@ -14,7 +14,7 @@ authors = [
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License", # Choose appropriate license
+    "License :: OSI Approved :: TBD License", # Choose appropriate license
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering :: Chemistry",
     "Framework :: AsyncIO",
