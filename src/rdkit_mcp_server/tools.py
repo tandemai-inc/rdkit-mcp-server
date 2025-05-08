@@ -108,7 +108,7 @@ async def draw_molecule(smiles: str, width: int = 300, height: int = 300, file_n
         # Save image to file in output directory
         if not file_name:
             logger.warning("No file name provided. Using default naming convention.")
-            file_name = f"rdkit_mol_{datetime.now()}.png"
+            file_name = f"rdkit_mol_{datetime.now().strftime('%Y%m%d-%H%M%S')}.png"
         file_path = os.path.join(OUTPUT_DIR, file_name)
 
         await asyncio.to_thread(img.save, file_path)
