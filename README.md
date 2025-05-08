@@ -12,11 +12,18 @@ pip install .
 
 ## Usage
 
+### Start server
 ```bash
-python -m rdkit_mcp_server
+python run_server.py
 ```
 
-This will start the server using STDIO transport by default.
+### Start client in another terminal
+```bash
+export OPENAI_API_KEY="sk-proj-xxx"
+python run_client.py
+```
+
+This will start the server using SSE transport by default.
 
 ## Available Tools
 

@@ -1,9 +1,7 @@
 import asyncio
-import logging
 import os
-import tempfile
-import uuid
 from typing import Dict, Union, Optional
+from datetime import datetime
 
 # Import the MCP instance from the server module to use the @mcp.tool() decorator
 from .server import mcp, logger
@@ -23,6 +21,8 @@ try:
 except ImportError:
     logger.warning("Pillow library not found. Molecule drawing to PNG will not work.")
     PILLOW_AVAILABLE = False
+
+OUTPUT_DIR = os.path.join(os.getcwd(), 'outputs')
 
 # Helper function to handle RDKit molecule loading and errors
 def _load_molecule(smiles: str) -> Optional[Chem.Mol]:
@@ -65,7 +65,7 @@ async def parse_molecule(smiles: str) -> Dict[str, Union[str, int, float]]:
         # Calculate properties using RDKit (run in thread pool as they might block)
         atom_count = await asyncio.to_thread(mol.GetNumAtoms)
         heavy_atom_count = await asyncio.to_thread(mol.GetNumHeavyAtoms)
-        formula = await asyncio.to_thread(Descriptors.MolFormula, mol)
+        formula = await asyncio.to_thread(AllChem.CalcMolFormula, mol)
         mol_weight = await asyncio.to_thread(Descriptors.MolWt, mol)
 
         return {
@@ -79,7 +79,7 @@ async def parse_molecule(smiles: str) -> Dict[str, Union[str, int, float]]:
         return {"error": f"Error calculating properties: {e}"}
 
 @mcp.tool()
-async def draw_molecule(smiles: str, width: int = 300, height: int = 300) -> Dict[str, str]:
+async def draw_molecule(smiles: str, width: int = 300, height: int = 300, file_name=None) -> Dict[str, str]:
     """
     Generates a PNG image representation of a molecule from its SMILES string.
 
@@ -87,7 +87,7 @@ async def draw_molecule(smiles: str, width: int = 300, height: int = 300) -> Dic
         smiles: The SMILES representation of the molecule.
         width: The desired width of the image in pixels (default: 300).
         height: The desired height of the image in pixels (default: 300).
-
+        file_name: Optional name for the output file. Must be a .png format.
     Returns:
         A dictionary containing a 'file_uri' key with the file:// URI of the generated PNG image,
         or an 'error' key with an error message string if generation fails.
@@ -105,10 +105,11 @@ async def draw_molecule(smiles: str, width: int = 300, height: int = 300) -> Dic
         # Generate image using RDKit (sync call, run in thread)
         img = await asyncio.to_thread(Draw.MolToImage, mol, size=(width, height))
 
-        # Save image to a temporary file
-        temp_dir = tempfile.gettempdir()
-        file_name = f"rdkit_mol_{uuid.uuid4()}.png"
-        file_path = os.path.join(temp_dir, file_name)
+        # Save image to file in output directory
+        if not file_name:
+            logger.warning("No file name provided. Using default naming convention.")
+            file_name = f"rdkit_mol_{datetime.now().strftime('%Y%m%d-%H%M%S')}.png"
+        file_path = os.path.join(OUTPUT_DIR, file_name)
 
         await asyncio.to_thread(img.save, file_path)
 
@@ -116,9 +117,9 @@ async def draw_molecule(smiles: str, width: int = 300, height: int = 300) -> Dic
         # Note: Standard file URI format is file:///path/to/file
         # On Windows, it might be file:///C:/path/to/file
         if os.name == 'nt': # Windows
-             file_uri = f"file:///{file_path.replace(os.sep, '/')}"
+            file_uri = f"file:///{file_path.replace(os.sep, '/')}"
         else: # POSIX (macOS, Linux)
-             file_uri = f"file://{file_path}"
+            file_uri = f"file://{file_path}"
 
 
         logger.info(f"Molecule image saved to: {file_path}")

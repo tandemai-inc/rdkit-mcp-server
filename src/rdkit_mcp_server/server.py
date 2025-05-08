@@ -1,6 +1,6 @@
 import os
 import logging
-from modelcontextprotocol.server.fastmcp import FastMCP
+from mcp.server.fastmcp import FastMCP
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -27,7 +27,7 @@ except Exception as e:
 def main():
     """Main function to run the MCP server."""
     # Determine transport method (default to stdio)
-    transport = os.getenv("MCP_TRANSPORT", "stdio").lower()
+    transport = os.getenv("MCP_TRANSPORT", "sse").lower()
     host = os.getenv("MCP_HOST", "127.0.0.1") # Default host for SSE
     port_str = os.getenv("MCP_PORT", "8000")  # Default port for SSE
 
@@ -40,9 +40,8 @@ def main():
     logger.info(f"Starting RDKit MCP Server with transport: {transport}")
     if transport == "sse":
         logger.info(f"SSE transport selected. Listening on {host}:{port}")
-        mcp.run(transport="sse", host=host, port=port)
+        mcp.run(transport="sse")
     elif transport == "stdio":
-        logger.info("STDIO transport selected.")
         mcp.run(transport="stdio")
     else:
         logger.error(f"Unsupported transport type: {transport}. Defaulting to stdio.")
