@@ -6,7 +6,7 @@ from agents.model_settings import ModelSettings
 
 
 AGENT_INSTRUCTIONS = (
-    'YOu are an agent that assists scientist in the field of chemistry. '
+    'You are an agent that assists scientist in the field of chemistry. '
     'Use the tools to answer the questions. All numeric values in response must be based on the output of the tools. '
     'The final output will be read in a terminal; do not use Markdown or any other formatting. '
 )
