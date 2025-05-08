@@ -5,11 +5,19 @@ from agents.mcp import MCPServer, MCPServerSse
 from agents.model_settings import ModelSettings
 
 
+MCP_URL = "http://localhost:8000/sse"
+MCP_NAME = "RDKIT MCP Server"
+OPENAI_TRACE_URL = "https://platform.openai.com/traces/trace?trace_id={}"
+
 AGENT_INSTRUCTIONS = (
-    "You are an agent that leverages the RDkit library to aid scientists in the field of chemistry. "
+    "You are an agent that aids scientists working in the field of chemistry. "
+    "You have access to a set of tools that can be used to perform various cheminformatics tasks. "
     "Use the tools to answer the user's questions. All numeric values in response must be based on the output of the tools. "
     "The final output will be read in a terminal; do not use Markdown or any other formatting. "
 )
+
+# Default prompt makes testing more convenient
+DEFAULT_PROMPT = 'Get basic properties of SMILES CC(=O)NC1=CC=C(C=C1)O'
 
 
 async def run(mcp_server: MCPServer, prompt: str = None):
@@ -23,12 +31,6 @@ async def run(mcp_server: MCPServer, prompt: str = None):
     result = await Runner.run(starting_agent=agent, input=prompt)
     print(result.final_output)
 
-MCP_URL = "http://localhost:8000/sse"
-MCP_NAME = "RDKIT MCP Server"
-OPENAI_TRACE_URL = "https://platform.openai.com/traces/trace?trace_id={}"
-
-# Default prompt makes testing more convenient
-DEFAULT_PROMPT = 'Get basic properties of SMILES CC(=O)NC1=CC=C(C=C1)O'
 
 async def main():
     # Create a while loop that requests a prompt from a user, and then sends it to the agent to process
