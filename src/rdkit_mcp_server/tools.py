@@ -1,7 +1,7 @@
 import asyncio
 import os
-import uuid
 from typing import Dict, Union, Optional
+from datetime import datetime
 
 # Import the MCP instance from the server module to use the @mcp.tool() decorator
 from .server import mcp, logger
@@ -106,7 +106,7 @@ async def draw_molecule(smiles: str, width: int = 300, height: int = 300) -> Dic
         img = await asyncio.to_thread(Draw.MolToImage, mol, size=(width, height))
 
         # Save image to a temporary file
-        file_name = f"rdkit_mol_{uuid.uuid4()}.png"
+        file_name = f"rdkit_mol_{datetime.now()}.png"
         file_path = os.path.join(OUTPUT_DIR, file_name)
 
         await asyncio.to_thread(img.save, file_path)
