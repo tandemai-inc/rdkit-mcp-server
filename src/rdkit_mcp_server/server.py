@@ -1,27 +1,35 @@
+import itertools
 import os
 import logging
 from mcp.server.fastmcp import FastMCP
 
-# Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# Initialize FastMCP server instance
-# The server name might be used by clients to identify this server.
 mcp = FastMCP("RDKit-MCP Server")
 
-# Import tool functions from the tools module.
-# The @mcp.tool() decorator in tools.py will register them with this 'mcp' instance.
-logger.info("Importing RDKit tools...")
-try:
-    from . import tools
-    logger.info("Successfully imported tools.")
-except ImportError as e:
-    logger.error(f"Failed to import tools module: {e}")
-    # Depending on the desired behavior, we might exit or continue without tools.
-    # For now, we'll log the error and continue, but the server might not have tools.
-except Exception as e:
-    logger.error(f"An unexpected error occurred during tool import: {e}")
+from . import tools as base_tools
+from .rdkit.Chem.Descriptors import tools as rdkit_tools
+
+# Modules to search for tools
+TOOL_MODULES = [
+    base_tools,
+    rdkit_tools,
+]
+
+
+def get_tools_from_module(module):
+    """Get all functions from the module that are decorated with @mcp.tool()"""
+    return [
+        getattr(module, func) for func in dir(module) if callable(getattr(module, func)) and not func.startswith("_")
+    ]
+
+
+def get_all_tools(tool_modules):
+    tool_fns = itertools.chain.from_iterable(
+        get_tools_from_module(module) for module in tool_modules
+    )
+    return tool_fns
 
 
 def main():
@@ -36,6 +44,13 @@ def main():
     except ValueError:
         logger.warning(f"Invalid MCP_PORT value '{port_str}'. Using default port 8000.")
         port = 8000
+    
+    logger.info("Registering tools with MCP server...")
+    for tool in get_all_tools():
+        try:
+            mcp.add_tool(tool)
+        except Exception as e:
+            logger.error(f"Failed to register tool {tool.__name__}: {e}")
 
     logger.info(f"Starting RDKit MCP Server with transport: {transport}")
     if transport == "sse":
