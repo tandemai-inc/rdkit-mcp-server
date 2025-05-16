@@ -3,7 +3,7 @@ import os
 from typing import Dict, Union, Optional
 from datetime import datetime
 from mcp.server.fastmcp import FastMCP
-
+from mcp.server.fastmcp.exceptions import ToolError
 import logging
 
 logger = logging.getLogger(__name__)
@@ -65,7 +65,7 @@ def register_tools(mcp: FastMCP):
         mol = await asyncio.to_thread(_load_molecule, smiles) # Run sync RDKit call in thread
 
         if mol is None:
-            return {"error": f"Invalid or unparsable SMILES string: {smiles}"}
+            raise ToolError(f"Invalid or unparsable SMILES string: {smiles}")
 
         try:
             # Calculate properties using RDKit (run in thread pool as they might block)
@@ -81,8 +81,7 @@ def register_tools(mcp: FastMCP):
                 "molecular_weight": round(mol_weight, 4)
             }
         except Exception as e:
-            logger.error(f"Error calculating properties for SMILES '{smiles}': {e}")
-            return {"error": f"Error calculating properties: {e}"}
+            raise ToolError(f"Error calculating properties for SMILES '{smiles}': {e}")
 
 
     @mcp.tool()
@@ -102,11 +101,11 @@ def register_tools(mcp: FastMCP):
         """
         logger.info(f"Tool 'draw_molecule' called for SMILES: {smiles[:30]}...")
         if not RDKIT_AVAILABLE or not PILLOW_AVAILABLE:
-            return {"error": "RDKit or Pillow library not available for drawing."}
+            raise ToolError("RDKit or Pillow library not available for drawing.")
 
         mol = await asyncio.to_thread(_load_molecule, smiles)
         if mol is None:
-            return {"error": f"Invalid or unparsable SMILES string: {smiles}"}
+            raise ToolError(f"Invalid or unparsable SMILES string: {smiles}")
 
         try:
             # Generate image using RDKit (sync call, run in thread)
@@ -134,8 +133,7 @@ def register_tools(mcp: FastMCP):
 
         except Exception as e:
             logger.error(f"Error drawing molecule for SMILES '{smiles}': {e}")
-            return {"error": f"Error generating molecule image: {e}"}
-
+            raise ToolError(f"Error generating molecule image: {e}")
 
 
     @mcp.tool()
@@ -157,7 +155,7 @@ def register_tools(mcp: FastMCP):
         logger.info(f"Tool 'compute_fingerprint' called for SMILES: {smiles[:30]}..., Method: {method}")
         mol = await asyncio.to_thread(_load_molecule, smiles)
         if mol is None:
-            return {"error": f"Invalid or unparsable SMILES string: {smiles}"}
+            raise ToolError(f"Invalid or unparsable SMILES string: {smiles}")
 
         try:
             fp = None
@@ -169,7 +167,7 @@ def register_tools(mcp: FastMCP):
             elif method_lower == "rdkit":
                 fp = await asyncio.to_thread(Chem.RDKFingerprint, mol, fpSize=nBits)
             else:
-                return {"error": f"Unsupported fingerprint method: {method}. Supported methods: 'morgan', 'rdkit'."}
+                raise ToolError(f"Unsupported fingerprint method: {method}. Supported methods: 'morgan', 'rdkit'.")
 
             # Convert fingerprint to hex string
             fp_hex = await asyncio.to_thread(fp.ToBitString) # Get binary string first
@@ -183,7 +181,7 @@ def register_tools(mcp: FastMCP):
 
         except Exception as e:
             logger.error(f"Error computing fingerprint for SMILES '{smiles}': {e}")
-            return {"error": f"Error computing fingerprint: {e}"}
+            raise ToolError(f"Error computing fingerprint: {e}")
 
 
     @mcp.tool()
@@ -210,9 +208,9 @@ def register_tools(mcp: FastMCP):
         mol1, mol2 = await asyncio.gather(mol1_task, mol2_task)
 
         if mol1 is None:
-            return {"error": f"Invalid or unparsable SMILES string for molecule 1: {smiles1}"}
+            raise ToolError(f"Invalid or unparsable SMILES string for molecule 1: {smiles1}")
         if mol2 is None:
-            return {"error": f"Invalid or unparsable SMILES string for molecule 2: {smiles2}"}
+            raise ToolError(f"Invalid or unparsable SMILES string for molecule 2: {smiles2}")
 
         try:
             fp1 = None
@@ -240,10 +238,10 @@ def register_tools(mcp: FastMCP):
 
         except ValueError as ve: # Catch specific error from get_fp
             logger.error(f"Fingerprint method error: {ve}")
-            return {"error": str(ve)}
+            raise ToolError(str(ve))
         except Exception as e:
             logger.error(f"Error calculating similarity between '{smiles1}' and '{smiles2}': {e}")
-            return {"error": f"Error calculating similarity: {e}"}
+            raise ToolError(f"Error calculating similarity: {e}")
 
     # Log all tool function names defined in register_tools
     tool_functions = [
