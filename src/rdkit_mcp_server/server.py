@@ -2,7 +2,7 @@ import os
 import logging
 from mcp.server.fastmcp import FastMCP
 
-from .tools import register_tools
+from .tools.register_tools import register_tools
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 mcp = FastMCP("RDKit-MCP Server")
 
 
-def main():
+async def main():
     """Main function to run the MCP server."""
     # Determine transport method (default to stdio)
     transport = os.getenv("MCP_TRANSPORT", "sse").lower()
@@ -28,7 +28,7 @@ def main():
     # TODO: Add settings to have whitelist and blacklist
     whitelist = []
     blacklist = []
-    register_tools(mcp, whitelist=whitelist, blacklist=blacklist)
+    await register_tools(mcp, whitelist=whitelist, blacklist=blacklist)
 
     logger.info(f"Starting RDKit MCP Server with transport: {transport}")
     if transport == "sse":

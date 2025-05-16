@@ -4,7 +4,7 @@ from rdkit import Chem
 from rdkit.Chem import Descriptors
 
 from mcp.server.fastmcp.exceptions import ToolError
-from ...decorators import rdkit_tool
+from ...utils import rdkit_tool
 logger = logging.getLogger(__name__)
 
 

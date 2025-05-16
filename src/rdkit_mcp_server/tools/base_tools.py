@@ -2,9 +2,8 @@ import asyncio
 import os
 from typing import Dict, Union, Optional
 from datetime import datetime
-from mcp.server.fastmcp import FastMCP
 from mcp.server.fastmcp.exceptions import ToolError
-from .decorators import rdkit_tool
+from .utils import rdkit_tool
 import logging
 
 logger = logging.getLogger(__name__)
@@ -242,14 +241,17 @@ async def tanimoto_similarity(smiles1: str, smiles2: str, method: str = "morgan"
         logger.error(f"Error calculating similarity between '{smiles1}' and '{smiles2}': {e}")
         raise ToolError(f"Error calculating similarity: {e}")
 
-# Log all tool function names defined in register_tools
-tool_functions = [
-    func.__name__
-    for func in [
+
+def get_base_tools():
+    """
+    Get all base tools defined in this module.
+
+    Returns:
+        A list of tool functions.
+    """
+    return [
         parse_molecule,
         draw_molecule,
         compute_fingerprint,
         tanimoto_similarity
     ]
-]
-logger.debug(f"Registered tool functions: {tool_functions}")
