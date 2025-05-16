@@ -1,4 +1,4 @@
-from  .tools import register_tools as base_tools
+from  .base_tools import register_tools as base_tools
 from .rdkit.Chem.Descriptors import register_tools as rdkit_chem_descriptor_tools
 from mcp.server.fastmcp import FastMCP
 
