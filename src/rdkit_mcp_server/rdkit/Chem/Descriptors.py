@@ -1,8 +1,9 @@
 from rdkit import Chem
 from rdkit.Chem import Descriptors
 
+from mcp.server.fastmcp.exceptions import ToolError
 
-def exact_mol_wt(smiles: str) -> dict:
+def exact_mol_wt(smiles: str) -> float:
     """
     Calculates the exact molecular weight of a molecule using its SMILES representation.
 
@@ -15,14 +16,14 @@ def exact_mol_wt(smiles: str) -> dict:
     try:
         mol = Chem.MolFromSmiles(smiles)
         if not mol:
-            return {"error": "Invalid SMILES string"}
+            raise ToolError("Invalid SMILES string")
         weight = Descriptors.ExactMolWt(mol)
-        return {"ExactMolWt": weight}
+        return weight
     except Exception as e:
-        return {"error": f"Error calculating ExactMolWt: {str(e)}"}
+        raise ToolError(f"Error calculating ExactMolWt: {str(e)}")
 
 
-def fp_density_morgan1(smiles: str) -> dict:
+def fp_density_morgan1(smiles: str) -> str:
     """
     Calculates the fingerprint density using Morgan fingerprints of radius 1.
 
@@ -30,19 +31,19 @@ def fp_density_morgan1(smiles: str) -> dict:
     - smiles (str): The SMILES string of the molecule.
 
     Returns:
-    - dict: A dictionary containing the fingerprint density or an error message.
+    - float: A float containing the fingerprint density or an error message.
     """
     try:
         mol = Chem.MolFromSmiles(smiles)
         if not mol:
-            return {"error": "Invalid SMILES string"}
+            raise ToolError("Invalid SMILES string")
         density = Descriptors.FpDensityMorgan1(mol)
-        return {"FpDensityMorgan1": density}
+        return density
     except Exception as e:
-        return {"error": f"Error calculating FpDensityMorgan1: {str(e)}"}
+        raise ToolError(f"Error calculating FpDensityMorgan1: {str(e)}")
 
 
-def fp_density_morgan2(smiles: str) -> dict:
+def fp_density_morgan2(smiles: str) -> float:
     """
     Calculates the fingerprint density using Morgan fingerprints of radius 2.
 
@@ -50,19 +51,19 @@ def fp_density_morgan2(smiles: str) -> dict:
     - smiles (str): The SMILES string of the molecule.
 
     Returns:
-    - dict: A dictionary containing the fingerprint density or an error message.
+    - float: A float containing the fingerprint density or an error message.
     """
     try:
         mol = Chem.MolFromSmiles(smiles)
         if not mol:
-            return {"error": "Invalid SMILES string"}
+            raise ToolError("Invalid SMILES string")
         density = Descriptors.FpDensityMorgan3(mol)
-        return {"FpDensityMorgan3": density}
+        return density
     except Exception as e:
-        return {"error": f"Error calculating FpDensityMorgan3: {str(e)}"}
+         raise ToolError(f"Error calculating FpDensityMorgan3: {str(e)}")
 
 
-def fp_density_morgan3(smiles: str) -> dict:
+def fp_density_morgan3(smiles: str) -> float:
     """
     Calculates the fingerprint density using Morgan fingerprints of radius 3.
 
@@ -70,19 +71,19 @@ def fp_density_morgan3(smiles: str) -> dict:
     - smiles (str): The SMILES string of the molecule.
 
     Returns:
-    - dict: A dictionary containing the fingerprint density or an error message.
+    - float: A float containing the fingerprint density or an error message.
     """
     try:
         mol = Chem.MolFromSmiles(smiles)
         if not mol:
-            return {"error": "Invalid SMILES string"}
+            raise ToolError("Invalid SMILES string")
         density = Descriptors.FpDensityMorgan3(mol)
         return {"FpDensityMorgan3": density}
     except Exception as e:
-        return {"error": f"Error calculating FpDensityMorgan3: {str(e)}"}
+         raise ToolError(f"Error calculating FpDensityMorgan3: {str(e)}")
 
 
-def heavy_atom_mol_wt(smiles: str) -> dict:
+def heavy_atom_mol_wt(smiles: str) -> float:
     """
     Calculates the molecular weight of a molecule excluding hydrogen atoms.
 
@@ -95,12 +96,11 @@ def heavy_atom_mol_wt(smiles: str) -> dict:
     try:
         mol = Chem.MolFromSmiles(smiles)
         if not mol:
-            return {"error": "Invalid SMILES string"}
+            raise ToolError("Invalid SMILES string")
         weight = Descriptors.HeavyAtomMolWt(mol)
         return {"HeavyAtomMolWt": weight}
     except Exception as e:
-        return {"error": f"Error calculating HeavyAtomMolWt: {str(e)}"}
-
+         raise ToolError("error": f"Error calculating HeavyAtomMolWt: {str(e)}")
 
 def max_abs_partial_charge(smiles: str) -> dict:
     """
@@ -115,14 +115,14 @@ def max_abs_partial_charge(smiles: str) -> dict:
     try:
         mol = Chem.MolFromSmiles(smiles)
         if not mol:
-            return {"error": "Invalid SMILES string"}
+            raise ToolError("Invalid SMILES string")
         charge = Descriptors.MaxAbsPartialCharge(mol)
         return {"MaxAbsPartialCharge": charge}
     except Exception as e:
-        return {"error": f"Error calculating MaxAbsPartialCharge: {str(e)}"}
+         raise ToolError(f"Error calculating MaxAbsPartialCharge: {str(e)}")
 
 
-def max_partial_charge(smiles: str) -> dict:
+def max_partial_charge(smiles: str) -> float:
     """
     Calculates the maximum partial charge of a molecule.
 
@@ -135,14 +135,14 @@ def max_partial_charge(smiles: str) -> dict:
     try:
         mol = Chem.MolFromSmiles(smiles)
         if not mol:
-            return {"error": "Invalid SMILES string"}
+            raise ToolError("Invalid SMILES string")
         charge = Descriptors.MaxPartialCharge(mol)
         return {"MaxPartialCharge": charge}
     except Exception as e:
-        return {"error": f"Error calculating MaxPartialCharge: {str(e)}"}
+         raise ToolError(f"Error calculating MaxPartialCharge: {str(e)}")
 
 
-def min_abs_partial_charge(smiles: str) -> dict:
+def min_abs_partial_charge(smiles: str) -> float:
     """
     Calculates the minimum absolute partial charge of a molecule.
 
@@ -155,14 +155,14 @@ def min_abs_partial_charge(smiles: str) -> dict:
     try:
         mol = Chem.MolFromSmiles(smiles)
         if not mol:
-            return {"error": "Invalid SMILES string"}
+            raise ToolError("Invalid SMILES string")
         charge = Descriptors.MinAbsPartialCharge(mol)
-        return {"MinAbsPartialCharge": charge}
+        return charge
     except Exception as e:
-        return {"error": f"Error calculating MinAbsPartialCharge: {str(e)}"}
+         raise ToolError(f"Error calculating MinAbsPartialCharge: {str(e)}")
 
 
-def min_partial_charge(smiles: str) -> dict:
+def min_partial_charge(smiles: str) -> float:
     """
     Calculates the minimum partial charge of a molecule.
 
@@ -175,47 +175,48 @@ def min_partial_charge(smiles: str) -> dict:
     try:
         mol = Chem.MolFromSmiles(smiles)
         if not mol:
-            return {"error": "Invalid SMILES string"}
+            raise ToolError("Invalid SMILES string")
         charge = Descriptors.MinPartialCharge(mol)
-        return {"MinPartialCharge": charge}
+        return charge
     except Exception as e:
-        return {"error": f"Error calculating MinPartialCharge: {str(e)}"}
+        raise ToolError(f"Error calculating MinPartialCharge: {str(e)}")
 
 
-def mol_wt(smiles: str) -> dict:
+def mol_wt(smiles: str) -> float:
     """
     Calculates the molecular weight of a molecule including hydrogen atoms.
     """
     try:
         mol = Chem.MolFromSmiles(smiles)
         if not mol:
-            return {"error": "Invalid SMILES string"}
-        return {"MolWt": Descriptors.MolWt(mol)}
+            raise ToolError("Invalid SMILES string")
+        mol_wt =  Descriptors.MolWt(mol)
+        return mol_wt
     except Exception as e:
-        return {"error": str(e)}
+        raise ToolError(str(e))
 
 
-def num_radical_electrons(smiles: str) -> dict:
+def num_radical_electrons(smiles: str) -> int:
     """
     Calculates the number of radical electrons in a molecule.
     """
     try:
         mol = Chem.MolFromSmiles(smiles)
         if not mol:
-            return {"error": "Invalid SMILES string"}
-        return {"NumRadicalElectrons": Descriptors.NumRadicalElectrons(mol)}
+            raise ToolError("Invalid SMILES string")
+        return Descriptors.NumRadicalElectrons(mol)
     except Exception as e:
-        return {"error": str(e)}
+         raise ToolError(str(e))
 
 
-def num_valence_electrons(smiles: str) -> dict:
+def num_valence_electrons(smiles: str) -> int:
     """
     Calculates the number of valence electrons in a molecule.
     """
     try:
         mol = Chem.MolFromSmiles(smiles)
         if not mol:
-            return {"error": "Invalid SMILES string"}
-        return {"NumValenceElectrons": Descriptors.NumValenceElectrons(mol)}
+             raise ToolError("Invalid SMILES string")
+        return Descriptors.NumValenceElectrons(mol)
     except Exception as e:
-        return {"error": str(e)}
+         raise ToolError(str(e))
