@@ -25,7 +25,10 @@ def main():
         port = 8000
 
     logger.info("Registering tools with MCP server...")
-    register_tools(mcp)
+    # TODO: Add settings to have whitelist and blacklist
+    whitelist = []
+    blacklist = []
+    register_tools(mcp, whitelist=whitelist, blacklist=blacklist)
 
     logger.info(f"Starting RDKit MCP Server with transport: {transport}")
     if transport == "sse":

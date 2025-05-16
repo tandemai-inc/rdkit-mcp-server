@@ -1,1 +1,1 @@
-from .register_tools import *
+from .tool_registry import *
