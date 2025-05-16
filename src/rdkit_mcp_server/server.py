@@ -33,9 +33,9 @@ async def main():
     logger.info(f"Starting RDKit MCP Server with transport: {transport}")
     if transport == "sse":
         logger.info(f"SSE transport selected. Listening on {host}:{port}")
-        mcp.run(transport="sse")
+        await mcp.run_sse_async()
     elif transport == "stdio":
-        mcp.run(transport="stdio")
+        mcp.run_stdio_async()
     else:
-        logger.error(f"Unsupported transport type: {transport}. Defaulting to stdio.")
-        mcp.run(transport="stdio")
+        logger.error(f"Unsupported transport type: {transport}. Defaulting to sse.")
+        mcp.run_sse_async()

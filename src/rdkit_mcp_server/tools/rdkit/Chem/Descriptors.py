@@ -8,7 +8,7 @@ from ...utils import rdkit_tool
 logger = logging.getLogger(__name__)
 
 
-@rdkit_tool
+@rdkit_tool()
 def exact_mol_wt(smiles: str) -> float:
     """
     Calculates the exact molecular weight of a molecule using its SMILES representation.
@@ -28,10 +28,10 @@ def exact_mol_wt(smiles: str) -> float:
     except Exception as e:
         raise ToolError(f"Error calculating ExactMolWt: {str(e)}")
 
-@rdkit_tool
+@rdkit_tool()
 def fp_density_morgan1(smiles: str) -> str:
     """
-    Calculates the fingerprint density using Morgan fingerprints of radius 1.
+    Calculatess the fingerprint density using Morgan fingerprints of radius 1.
 
     Parameters:
     - smiles (str): The SMILES string of the molecule.
@@ -48,7 +48,8 @@ def fp_density_morgan1(smiles: str) -> str:
     except Exception as e:
         raise ToolError(f"Error calculating FpDensityMorgan1: {str(e)}")
 
-@rdkit_tool
+
+@rdkit_tool()
 def fp_density_morgan2(smiles: str) -> float:
     """
     Calculates the fingerprint density using Morgan fingerprints of radius 2.
@@ -68,7 +69,8 @@ def fp_density_morgan2(smiles: str) -> float:
     except Exception as e:
         raise ToolError(f"Error calculating FpDensityMorgan3: {str(e)}")
 
-@rdkit_tool
+
+@rdkit_tool()
 def fp_density_morgan3(smiles: str) -> float:
     """
     Calculates the fingerprint density using Morgan fingerprints of radius 3.
@@ -88,7 +90,8 @@ def fp_density_morgan3(smiles: str) -> float:
     except Exception as e:
         raise ToolError(f"Error calculating FpDensityMorgan3: {str(e)}")
 
-@rdkit_tool
+
+@rdkit_tool()
 def heavy_atom_mol_wt(smiles: str) -> float:
     """
     Calculates the molecular weight of a molecule excluding hydrogen atoms.
@@ -108,7 +111,8 @@ def heavy_atom_mol_wt(smiles: str) -> float:
     except Exception as e:
         raise ToolError(f"Error calculating HeavyAtomMolWt: {str(e)}")
 
-@rdkit_tool
+
+@rdkit_tool()
 def max_abs_partial_charge(smiles: str) -> dict:
     """
     Calculates the maximum absolute partial charge of a molecule.
@@ -128,7 +132,8 @@ def max_abs_partial_charge(smiles: str) -> dict:
     except Exception as e:
         raise ToolError(f"Error calculating MaxAbsPartialCharge: {str(e)}")
 
-@rdkit_tool
+
+@rdkit_tool()
 def max_partial_charge(smiles: str) -> float:
     """
     Calculates the maximum partial charge of a molecule.
@@ -148,7 +153,8 @@ def max_partial_charge(smiles: str) -> float:
     except Exception as e:
         raise ToolError(f"Error calculating MaxPartialCharge: {str(e)}")
 
-@rdkit_tool
+
+@rdkit_tool()
 def min_abs_partial_charge(smiles: str) -> float:
     """
     Calculates the minimum absolute partial charge of a molecule.
@@ -168,7 +174,8 @@ def min_abs_partial_charge(smiles: str) -> float:
     except Exception as e:
         raise ToolError(f"Error calculating MinAbsPartialCharge: {str(e)}")
 
-@rdkit_tool
+
+@rdkit_tool()
 def min_partial_charge(smiles: str) -> float:
     """
     Calculates the minimum partial charge of a molecule.
@@ -188,7 +195,8 @@ def min_partial_charge(smiles: str) -> float:
     except Exception as e:
         raise ToolError(f"Error calculating MinPartialCharge: {str(e)}")
 
-@rdkit_tool
+
+@rdkit_tool()
 def mol_wt(smiles: str) -> float:
     """
     Calculates the molecular weight of a molecule including hydrogen atoms.
@@ -211,7 +219,8 @@ def mol_wt(smiles: str) -> float:
     except Exception as e:
         raise ToolError(str(e))
 
-@rdkit_tool
+
+@rdkit_tool()
 def num_radical_electrons(smiles: str) -> int:
     """
     Calculates the number of radical electrons in a molecule from its SMILES representation.
@@ -233,7 +242,8 @@ def num_radical_electrons(smiles: str) -> int:
     except Exception as e:
         raise ToolError(str(e))
 
-@rdkit_tool
+
+@rdkit_tool()
 def num_valence_electrons(smiles: str) -> int:
     """
     Calculates the number of valence electrons in a molecule from its SMILES representation.
@@ -252,4 +262,3 @@ def num_valence_electrons(smiles: str) -> int:
         return Descriptors.NumValenceElectrons(mol)
     except Exception as e:
         raise ToolError(str(e))
-
