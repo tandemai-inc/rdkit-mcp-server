@@ -100,7 +100,7 @@ def heavy_atom_mol_wt(smiles: str) -> float:
         weight = Descriptors.HeavyAtomMolWt(mol)
         return {"HeavyAtomMolWt": weight}
     except Exception as e:
-         raise ToolError("error": f"Error calculating HeavyAtomMolWt: {str(e)}")
+         raise ToolError(f"Error calculating HeavyAtomMolWt: {str(e)}")
 
 def max_abs_partial_charge(smiles: str) -> dict:
     """

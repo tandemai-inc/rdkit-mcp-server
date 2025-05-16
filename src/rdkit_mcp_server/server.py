@@ -47,7 +47,11 @@ def main():
     logger.info("Registering tools with MCP server...")
     for tool in get_all_tools(TOOL_MODULES):
         try:
-            mcp.add_tool(tool)
+            mcp.add_tool(
+                tool,
+                name=tool.__name__,
+                description=tool.__doc__,
+            )
         except Exception as e:
             logger.error(f"Failed to register tool {tool.__name__}: {e}")
 
