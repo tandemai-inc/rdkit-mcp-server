@@ -32,11 +32,11 @@ async def register_tools(mcp: FastMCP, whitelist: List[str] = None, blacklist: L
     # the rdkit wrapper module will be the only source of tools
     base_tool_iter = base_tools.get_base_tools()
     rdkit_tool_iter = get_rdkit_tools()
-
     all_tools = itertools.chain(
         base_tool_iter,
         rdkit_tool_iter
     )
+
     # Loop through all tools and register them with the MCP server
     for tool_fn in all_tools:
         try:
