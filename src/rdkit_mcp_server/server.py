@@ -9,12 +9,12 @@ logger = logging.getLogger(__name__)
 mcp = FastMCP("RDKit-MCP Server")
 
 from . import tools as base_tools
-from .rdkit.Chem.Descriptors import tools as rdkit_tools
+from .rdkit.Chem import Descriptors as descriptor_tools
 
 # Modules to search for tools
 TOOL_MODULES = [
     base_tools,
-    rdkit_tools,
+    descriptor_tools,
 ]
 
 def get_all_tools(tool_modules):
