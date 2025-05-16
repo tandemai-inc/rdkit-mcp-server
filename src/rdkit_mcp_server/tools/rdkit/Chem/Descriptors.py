@@ -69,7 +69,7 @@ def register_tools(mcp: FastMCP):
             mol = Chem.MolFromSmiles(smiles)
             if not mol:
                 raise ToolError("Invalid SMILES string")
-            density = Descriptors.FpDensityMorgan3(mol)
+            density = Descriptors.FpDensityMorgan2(mol)
             return density
         except Exception as e:
             raise ToolError(f"Error calculating FpDensityMorgan3: {str(e)}")
@@ -204,6 +204,15 @@ def register_tools(mcp: FastMCP):
     def mol_wt(smiles: str) -> float:
         """
         Calculates the molecular weight of a molecule including hydrogen atoms.
+
+        Parameters:
+            smiles (str): The SMILES string representing the molecule.
+
+        Returns:
+            float: The molecular weight of the molecule.
+
+        Raises:
+            ToolError: If the SMILES string is invalid or an error occurs during calculation.
         """
         try:
             mol = Chem.MolFromSmiles(smiles)
@@ -218,8 +227,17 @@ def register_tools(mcp: FastMCP):
     @mcp.tool()
     def num_radical_electrons(smiles: str) -> int:
         """
-        Calculates the number of radical electrons in a molecule.
-        """
+        Calculates the number of radical electrons in a molecule from its SMILES representation.
+
+        Parameters:
+            smiles (str): The SMILES string representing the molecule.
+
+        Returns:
+            int: The number of radical electrons in the molecule.
+
+        Raises:
+            ToolError: If the SMILES string is invalid or an error occurs during calculation.
+        """        
         try:
             mol = Chem.MolFromSmiles(smiles)
             if not mol:
@@ -232,7 +250,14 @@ def register_tools(mcp: FastMCP):
     @mcp.tool()
     def num_valence_electrons(smiles: str) -> int:
         """
-        Calculates the number of valence electrons in a molecule.
+        Calculates the number of valence electrons in a molecule from its SMILES representation.
+
+        Parameters:
+            smiles (str): The SMILES string representing the molecule.
+        Returns:
+            int: The total number of valence electrons in the molecule.
+        Raises:
+            ToolError: If the SMILES string is invalid or if an error occurs during calculation.
         """
         try:
             mol = Chem.MolFromSmiles(smiles)
