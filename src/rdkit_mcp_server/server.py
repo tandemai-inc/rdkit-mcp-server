@@ -15,7 +15,7 @@ def main():
     """Main function to run the MCP server."""
     # Determine transport method (default to stdio)
     transport = os.getenv("MCP_TRANSPORT", "sse").lower()
-    host = os.getenv("MCP_HOST", "127.0.0.1") # Default host for SSE
+    host = os.getenv("MCP_HOST", "127.0.0.1")  # Default host for SSE
     port_str = os.getenv("MCP_PORT", "8000")  # Default port for SSE
 
     try:
@@ -23,7 +23,7 @@ def main():
     except ValueError:
         logger.warning(f"Invalid MCP_PORT value '{port_str}'. Using default port 8000.")
         port = 8000
-    
+
     logger.info("Registering tools with MCP server...")
     register_tools(mcp)
 

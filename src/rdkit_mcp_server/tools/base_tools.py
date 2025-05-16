@@ -27,6 +27,8 @@ except ImportError:
 OUTPUT_DIR = os.path.join(os.getcwd(), 'outputs')
 
 # Helper function to handle RDKit molecule loading and errors
+
+
 def _load_molecule(smiles: str) -> Optional[Chem.Mol]:
     """Loads a molecule from SMILES, returning None on failure."""
     if not RDKIT_AVAILABLE:
@@ -62,7 +64,7 @@ def register_tools(mcp: FastMCP):
             and 'molecular_weight' if parsing succeeds, or an 'error' message string if it fails.
         """
         logger.info(f"Tool 'parse_molecule' called with SMILES: {smiles[:30]}...")
-        mol = await asyncio.to_thread(_load_molecule, smiles) # Run sync RDKit call in thread
+        mol = await asyncio.to_thread(_load_molecule, smiles)  # Run sync RDKit call in thread
 
         if mol is None:
             raise ToolError(f"Invalid or unparsable SMILES string: {smiles}")
@@ -82,7 +84,6 @@ def register_tools(mcp: FastMCP):
             }
         except Exception as e:
             raise ToolError(f"Error calculating properties for SMILES '{smiles}': {e}")
-
 
     @mcp.tool()
     async def draw_molecule(smiles: str, width: int = 300, height: int = 300, file_name=None) -> Dict[str, str]:
@@ -122,11 +123,10 @@ def register_tools(mcp: FastMCP):
             # Generate file URI (ensure correct format for OS)
             # Note: Standard file URI format is file:///path/to/file
             # On Windows, it might be file:///C:/path/to/file
-            if os.name == 'nt': # Windows
+            if os.name == 'nt':  # Windows
                 file_uri = f"file:///{file_path.replace(os.sep, '/')}"
-            else: # POSIX (macOS, Linux)
+            else:  # POSIX (macOS, Linux)
                 file_uri = f"file://{file_path}"
-
 
             logger.info(f"Molecule image saved to: {file_path}")
             return {"file_uri": file_uri}
@@ -134,7 +134,6 @@ def register_tools(mcp: FastMCP):
         except Exception as e:
             logger.error(f"Error drawing molecule for SMILES '{smiles}': {e}")
             raise ToolError(f"Error generating molecule image: {e}")
-
 
     @mcp.tool()
     async def compute_fingerprint(smiles: str, method: str = "morgan", radius: int = 2, nBits: int = 2048) -> Dict[str, str]:
@@ -170,7 +169,7 @@ def register_tools(mcp: FastMCP):
                 raise ToolError(f"Unsupported fingerprint method: {method}. Supported methods: 'morgan', 'rdkit'.")
 
             # Convert fingerprint to hex string
-            fp_hex = await asyncio.to_thread(fp.ToBitString) # Get binary string first
+            fp_hex = await asyncio.to_thread(fp.ToBitString)  # Get binary string first
             # Convert binary string to hex for better readability/storage if needed, though binary might be more standard
             # For simplicity, let's return the binary string representation directly.
             # fp_hex = fp.ToHex() # RDKit >= 2021.09 provides ToHex()
@@ -182,7 +181,6 @@ def register_tools(mcp: FastMCP):
         except Exception as e:
             logger.error(f"Error computing fingerprint for SMILES '{smiles}': {e}")
             raise ToolError(f"Error computing fingerprint: {e}")
-
 
     @mcp.tool()
     async def tanimoto_similarity(smiles1: str, smiles2: str, method: str = "morgan", radius: int = 2, nBits: int = 2048) -> Dict[str, Union[str, float]]:
@@ -236,7 +234,7 @@ def register_tools(mcp: FastMCP):
 
             return {"similarity_score": round(similarity, 4), "method": method_lower}
 
-        except ValueError as ve: # Catch specific error from get_fp
+        except ValueError as ve:  # Catch specific error from get_fp
             logger.error(f"Fingerprint method error: {ve}")
             raise ToolError(str(ve))
         except Exception as e:

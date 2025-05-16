@@ -32,7 +32,6 @@ def register_tools(mcp: FastMCP):
         except Exception as e:
             raise ToolError(f"Error calculating ExactMolWt: {str(e)}")
 
-
     @mcp.tool()
     def fp_density_morgan1(smiles: str) -> str:
         """
@@ -52,7 +51,6 @@ def register_tools(mcp: FastMCP):
             return density
         except Exception as e:
             raise ToolError(f"Error calculating FpDensityMorgan1: {str(e)}")
-
 
     @mcp.tool()
     def fp_density_morgan2(smiles: str) -> float:
@@ -74,7 +72,6 @@ def register_tools(mcp: FastMCP):
         except Exception as e:
             raise ToolError(f"Error calculating FpDensityMorgan3: {str(e)}")
 
-
     @mcp.tool()
     def fp_density_morgan3(smiles: str) -> float:
         """
@@ -94,7 +91,6 @@ def register_tools(mcp: FastMCP):
             return {"FpDensityMorgan3": density}
         except Exception as e:
             raise ToolError(f"Error calculating FpDensityMorgan3: {str(e)}")
-
 
     @mcp.tool()
     def heavy_atom_mol_wt(smiles: str) -> float:
@@ -136,7 +132,6 @@ def register_tools(mcp: FastMCP):
         except Exception as e:
             raise ToolError(f"Error calculating MaxAbsPartialCharge: {str(e)}")
 
-
     @mcp.tool()
     def max_partial_charge(smiles: str) -> float:
         """
@@ -156,7 +151,6 @@ def register_tools(mcp: FastMCP):
             return {"MaxPartialCharge": charge}
         except Exception as e:
             raise ToolError(f"Error calculating MaxPartialCharge: {str(e)}")
-
 
     @mcp.tool()
     def min_abs_partial_charge(smiles: str) -> float:
@@ -178,7 +172,6 @@ def register_tools(mcp: FastMCP):
         except Exception as e:
             raise ToolError(f"Error calculating MinAbsPartialCharge: {str(e)}")
 
-
     @mcp.tool()
     def min_partial_charge(smiles: str) -> float:
         """
@@ -199,7 +192,6 @@ def register_tools(mcp: FastMCP):
         except Exception as e:
             raise ToolError(f"Error calculating MinPartialCharge: {str(e)}")
 
-
     @mcp.tool()
     def mol_wt(smiles: str) -> float:
         """
@@ -218,11 +210,10 @@ def register_tools(mcp: FastMCP):
             mol = Chem.MolFromSmiles(smiles)
             if not mol:
                 raise ToolError("Invalid SMILES string")
-            mol_wt =  Descriptors.MolWt(mol)
+            mol_wt = Descriptors.MolWt(mol)
             return mol_wt
         except Exception as e:
             raise ToolError(str(e))
-
 
     @mcp.tool()
     def num_radical_electrons(smiles: str) -> int:
@@ -237,7 +228,7 @@ def register_tools(mcp: FastMCP):
 
         Raises:
             ToolError: If the SMILES string is invalid or an error occurs during calculation.
-        """        
+        """
         try:
             mol = Chem.MolFromSmiles(smiles)
             if not mol:
@@ -245,7 +236,6 @@ def register_tools(mcp: FastMCP):
             return Descriptors.NumRadicalElectrons(mol)
         except Exception as e:
             raise ToolError(str(e))
-
 
     @mcp.tool()
     def num_valence_electrons(smiles: str) -> int:
