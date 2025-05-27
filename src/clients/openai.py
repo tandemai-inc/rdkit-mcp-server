@@ -17,7 +17,7 @@ AGENT_INSTRUCTIONS = (
 )
 
 # Default prompt makes testing more convenient
-DEFAULT_PROMPT = 'Get basic properties of SMILES CC(=O)NC1=CC=C(C=C1)O'
+DEFAULT_PROMPT = 'What tools are available?'
 
 
 async def run(mcp_server: MCPServer, prompt: str = None):

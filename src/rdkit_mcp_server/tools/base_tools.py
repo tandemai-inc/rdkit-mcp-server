@@ -2,9 +2,11 @@ import asyncio
 import os
 from typing import Dict, Union, Optional
 from datetime import datetime
+from mcp.server.fastmcp.exceptions import ToolError
+from .utils import rdkit_tool
+import logging
 
-# Import the MCP instance from the server module to use the @mcp.tool() decorator
-from .server import mcp, logger
+logger = logging.getLogger(__name__)
 
 # Attempt to import RDKit and Pillow, logging errors if they are not found
 try:
@@ -25,6 +27,8 @@ except ImportError:
 OUTPUT_DIR = os.path.join(os.getcwd(), 'outputs')
 
 # Helper function to handle RDKit molecule loading and errors
+
+
 def _load_molecule(smiles: str) -> Optional[Chem.Mol]:
     """Loads a molecule from SMILES, returning None on failure."""
     if not RDKIT_AVAILABLE:
@@ -43,7 +47,8 @@ def _load_molecule(smiles: str) -> Optional[Chem.Mol]:
         logger.error(f"Error parsing SMILES '{smiles}': {e}")
         return None
 
-@mcp.tool()
+
+@rdkit_tool
 async def parse_molecule(smiles: str) -> Dict[str, Union[str, int, float]]:
     """
     Parse a SMILES string into an RDKit molecule object and return basic properties.
@@ -56,10 +61,10 @@ async def parse_molecule(smiles: str) -> Dict[str, Union[str, int, float]]:
         and 'molecular_weight' if parsing succeeds, or an 'error' message string if it fails.
     """
     logger.info(f"Tool 'parse_molecule' called with SMILES: {smiles[:30]}...")
-    mol = await asyncio.to_thread(_load_molecule, smiles) # Run sync RDKit call in thread
+    mol = await asyncio.to_thread(_load_molecule, smiles)  # Run sync RDKit call in thread
 
     if mol is None:
-        return {"error": f"Invalid or unparsable SMILES string: {smiles}"}
+        raise ToolError(f"Invalid or unparsable SMILES string: {smiles}")
 
     try:
         # Calculate properties using RDKit (run in thread pool as they might block)
@@ -75,10 +80,10 @@ async def parse_molecule(smiles: str) -> Dict[str, Union[str, int, float]]:
             "molecular_weight": round(mol_weight, 4)
         }
     except Exception as e:
-        logger.error(f"Error calculating properties for SMILES '{smiles}': {e}")
-        return {"error": f"Error calculating properties: {e}"}
+        raise ToolError(f"Error calculating properties for SMILES '{smiles}': {e}")
 
-@mcp.tool()
+
+@rdkit_tool
 async def draw_molecule(smiles: str, width: int = 300, height: int = 300, file_name=None) -> Dict[str, str]:
     """
     Generates a PNG image representation of a molecule from its SMILES string.
@@ -95,11 +100,11 @@ async def draw_molecule(smiles: str, width: int = 300, height: int = 300, file_n
     """
     logger.info(f"Tool 'draw_molecule' called for SMILES: {smiles[:30]}...")
     if not RDKIT_AVAILABLE or not PILLOW_AVAILABLE:
-        return {"error": "RDKit or Pillow library not available for drawing."}
+        raise ToolError("RDKit or Pillow library not available for drawing.")
 
     mol = await asyncio.to_thread(_load_molecule, smiles)
     if mol is None:
-        return {"error": f"Invalid or unparsable SMILES string: {smiles}"}
+        raise ToolError(f"Invalid or unparsable SMILES string: {smiles}")
 
     try:
         # Generate image using RDKit (sync call, run in thread)
@@ -116,21 +121,20 @@ async def draw_molecule(smiles: str, width: int = 300, height: int = 300, file_n
         # Generate file URI (ensure correct format for OS)
         # Note: Standard file URI format is file:///path/to/file
         # On Windows, it might be file:///C:/path/to/file
-        if os.name == 'nt': # Windows
+        if os.name == 'nt':  # Windows
             file_uri = f"file:///{file_path.replace(os.sep, '/')}"
-        else: # POSIX (macOS, Linux)
+        else:  # POSIX (macOS, Linux)
             file_uri = f"file://{file_path}"
-
 
         logger.info(f"Molecule image saved to: {file_path}")
         return {"file_uri": file_uri}
 
     except Exception as e:
         logger.error(f"Error drawing molecule for SMILES '{smiles}': {e}")
-        return {"error": f"Error generating molecule image: {e}"}
+        raise ToolError(f"Error generating molecule image: {e}")
 
 
-@mcp.tool()
+@rdkit_tool
 async def compute_fingerprint(smiles: str, method: str = "morgan", radius: int = 2, nBits: int = 2048) -> Dict[str, str]:
     """
     Computes a molecular fingerprint for a given SMILES string.
@@ -149,7 +153,7 @@ async def compute_fingerprint(smiles: str, method: str = "morgan", radius: int =
     logger.info(f"Tool 'compute_fingerprint' called for SMILES: {smiles[:30]}..., Method: {method}")
     mol = await asyncio.to_thread(_load_molecule, smiles)
     if mol is None:
-        return {"error": f"Invalid or unparsable SMILES string: {smiles}"}
+        raise ToolError(f"Invalid or unparsable SMILES string: {smiles}")
 
     try:
         fp = None
@@ -161,10 +165,10 @@ async def compute_fingerprint(smiles: str, method: str = "morgan", radius: int =
         elif method_lower == "rdkit":
             fp = await asyncio.to_thread(Chem.RDKFingerprint, mol, fpSize=nBits)
         else:
-            return {"error": f"Unsupported fingerprint method: {method}. Supported methods: 'morgan', 'rdkit'."}
+            raise ToolError(f"Unsupported fingerprint method: {method}. Supported methods: 'morgan', 'rdkit'.")
 
         # Convert fingerprint to hex string
-        fp_hex = await asyncio.to_thread(fp.ToBitString) # Get binary string first
+        fp_hex = await asyncio.to_thread(fp.ToBitString)  # Get binary string first
         # Convert binary string to hex for better readability/storage if needed, though binary might be more standard
         # For simplicity, let's return the binary string representation directly.
         # fp_hex = fp.ToHex() # RDKit >= 2021.09 provides ToHex()
@@ -175,10 +179,10 @@ async def compute_fingerprint(smiles: str, method: str = "morgan", radius: int =
 
     except Exception as e:
         logger.error(f"Error computing fingerprint for SMILES '{smiles}': {e}")
-        return {"error": f"Error computing fingerprint: {e}"}
+        raise ToolError(f"Error computing fingerprint: {e}")
 
 
-@mcp.tool()
+@rdkit_tool
 async def tanimoto_similarity(smiles1: str, smiles2: str, method: str = "morgan", radius: int = 2, nBits: int = 2048) -> Dict[str, Union[str, float]]:
     """
     Calculates the Tanimoto similarity between two molecules based on their fingerprints.
@@ -202,9 +206,9 @@ async def tanimoto_similarity(smiles1: str, smiles2: str, method: str = "morgan"
     mol1, mol2 = await asyncio.gather(mol1_task, mol2_task)
 
     if mol1 is None:
-        return {"error": f"Invalid or unparsable SMILES string for molecule 1: {smiles1}"}
+        raise ToolError(f"Invalid or unparsable SMILES string for molecule 1: {smiles1}")
     if mol2 is None:
-        return {"error": f"Invalid or unparsable SMILES string for molecule 2: {smiles2}"}
+        raise ToolError(f"Invalid or unparsable SMILES string for molecule 2: {smiles2}")
 
     try:
         fp1 = None
@@ -230,11 +234,24 @@ async def tanimoto_similarity(smiles1: str, smiles2: str, method: str = "morgan"
 
         return {"similarity_score": round(similarity, 4), "method": method_lower}
 
-    except ValueError as ve: # Catch specific error from get_fp
-         logger.error(f"Fingerprint method error: {ve}")
-         return {"error": str(ve)}
+    except ValueError as ve:  # Catch specific error from get_fp
+        logger.error(f"Fingerprint method error: {ve}")
+        raise ToolError(str(ve))
     except Exception as e:
         logger.error(f"Error calculating similarity between '{smiles1}' and '{smiles2}': {e}")
-        return {"error": f"Error calculating similarity: {e}"}
+        raise ToolError(f"Error calculating similarity: {e}")
 
-logger.info("RDKit tool functions defined.")
+
+def get_base_tools():
+    """
+    Get all base tools defined in this module.
+
+    Returns:
+        A list of tool functions.
+    """
+    return [
+        parse_molecule,
+        draw_molecule,
+        compute_fingerprint,
+        tanimoto_similarity
+    ]

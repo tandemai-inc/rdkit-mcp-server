@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from src.rdkit_mcp_server.server import main, logger
 
@@ -7,4 +8,4 @@ if __name__ == "__main__":
     logger.info("Starting the RDKit MCP Server...")
 
     # Start the MCP server
-    main()
+    asyncio.run(main())

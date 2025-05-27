@@ -1,0 +1,55 @@
+from typing import Any, Callable
+from mcp.types import (
+    AnyFunction,
+    ToolAnnotations,
+)
+
+
+def rdkit_tool(
+    name: str | None = None,
+    description: str | None = None,
+    annotations: ToolAnnotations | dict[str, Any] | None = None,
+) -> Callable[[AnyFunction], AnyFunction]:
+    """Decorator to register a tool.
+
+    Tools can optionally request a Context object by adding a parameter with the
+    Context type annotation. The context provides access to MCP capabilities like
+    logging, progress reporting, and resource access.
+
+    Args:
+        name: Optional name for the tool (defaults to function name)
+        description: Optional description of what the tool does
+        annotations: Optional annotations about the tool's behavior
+
+    Example:
+        @rdkit_tool(name="MyTool", description="This is my tool")
+        def my_tool(x: int) -> str:
+            return str(x)
+
+        @rdkit_tool(name="MyTool", description="This is my tool")
+        def tool_with_context(x: int, ctx: Context) -> str:
+            ctx.info(f"Processing {x}")
+            return str(x)
+
+        @rdkit_tool(name="MyTool", description="This is my tool")
+        async def async_tool(x: int, context: Context) -> str:
+            await context.report_progress(50, 100)
+            return str(x)
+    """
+
+    def decorator(fn: AnyFunction) -> AnyFunction:
+        # Add attributes to the function to be used when registering the tool
+        fn._is_rdkit_tool = True
+        fn.tool_name = name or fn.__name__
+        fn.tool_description = description or fn.__doc__
+        fn.tool_annotations = annotations or {}
+        return fn
+    return decorator
+
+
+def is_rdkit_tool(func: Callable) -> bool:
+    """Check if a function is decorated with @rdkit_tool."""
+    # Access the original function in case of multiple wrappers
+    while hasattr(func, "__wrapped__"):
+        func = func.__wrapped__
+    return hasattr(func, "_is_rdkit_tool")
