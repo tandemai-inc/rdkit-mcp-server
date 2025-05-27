@@ -7,22 +7,9 @@ from .utils import rdkit_tool
 import logging
 
 logger = logging.getLogger(__name__)
+from rdkit import Chem, DataStructs
+from rdkit.Chem import AllChem, Descriptors, Draw
 
-# Attempt to import RDKit and Pillow, logging errors if they are not found
-try:
-    from rdkit import Chem, DataStructs
-    from rdkit.Chem import AllChem, Descriptors, Draw
-    RDKIT_AVAILABLE = True
-except ImportError:
-    logger.error("RDKit library not found. Please install it (e.g., via conda). Tool functionality will be limited.")
-    RDKIT_AVAILABLE = False
-
-try:
-    from PIL import Image
-    PILLOW_AVAILABLE = True
-except ImportError:
-    logger.warning("Pillow library not found. Molecule drawing to PNG will not work.")
-    PILLOW_AVAILABLE = False
 
 OUTPUT_DIR = os.path.join(os.getcwd(), 'outputs')
 
@@ -31,9 +18,6 @@ OUTPUT_DIR = os.path.join(os.getcwd(), 'outputs')
 
 def _load_molecule(smiles: str) -> Optional[Chem.Mol]:
     """Loads a molecule from SMILES, returning None on failure."""
-    if not RDKIT_AVAILABLE:
-        logger.error("RDKit is not available.")
-        return None
     if not smiles or not isinstance(smiles, str):
         logger.error("Invalid SMILES input: must be a non-empty string.")
         return None
@@ -46,7 +30,6 @@ def _load_molecule(smiles: str) -> Optional[Chem.Mol]:
     except Exception as e:
         logger.error(f"Error parsing SMILES '{smiles}': {e}")
         return None
-
 
 @rdkit_tool
 async def parse_molecule(smiles: str) -> Dict[str, Union[str, int, float]]:
@@ -99,9 +82,6 @@ async def draw_molecule(smiles: str, width: int = 300, height: int = 300, file_n
         Requires RDKit and Pillow libraries.
     """
     logger.info(f"Tool 'draw_molecule' called for SMILES: {smiles[:30]}...")
-    if not RDKIT_AVAILABLE or not PILLOW_AVAILABLE:
-        raise ToolError("RDKit or Pillow library not available for drawing.")
-
     mol = await asyncio.to_thread(_load_molecule, smiles)
     if mol is None:
         raise ToolError(f"Invalid or unparsable SMILES string: {smiles}")
