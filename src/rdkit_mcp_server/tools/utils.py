@@ -52,6 +52,7 @@ def rdkit_tool(
     name: str | None = None,
     description: str | None = None,
     annotations: ToolAnnotations | dict[str, Any] | None = None,
+    disabled: bool = False
 ) -> Callable[[AnyFunction], AnyFunction]:
     """Decorator to register a tool.
 
@@ -63,6 +64,7 @@ def rdkit_tool(
         name: Optional name for the tool (defaults to function name)
         description: Optional description of what the tool does
         annotations: Optional annotations about the tool's behavior
+        disabled: If True, the tool will not be registered with the MCP server. Useful for tool under development.
 
     Example:
         @rdkit_tool(name="MyTool", description="This is my tool")
@@ -86,6 +88,7 @@ def rdkit_tool(
         fn.tool_name = name or fn.__name__
         fn.tool_description = description or fn.__doc__
         fn.tool_annotations = annotations or {}
+        fn.tool_disabled = disabled
         return fn
     return decorator
 

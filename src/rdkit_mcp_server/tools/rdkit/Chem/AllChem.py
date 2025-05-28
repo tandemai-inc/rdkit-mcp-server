@@ -81,7 +81,7 @@ def constrained_embed(
     use_tethers: bool = True,
     core_conf_id: int = -1,
     random_seed: int = 2342,
-    get_force_field: Optional[Callable[..., Any]] = None,
+    # get_force_field: Optional[Callable[..., Any]] = None,
     **kwargs: Any
 ) -> Optional[str]:
     """
@@ -104,14 +104,14 @@ def constrained_embed(
         useTethers=use_tethers,
         coreConfId=core_conf_id,
         randomseed=random_seed,
-        getForceField=get_force_field,
+        # getForceField=get_force_field,
         **kwargs
     )
     if result is None:
         return None
     return mol_to_sdf(result)
 
-@rdkit_tool()
+@rdkit_tool(disabled=True)
 def enumerate_library_from_reaction(
     reaction: rdChemReactions.ChemicalReaction,
     sidechain_sets: Sequence[Sequence[rdchem.Mol]],
