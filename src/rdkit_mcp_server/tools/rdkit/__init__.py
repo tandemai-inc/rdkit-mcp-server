@@ -1,4 +1,4 @@
-from .Chem import Descriptors, AllChem
+from .Chem import Descriptors, AllChem, rdMMPA
 from ..utils import is_rdkit_tool
 from typing import Iterable, Callable
 
@@ -7,6 +7,7 @@ from typing import Iterable, Callable
 TOOL_MODULES = [
     Descriptors,
     AllChem,
+    rdMMPA,
 ]
 
 
