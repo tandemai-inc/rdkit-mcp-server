@@ -26,6 +26,7 @@ def assign_bond_orders_from_template(
     result = AllChem.AssignBondOrdersFromTemplate(refmol, mol)
     return mol_to_sdf(result)
 
+
 @rdkit_tool()
 def compute_mol_shape(
     sdf_str: str,
@@ -53,6 +54,7 @@ def compute_mol_shape(
     dims = (grid.GetXDim(), grid.GetYDim(), grid.GetZDim())
     return {"dims": dims, "spacing": grid.GetSpacing(), "data": data}
 
+
 @rdkit_tool()
 def compute_mol_volume(
     mol_sdf_str: str,
@@ -73,6 +75,7 @@ def compute_mol_volume(
     """
     mol: rdchem.Mol = sdf_to_mol(mol_sdf_str)
     return AllChem.ComputeMolVolume(mol, conf_id, grid_spacing, box_margin)
+
 
 @rdkit_tool()
 def constrained_embed(
@@ -97,7 +100,7 @@ def constrained_embed(
       * kwargs: additional embedding args
     """
     mol: rdchem.Mol = sdf_to_mol(sdf_str)
-    core : rdchem.Mol = sdf_to_mol(core_sdf)
+    core: rdchem.Mol = sdf_to_mol(core_sdf)
     result = AllChem.ConstrainedEmbed(
         mol,
         core,
@@ -110,6 +113,7 @@ def constrained_embed(
     if result is None:
         return None
     return mol_to_sdf(result)
+
 
 @rdkit_tool(disabled=True)
 def enumerate_library_from_reaction(
@@ -149,6 +153,7 @@ def get_conformer_rms(
     mol: rdchem.Mol = sdf_to_mol(mol_sdf_str)
     return AllChem.GetConformerRMS(mol, conf_id1, conf_id2, atomIds=atom_ids, prealigned=prealigned)
 
+
 @rdkit_tool()
 def get_conformer_rms_matrix(
     mol_sdf_str: str,
@@ -173,6 +178,7 @@ def get_conformer_rms_matrix(
     """
     mol: rdchem.Mol = sdf_to_mol(mol_sdf_str)
     return AllChem.GetConformerRMSMatrix(mol, atomIds=atom_ids, prealigned=prealigned)
+
 
 @rdkit_tool()
 def transform_mol(

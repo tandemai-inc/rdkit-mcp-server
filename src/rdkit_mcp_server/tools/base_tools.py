@@ -3,12 +3,15 @@ import os
 from typing import Dict, Union, Optional
 from datetime import datetime
 from mcp.server.fastmcp.exceptions import ToolError
+from rdkit.Chem import AllChem, Descriptors, Draw
+from rdkit import Chem, DataStructs
+
 from .utils import rdkit_tool
+
+
 import logging
 
 logger = logging.getLogger(__name__)
-from rdkit import Chem, DataStructs
-from rdkit.Chem import AllChem, Descriptors, Draw
 
 
 OUTPUT_DIR = os.path.join(os.getcwd(), 'outputs')
@@ -30,6 +33,7 @@ def _load_molecule(smiles: str) -> Optional[Chem.Mol]:
     except Exception as e:
         logger.error(f"Error parsing SMILES '{smiles}': {e}")
         return None
+
 
 @rdkit_tool()
 async def parse_molecule(smiles: str) -> Dict[str, Union[str, int, float]]:

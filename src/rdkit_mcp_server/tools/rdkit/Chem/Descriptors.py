@@ -28,6 +28,7 @@ def exact_mol_wt(smiles: str) -> float:
     except Exception as e:
         raise ToolError(f"Error calculating ExactMolWt: {str(e)}")
 
+
 @rdkit_tool()
 def fp_density_morgan1(smiles: str) -> str:
     """
