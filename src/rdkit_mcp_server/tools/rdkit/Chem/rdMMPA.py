@@ -16,16 +16,16 @@ def FragmentMol(
     pattern: str = '[#6+0;!$(*=,#[!#6])]!@!=!#[*]'
 ) -> List[List[str]]:
     """Does the fragmentation necessary for an MMPA analysis.
-    
+
     Parameters:
     - smiles (str): The SMILES string of the molecule to be fragmented.
     - maxCuts (int): Maximum number of cuts to make in the molecule.
     - maxCutBonds (int): Maximum number of bonds to cut.
     - pattern (str): An rSMARTS string defining the bond-breaking SMARTS pattern to use.
-    
+
     Returns:
     - tuple: A tuple containing the fragments as RDKit Mol objects.
-    
+
     """
     mol = Chem.MolFromSmiles(smiles)
     if not mol:
