@@ -31,25 +31,25 @@ def assign_bond_orders_from_template(
 def compute_mol_shape(
     sdf_str: str,
     conf_id: int = -1,
-    box_dim: Tuple[int, int, int] = (20, 20, 20),
+    box_dim: List[int] = None,
     spacing: float = 0.5,
-    **kwargs: Any
 ) -> dict:
     """
-    returns a grid representation of the molecule’s shape
+    returns a grid representation of the molecule's shape
 
     Parameters:
       * mol (-) - the molecule
       * confId (-) - (optional) the conformer id to use
-      * boxDim (-) - (optional) the dimensions of the box to use
+      * boxDim (-) - (optional) the dimensions of the box to use (Length 3)
       * spacing (-) - (optional) the spacing to use
       * kwargs (-) - additional arguments to pass to the encoding function
 
     Returns:
     A Dictionary containing information about the UniformGrid3D object
     """
+    box_dim = box_dim or [20, 20, 20]
     mol: rdchem.Mol = sdf_to_mol(sdf_str)
-    grid: UniformGrid3D = AllChem.ComputeMolShape(mol, conf_id, box_dim, spacing, **kwargs)
+    grid: UniformGrid3D = AllChem.ComputeMolShape(mol, conf_id, box_dim, spacing)
     data = grid.GetData()
     dims = (grid.GetXDim(), grid.GetYDim(), grid.GetZDim())
     return {"dims": dims, "spacing": grid.GetSpacing(), "data": data}
