@@ -31,7 +31,7 @@ def _load_molecule(smiles: str) -> Optional[Chem.Mol]:
         logger.error(f"Error parsing SMILES '{smiles}': {e}")
         return None
 
-@rdkit_tool
+@rdkit_tool()
 async def parse_molecule(smiles: str) -> Dict[str, Union[str, int, float]]:
     """
     Parse a SMILES string into an RDKit molecule object and return basic properties.
@@ -66,7 +66,7 @@ async def parse_molecule(smiles: str) -> Dict[str, Union[str, int, float]]:
         raise ToolError(f"Error calculating properties for SMILES '{smiles}': {e}")
 
 
-@rdkit_tool
+@rdkit_tool()
 async def draw_molecule(smiles: str, width: int = 300, height: int = 300, file_name=None) -> Dict[str, str]:
     """
     Generates a PNG image representation of a molecule from its SMILES string.
@@ -114,7 +114,7 @@ async def draw_molecule(smiles: str, width: int = 300, height: int = 300, file_n
         raise ToolError(f"Error generating molecule image: {e}")
 
 
-@rdkit_tool
+@rdkit_tool()
 async def compute_fingerprint(smiles: str, method: str = "morgan", radius: int = 2, nBits: int = 2048) -> Dict[str, str]:
     """
     Computes a molecular fingerprint for a given SMILES string.
@@ -162,7 +162,7 @@ async def compute_fingerprint(smiles: str, method: str = "morgan", radius: int =
         raise ToolError(f"Error computing fingerprint: {e}")
 
 
-@rdkit_tool
+@rdkit_tool()
 async def tanimoto_similarity(smiles1: str, smiles2: str, method: str = "morgan", radius: int = 2, nBits: int = 2048) -> Dict[str, Union[str, float]]:
     """
     Calculates the Tanimoto similarity between two molecules based on their fingerprints.
