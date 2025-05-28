@@ -13,7 +13,7 @@ def FragmentMol(
     smiles: str,
     maxCuts: int = 3,
     maxCutBonds: int = 20,
-    pattern: str = '',
+    pattern: str = '[#6+0;!$(*=,#[!#6])]!@!=!#[*]'
 ) -> List[List[str]]:
     """Does the fragmentation necessary for an MMPA analysis.
     
@@ -21,29 +21,29 @@ def FragmentMol(
     - smiles (str): The SMILES string of the molecule to be fragmented.
     - maxCuts (int): Maximum number of cuts to make in the molecule.
     - maxCutBonds (int): Maximum number of bonds to cut.
-    - pattern (str): The SMARTS pattern to use for fragmentation. Default is '[#6+0;!$(*=, #[!#6])]!@!=!#[*]'.
+    - pattern (str): An rSMARTS string defining the bond-breaking SMARTS pattern to use.
     
     Returns:
     - tuple: A tuple containing the fragments as RDKit Mol objects.
     
     """
-    pattern = pattern or '[#6+0,#7+0;R;!$(*=,#[!#6])]!@!=!#[*]'
     mol = Chem.MolFromSmiles(smiles)
     if not mol:
         raise ToolError("Invalid SMILES string")
-
-    frags = rdMMPA.FragmentMol(
-        mol,
-        maxCuts=maxCuts,
-        maxCutBonds=maxCutBonds,
-        pattern=pattern,
-        resultsAsMols=True,
-    )
+    try:
+        frags = rdMMPA.FragmentMol(
+            mol,
+            maxCuts=maxCuts,
+            maxCutBonds=maxCutBonds,
+            pattern=pattern,
+            resultsAsMols=True,
+        )
+    except Exception as e:
+        logger.error(f"Fragmentation failed: {e}")
+        raise ToolError(f"Fragmentation failed: {e}")
     if not frags:
         raise ToolError("Fragmentation failed")
-    logger.info(f"Fragmentation produced {len(frags)} fragments")
-    logger.info(frags)
-
+    logger.debug(f"Fragmentation produced {len(frags)} fragments")
     output = []
     for frag_tup in frags:
         inner_list = []
@@ -53,4 +53,5 @@ def FragmentMol(
             else:
                 inner_list.append(item)
         output.append(inner_list)
+    logger.debug(f"Fragmentation output: {output}")
     return output
