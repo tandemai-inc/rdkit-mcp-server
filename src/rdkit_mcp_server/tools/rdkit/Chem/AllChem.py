@@ -83,9 +83,7 @@ def constrained_embed(
     core_sdf: str,
     use_tethers: bool = True,
     core_conf_id: int = -1,
-    random_seed: int = 2342,
-    # get_force_field: Optional[Callable[..., Any]] = None,
-    **kwargs: Any
+    random_seed: int = 2342
 ) -> Optional[str]:
     """
     generates an embedding with constraints and returns as SDF
@@ -96,8 +94,6 @@ def constrained_embed(
       * use_tethers: apply tether forces (optional)
       * core_conf_id: core conformer id (optional)
       * random_seed: RNG seed (optional)
-      * get_force_field: custom force field getter (optional)
-      * kwargs: additional embedding args
     """
     mol: rdchem.Mol = sdf_to_mol(sdf_str)
     core: rdchem.Mol = sdf_to_mol(core_sdf)
@@ -106,9 +102,7 @@ def constrained_embed(
         core,
         useTethers=use_tethers,
         coreConfId=core_conf_id,
-        randomseed=random_seed,
-        # getForceField=get_force_field,
-        **kwargs
+        randomseed=random_seed
     )
     if result is None:
         return None
