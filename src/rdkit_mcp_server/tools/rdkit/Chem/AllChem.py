@@ -14,7 +14,7 @@ def assign_bond_orders_from_template(
     """
     assigns bond orders to a molecule based on the bond orders in a template molecule
 
-    Arguments:
+    Parameters:
       * refmol: the template molecule
       * mol: the molecule to assign bond orders to
     Note that the template molecule should have no explicit hydrogens else the algorithm will fail.
@@ -38,11 +38,11 @@ def compute_mol_shape(
     returns a grid representation of the molecule's shape
 
     Parameters:
-      * mol (-) - the molecule
-      * confId (-) - (optional) the conformer id to use
-      * boxDim (-) - (optional) the dimensions of the box to use (Length 3)
-      * spacing (-) - (optional) the spacing to use
-      * kwargs (-) - additional arguments to pass to the encoding function
+      * mol - the molecule
+      * confId - (optional) the conformer id to use
+      * boxDim - (optional) the dimensions of the box to use (Length 3)
+      * spacing - (optional) the spacing to use
+      * kwargs - additional arguments to pass to the encoding function
 
     Returns:
     A Dictionary containing information about the UniformGrid3D object
@@ -68,10 +68,10 @@ def compute_mol_volume(
     based on a grid-encoding of the molecular shape.
 
     Parameters:
-      * mol_sdf_str: SDF string of the molecule
-      * conf_id (-) - (optional) the conformer id to use
-      * grid_spacing (-) - (optional) the spacing to use
-      * box_margin (-) - (optional) the margin to use around the molecule
+      * mol_sdf_str - SDF contents of the molecule as a string
+      * conf_id - (optional) the conformer id to use
+      * grid_spacing - (optional) the spacing to use
+      * box_margin - (optional) the margin to use around the molecule
     """
     mol: rdchem.Mol = sdf_to_mol(mol_sdf_str)
     return AllChem.ComputeMolVolume(mol, conf_id, grid_spacing, box_margin)
@@ -79,7 +79,7 @@ def compute_mol_volume(
 
 @rdkit_tool()
 def constrained_embed(
-    sdf_str: str,
+    mol_sdf_str: str,
     core_sdf: str,
     use_tethers: bool = True,
     core_conf_id: int = -1,
@@ -88,14 +88,14 @@ def constrained_embed(
     """
     generates an embedding with constraints and returns as SDF
 
-    Arguments:
-      * sdf_str: SDF string of the molecule to embed
-      * core_sdf: SDF string of the template core
-      * use_tethers: apply tether forces (optional)
-      * core_conf_id: core conformer id (optional)
-      * random_seed: RNG seed (optional)
+    Parameters:
+      * mol_sdf_str - SDF contents of the molecule as a string
+      * core_sdf - SDF contents of the template core as a string
+      * use_tethers - apply tether forces (optional)
+      * core_conf_id - core conformer id (optional)
+      * random_seed - RNG seed (optional)
     """
-    mol: rdchem.Mol = sdf_to_mol(sdf_str)
+    mol: rdchem.Mol = sdf_to_mol(mol_sdf_str)
     core: rdchem.Mol = sdf_to_mol(core_sdf)
     result = AllChem.ConstrainedEmbed(
         mol,
@@ -119,9 +119,9 @@ def enumerate_library_from_reaction(
     Returns a generator for the virtual library defined by a reaction and a sequence of sidechain sets
 
     Parameters:
-      * reaction (-) - the reaction
-      * sidechainSets (-) - a sequence of sequences of sidechains
-      * returnReactants (-) - (optional) if True, the generator will return information about the reactants as well as the products
+      * reaction - the reaction
+      * sidechainSets - a sequence of sequences of sidechains
+      * returnReactants - (optional) if True, the generator will return information about the reactants as well as the products
     """
     return AllChem.EnumerateLibraryFromReaction(reaction, sidechain_sets, returnReactants=return_reactants)
 
@@ -138,11 +138,11 @@ def get_conformer_rms(
     Returns the RMS between two conformations. By default, the conformers will be aligned to the first conformer before the RMS calculation and, as a side-effect, the second will be left in the aligned state.
 
     Args:
-      * sdf_str: SDF string of the molecule
-      * conf_id1: first conformer id
-      * conf_id2: second conformer id
-      * atom_ids: subset of atom indices (optional)
-      * prealigned: skip alignment if True (optional)
+      * sdf_str - SDF string of the molecule
+      * conf_id1 - first conformer id
+      * conf_id2 - second conformer id
+      * atom_ids - subset of atom indices (optional)
+      * prealigned - skip alignment if True (optional)
     """
     mol: rdchem.Mol = sdf_to_mol(mol_sdf_str)
     return AllChem.GetConformerRMS(mol, conf_id1, conf_id2, atomIds=atom_ids, prealigned=prealigned)
@@ -158,9 +158,9 @@ def get_conformer_rms_matrix(
     Returns the RMS matrix of the conformers of a molecule. As a side-effect, the conformers will be aligned to the first conformer (i.e. the reference) and will left in the aligned state.
 
     Parameters:
-      * mol_sdf_str (-) - the molecule
-      * atomIds (-) - (optional) list of atom ids to use a points for alingment - defaults to all atoms
-      * prealigned (-) - (optional) by default the conformers are assumed be unaligned and will therefore be aligned to the first conformer
+      * mol_sdf_str - the molecule
+      * atomIds - (optional) list of atom ids to use a points for alingment - defaults to all atoms
+      * prealigned - (optional) by default the conformers are assumed be unaligned and will therefore be aligned to the first conformer
 
     Note that the returned RMS matrix is symmetrical, i.e. it is the lower half of the matrix, e.g. for 5 conformers:
 
@@ -185,10 +185,10 @@ def transform_mol(
     Applies the transformation (usually a 4x4 double matrix) to a molecule
 
     Parameters:
-      * mol_sdf_str (-) - the molecule to be transformed
-      * tform (-) - the transformation to apply
-      * confId (-) - (optional) the conformer id to transform
-      * keepConfs (-) - (optional) if keepConfs is False then all but that conformer are removed
+      * mol_sdf_str - the molecule to be transformed
+      * tform - the transformation to apply
+      * confId - (optional) the conformer id to transform
+      * keepConfs - (optional) if keepConfs is False then all but that conformer are removed
     """
     mol: rdchem.Mol = sdf_to_mol(mol_sdf_str)
     result: rdchem.Mol = AllChem.TransformMol(mol, transform, confId=conf_id, keepConfs=keep_confs)
