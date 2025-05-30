@@ -115,7 +115,7 @@ def constrained_embed(
     return mol_to_sdf(result)
 
 
-@rdkit_tool(disabled=True)
+@rdkit_tool(enabled=False)
 def enumerate_library_from_reaction(
     reaction: rdChemReactions.ChemicalReaction,
     sidechain_sets: Sequence[Sequence[rdchem.Mol]],

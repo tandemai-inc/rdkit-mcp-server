@@ -17,7 +17,7 @@ def get_rdkit_tools() -> Iterable[Callable]:
             getattr(module, func)
             for func in dir(module)
             if is_rdkit_tool(getattr(module, func))
-            # Tool is not disabled
-            and not getattr(getattr(module, func), "tool_disabled", False)
+            # Tool is enabled
+            and getattr(getattr(module, func), "tool_enabled", True)
         )
         yield from tool_iter
