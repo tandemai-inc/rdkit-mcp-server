@@ -20,7 +20,7 @@ AGENT_INSTRUCTIONS = (
 )
 
 # Default prompt makes testing more convenient
-DEFAULT_PROMPT = 'What is the molecular weight of `CC(=O)NC1=CC=C(C=C1)O`'
+DEFAULT_PROMPT = 'What tools are available?'
 
 
 async def run(mcp_server: MCPServer, prompt: str = None, model: str = None) -> Runner:
