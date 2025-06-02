@@ -44,14 +44,20 @@ def calc_mol_formula(*args, **kwargs):
     return CalcMolFormula(*args, **kwargs)
 
 
-@rdkit_tool(enabled=False)
-def calc_num_rings(*args, **kwargs):
-    return CalcNumRings(*args, **kwargs)
+@rdkit_tool(enabled=True, description=CalcNumRings.__doc__)
+def calc_num_rings(
+    smiles: Annotated[str, Field(description="SMILES representation of a molecule")],
+) -> int:
+    mol = Chem.MolFromSmiles(smiles)
+    return CalcNumRings(mol)
 
 
-@rdkit_tool(enabled=False)
-def calc_num_aromatic_rings(*args, **kwargs):
-    return CalcNumAromaticRings(*args, **kwargs)
+@rdkit_tool(enabled=True, description=CalcNumAromaticRings.__doc__)
+def calc_num_aromatic_rings(
+    smiles: Annotated[str, Field(description="SMILES representation of a molecule")],
+) -> int:
+    mol = Chem.MolFromSmiles(smiles)
+    return CalcNumAromaticRings(mol)
 
 
 @rdkit_tool(enabled=False)
@@ -59,23 +65,11 @@ def calc_num_aliphatic_rings(*args, **kwargs):
     return CalcNumAliphaticRings(*args, **kwargs)
 
 
-@rdkit_tool(enabled=True)
+@rdkit_tool(enabled=True, description=CalcNumRotatableBonds.__doc__)
 def calc_num_rotatable_bonds(
         smiles: Annotated[str, Field(description="SMILES representation of a molecule")],
-        strict: Annotated[bool, Field(description="Handles linkages between ring systems.")]=True) -> int:
-    """Calculate the number of rotatable bonds in a molecule given its SMILES representation.
-    
-    Args:
-        smiles (str): The SMILES representation of the molecule.
-        strict (bool): Handles linkages between ring systems.
-            Single bonds between aliphatic ring Cs are always rotatable.
-            This means that the central bond in CC1CCCC(C)C1-C1C(C)CCCC1C is now considered
-            rotatable; it was not before
-            
-            Heteroatoms in the linked rings no longer affect whether or not
-            the linking bond is rotatable the linking bond in systems like
-            Cc1cccc(C)c1-c1c(C)cccc1 is now considered non-rotatable
-    """
+        strict: Annotated[bool, Field(description="Handles linkages between ring systems.")] = True) -> int:
+    """Calculate the number of rotatable bonds in a molecule given its SMILES representation."""
     mol = Chem.MolFromSmiles(smiles)
     return CalcNumRotatableBonds(mol, strict)
 
