@@ -1,9 +1,11 @@
 import asyncio
+import logging
 
 from agents import Agent, Runner, gen_trace_id, trace
 from agents.mcp import MCPServer, MCPServerSse
 from agents.model_settings import ModelSettings
 
+logger = logging.getLogger(__name__)
 
 MCP_URL = "http://localhost:8000/sse"
 MCP_NAME = "RDKIT MCP Server"
@@ -17,10 +19,10 @@ AGENT_INSTRUCTIONS = (
 )
 
 # Default prompt makes testing more convenient
-DEFAULT_PROMPT = 'What tools are available?'
+DEFAULT_PROMPT = 'What is the molecular weight of `CC(=O)NC1=CC=C(C=C1)O`'
 
 
-async def run(mcp_server: MCPServer, prompt: str = None) -> str:
+async def run(mcp_server: MCPServer, prompt: str = None) -> Runner:
     prompt = prompt or ""
     agent = Agent(
         name="RDKIT Agent",
@@ -28,9 +30,9 @@ async def run(mcp_server: MCPServer, prompt: str = None) -> str:
         mcp_servers=[mcp_server],
         model_settings=ModelSettings(tool_choice="required"),
     )
-    result = await Runner.run(starting_agent=agent, input=prompt)
+    result: Runner = await Runner.run(starting_agent=agent, input=prompt)
     print(result.final_output)
-    return result.final_output
+    return result
 
 
 async def main():
