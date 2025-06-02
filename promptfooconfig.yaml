@@ -1,5 +1,4 @@
 # yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
-
 # Learn more about building a configuration: https://promptfoo.dev/docs/configuration/guide
 
 description: "RDKit MCP Server Eval"
