@@ -1,9 +1,12 @@
 import asyncio
+import json
+import logging
 
 from agents import Agent, Runner, gen_trace_id, trace
 from agents.mcp import MCPServer, MCPServerSse
 from agents.model_settings import ModelSettings
 
+logger = logging.getLogger(__name__)
 
 MCP_URL = "http://localhost:8000/sse"
 MCP_NAME = "RDKIT MCP Server"
@@ -20,16 +23,17 @@ AGENT_INSTRUCTIONS = (
 DEFAULT_PROMPT = 'What tools are available?'
 
 
-async def run(mcp_server: MCPServer, prompt: str = None):
+async def run(mcp_server: MCPServer, prompt: str = None, model: str = None) -> Runner:
     prompt = prompt or ""
     agent = Agent(
         name="RDKIT Agent",
         instructions=AGENT_INSTRUCTIONS,
         mcp_servers=[mcp_server],
         model_settings=ModelSettings(tool_choice="required"),
+        model=model
     )
-    result = await Runner.run(starting_agent=agent, input=prompt)
-    print(result.final_output)
+    result: Runner = await Runner.run(starting_agent=agent, input=prompt)
+    return result
 
 
 async def main():
@@ -50,7 +54,49 @@ async def main():
             trace_id = gen_trace_id()
             with trace(workflow_name=prompt, trace_id=trace_id):
                 print(f"View trace: {OPENAI_TRACE_URL.format(trace_id)}\n")
-                await run(server, prompt)
+                result: Runner = await run(server, prompt)
+                print(result.final_output)
+
+
+def parse_function_calls(runner: Runner):
+    """Parse function calls and outputs from the runner and return as a list."""
+    input_list = runner.to_input_list()
+    function_calls = []
+    for input_item in input_list:
+        function_types = ['function_call', 'function_call_output']
+        if 'type' in input_item and input_item['type'] in function_types:
+            function_calls.append(input_item)
+    return function_calls
+
+
+def format_final_output(runner: Runner) -> str:
+    """Format the final output of the runner in a human readable format."""
+    final_output = f'FINAL OUTPUT: {runner.final_output}\n\n'
+    function_calls = parse_function_calls(runner)
+    for call in function_calls:
+        if 'arguments' in call:
+            final_output += f"Function Call: {call.get('name', 'unknown')}\n"
+            try:
+                args = json.loads(call['arguments'])
+                if isinstance(args, list):
+                    arg_string = '\n'.join({f"arg_{i}": v for i, v in enumerate(args)})
+                else:
+                    arg_string = '\n'.join(f"{k}: {v}" for k, v in args.items())
+            except (json.JSONDecodeError, TypeError):
+                arg_string = str(call['arguments'])
+            final_output += f"Arguments: {arg_string}\n"
+        if 'output' in call:
+            try:
+                output = json.loads(call['output'])
+                if isinstance(args, list):
+                    output_str = '\n'.join({f"arg_{i}": v for i, v in enumerate(args)})
+                else:
+                    output_str = '\n'.join(f"{k}: {v}" for k, v in output.items())
+            except (json.JSONDecodeError, TypeError):
+                output_str = str(call['output'])
+            final_output += f"Output: {output_str}\n"
+        final_output += "\n"
+    return final_output
 
 if __name__ == "__main__":
     asyncio.run(main())
