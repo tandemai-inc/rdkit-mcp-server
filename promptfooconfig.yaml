@@ -9,7 +9,13 @@ prompts:
 
 providers:
   - id: 'file://python_provider.py'
-    label: 'Python agent'
+    label: '4o'
+    config:
+      model: 'gpt-4o'
+  - id: 'file://python_provider.py'
+    label: 'o1'
+    config:
+      model: 'o1'
 
 tests:
   - vars:
@@ -45,3 +51,20 @@ tests:
     assert:
       - type: llm-rubric
         value: "The final output states that the SMILES in {{expected_output}} contain pyridine rings."
+
+  - vars:
+      prompt: "Compute the number of hydrogen bond donors and acceptors for this molecule: COc1ccc(CO)cc1"
+      expected_output: "Donors: 1, Acceptors: 2"
+    description: "Verify hydrogen bond donor and acceptor counting"
+    assert:
+      - type: llm-rubric
+        value: "The final output states that the SMILES has 1 Donor hydrogen bond, and 2 Acceptors."
+  
+  # 
+  - vars:
+      prompt: "Which of these molecules violates Lipinski's Rule of Five? CCO, CC(C)CC1=CC=CC=C1"
+      expected_output: "Only CC(C)CC1=CC=CC=C1 violates (high logP)"
+    description: "Verify Lipinski's Rule of Five violations"
+    assert:
+      - type: llm-rubric
+        value: "The final output states that only CC(C)CC1=CC=CC=C1 violates Lipinski's rule of Five (high logP)."

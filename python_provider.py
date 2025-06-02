@@ -6,7 +6,7 @@ from src.clients.openai import MCP_URL, MCP_NAME, OPENAI_TRACE_URL, run, format_
 logger = logging.getLogger(__name__)
 
 
-async def call_llm(prompt: str) -> Runner:
+async def call_llm(prompt: str, model=None) -> Runner:
     async with MCPServerSse(
         name=MCP_NAME,
         params={
@@ -16,7 +16,7 @@ async def call_llm(prompt: str) -> Runner:
         trace_id = gen_trace_id()
         with trace(workflow_name=prompt, trace_id=trace_id):
             print(f"View trace: {OPENAI_TRACE_URL.format(trace_id)}\n")
-            result: Runner = await run(server, prompt)
+            result: Runner = await run(server, prompt, model=model)
     return result
 
 
@@ -57,7 +57,11 @@ class ProviderClassificationResponse:
 
 
 async def call_api(prompt: str, options: Dict[str, Any], context: Dict[str, Any]) -> ProviderResponse:
-    result: Runner = await call_llm(prompt)
+    # The 'options' parameter contains additional configuration for the API call.
+    config = options.get('config', None)
+    model = config.get('model', None)
+    
+    result: Runner = await call_llm(prompt, model=model)
     final_output = format_final_output(result)
     response = {
         "output": final_output

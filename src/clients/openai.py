@@ -23,16 +23,16 @@ AGENT_INSTRUCTIONS = (
 DEFAULT_PROMPT = 'What is the molecular weight of `CC(=O)NC1=CC=C(C=C1)O`'
 
 
-async def run(mcp_server: MCPServer, prompt: str = None) -> Runner:
+async def run(mcp_server: MCPServer, prompt: str = None, model: str = None) -> Runner:
     prompt = prompt or ""
     agent = Agent(
         name="RDKIT Agent",
         instructions=AGENT_INSTRUCTIONS,
         mcp_servers=[mcp_server],
         model_settings=ModelSettings(tool_choice="required"),
+        model=model
     )
     result: Runner = await Runner.run(starting_agent=agent, input=prompt)
-    # output = format_final_output(result)
     return result
 
 
@@ -78,14 +78,20 @@ def format_final_output(runner: Runner) -> str:
             final_output += f"Function Call: {call.get('name', 'unknown')}\n"
             try:
                 args = json.loads(call['arguments'])
-                arg_string = '\n'.join(f"{k}: {v}" for k, v in args.items())
+                if isinstance(args, list):
+                    arg_string = '\n'.join({f"arg_{i}": v for i, v in enumerate(args)})
+                else:
+                    arg_string = '\n'.join(f"{k}: {v}" for k, v in args.items())
             except (json.JSONDecodeError, TypeError):
                 arg_string = str(call['arguments'])
             final_output += f"Arguments: {arg_string}\n"
         if 'output' in call:
             try:
                 output = json.loads(call['output'])
-                output_str = '\n'.join(f"{k}: {v}" for k, v in output.items())
+                if isinstance(args, list):
+                    output_str = '\n'.join({f"arg_{i}": v for i, v in enumerate(args)})
+                else:
+                    output_str = '\n'.join(f"{k}: {v}" for k, v in output.items())
             except (json.JSONDecodeError, TypeError):
                 output_str = str(call['output'])
             final_output += f"Output: {output_str}\n"
