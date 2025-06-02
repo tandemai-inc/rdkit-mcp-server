@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
+
+# Learn more about building a configuration: https://promptfoo.dev/docs/configuration/guide
+
+description: "RDKit MCP Server Eval"
+
+prompts:
+  - "What is the molecular weight of {{smiles}}?"
+
+providers:
+  - id: 'file://python_provider.py'
+    label: 'Python agent' # Optional display label for this provider
+
+tests:
+  - vars:
+      smiles: "CC(=O)NC1=CC=C(C=C1)O"
+    description: "Verify molecular weight of CC(=O)NC1=CC=C(C=C1)O is approximately 180"
+    assert:
+      - type: llm-rubric
+        value: "Molecular weight is approximately 151.165"

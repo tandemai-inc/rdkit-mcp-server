@@ -20,7 +20,7 @@ AGENT_INSTRUCTIONS = (
 DEFAULT_PROMPT = 'What tools are available?'
 
 
-async def run(mcp_server: MCPServer, prompt: str = None):
+async def run(mcp_server: MCPServer, prompt: str = None) -> str:
     prompt = prompt or ""
     agent = Agent(
         name="RDKIT Agent",
@@ -30,6 +30,7 @@ async def run(mcp_server: MCPServer, prompt: str = None):
     )
     result = await Runner.run(starting_agent=agent, input=prompt)
     print(result.final_output)
+    return result.final_output
 
 
 async def main():
