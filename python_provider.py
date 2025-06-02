@@ -62,13 +62,19 @@ async def call_api(prompt: str, options: Dict[str, Any], context: Dict[str, Any]
     # Parse tool calls and return in result
     function_calls = parse_function_calls(result)
     # The result should be a dictionary with at least an 'output' field.
+    final_output = f'FINAL OUTPUT: {result.final_output}\n\n'
+    for call in function_calls:
+        if 'arguments' in call:
+            final_output += f"Function Call: {call.get('name', 'unknown')}\n"
+            # arguments = '\n'.join(f"{k}: {v}" for k, v in call['arguments'].items())
+            arguments = call['arguments']
+            final_output += f"Arguments: {arguments}\n"
+        if 'output' in call:
+            final_output += f"Output: {call['output']}\n"
+            final_output += "\n"
     response = {
-        "output": {
-            "final_output": result.final_output,
-            "function_calls": function_calls,
-        }
+        "output": final_output
     }
-
     return response
 
 
