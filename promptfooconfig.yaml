@@ -34,7 +34,7 @@ tests:
   - vars:
       prompt: "Give me the number of rotatable bonds in this SMILES: CCOC(=O)C1=CC=CC=C1?"
       smiles: "CCOC(=O)C1=CC=CC=C1"
-      expected_output: 5
+      expected_output: 2
     description: "Verify number of rotatable bonds in `CCOC(=O)C1=CC=CC=C1`"
     assert:
       - type: llm-rubric
@@ -62,9 +62,14 @@ tests:
   
   # 
   - vars:
-      prompt: "Which of these molecules violates Lipinski's Rule of Five? CCO, CC(C)CC1=CC=CC=C1"
-      expected_output: "Only CC(C)CC1=CC=CC=C1 violates (high logP)"
-    description: "Verify Lipinski's Rule of Five violations"
+      prompt: |
+        Which of these is more similar to this reference molecule
+        Reference: CC(=O)OC1=CC=CC=C1C(=O)O
+        Candidates: CC(OC1C(C(O)=O)=CC(C)=CC=1)=O or CCOC(C)C or C1C=CC=CC=1
+      expected_output: "CC(OC1C(C(O)=O)=CC(C)=CC=1)=O"
+    description: "Verify similarity comparison of molecules"
     assert:
       - type: llm-rubric
-        value: "The final output states that only CC(C)CC1=CC=CC=C1 violates Lipinski's rule of Five (high logP)."
+        value: "The final output states that CC(OC1C(C(O)=O)=CC(C)=CC=1)=O is the most similar to the reference"
+      - type: llm-rubric
+        value: "We expect a function to calculate the tanimoto similarity between the reference for each candidate"
