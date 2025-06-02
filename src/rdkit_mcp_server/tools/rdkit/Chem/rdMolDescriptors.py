@@ -33,20 +33,23 @@ from rdkit.Chem.rdMolDescriptors import (
 
 from ...utils import rdkit_tool
 
+smiles_type = Annotated[str, Field(description="SMILES representation of a molecule")]
+
 
 @rdkit_tool(enabled=False)
 def calc_exact_mol_wt(*args, **kwargs):
     return CalcExactMolWt(*args, **kwargs)
 
 
-@rdkit_tool(enabled=False)
-def calc_mol_formula(*args, **kwargs):
-    return CalcMolFormula(*args, **kwargs)
+@rdkit_tool(enabled=True, description=CalcMolFormula.__doc__)
+def calc_mol_formula(smiles: smiles_type) -> str:
+    mol = Chem.MolFromSmiles(smiles)
+    return CalcMolFormula(mol)
 
 
 @rdkit_tool(enabled=True, description=CalcNumRings.__doc__)
 def calc_num_rings(
-    smiles: Annotated[str, Field(description="SMILES representation of a molecule")],
+    smiles: smiles_type,
 ) -> int:
     mol = Chem.MolFromSmiles(smiles)
     return CalcNumRings(mol)
@@ -54,7 +57,7 @@ def calc_num_rings(
 
 @rdkit_tool(enabled=True, description=CalcNumAromaticRings.__doc__)
 def calc_num_aromatic_rings(
-    smiles: Annotated[str, Field(description="SMILES representation of a molecule")],
+    smiles: smiles_type,
 ) -> int:
     mol = Chem.MolFromSmiles(smiles)
     return CalcNumAromaticRings(mol)
@@ -67,7 +70,7 @@ def calc_num_aliphatic_rings(*args, **kwargs):
 
 @rdkit_tool(enabled=True, description=CalcNumRotatableBonds.__doc__)
 def calc_num_rotatable_bonds(
-        smiles: Annotated[str, Field(description="SMILES representation of a molecule")],
+        smiles: smiles_type,
         strict: Annotated[bool, Field(description="Handles linkages between ring systems.")] = True) -> int:
     """Calculate the number of rotatable bonds in a molecule given its SMILES representation."""
     mol = Chem.MolFromSmiles(smiles)
@@ -139,14 +142,20 @@ def calc_num_hbd(*args, **kwargs):
     return CalcNumHBD(*args, **kwargs)
 
 
-@rdkit_tool(enabled=False)
-def calc_num_lipinski_hba(*args, **kwargs):
-    return CalcNumLipinskiHBA(*args, **kwargs)
+@rdkit_tool(enabled=True, description=CalcNumLipinskiHBA.__doc__)
+def calc_num_lipinski_hba(
+    smiles: smiles_type
+) -> int:
+    """Calculate the number of hydrogen bond acceptors according to Lipinski's rule of five."""
+    mol = Chem.MolFromSmiles(smiles)
+    return CalcNumLipinskiHBA(mol)
 
 
-@rdkit_tool(enabled=False)
-def calc_num_lipinski_hbd(*args, **kwargs):
-    return CalcNumLipinskiHBD(*args, **kwargs)
+@rdkit_tool(enabled=True, description=CalcNumLipinskiHBD.__doc__)
+def calc_num_lipinski_hbd(smiles: smiles_type) -> int:
+    """Calculate the number of hydrogen bond donors according to Lipinski's rule of five."""
+    mol = Chem.MolFromSmiles(smiles)
+    return CalcNumLipinskiHBD(mol)
 
 
 @rdkit_tool(enabled=False)
