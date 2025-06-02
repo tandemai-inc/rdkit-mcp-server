@@ -3,26 +3,16 @@ import os
 from typing import Dict, Union, Optional
 from datetime import datetime
 from mcp.server.fastmcp.exceptions import ToolError
+from rdkit.Chem import AllChem, Descriptors, Draw
+from rdkit import Chem, DataStructs
+
 from .utils import rdkit_tool
+
+
 import logging
 
 logger = logging.getLogger(__name__)
 
-# Attempt to import RDKit and Pillow, logging errors if they are not found
-try:
-    from rdkit import Chem, DataStructs
-    from rdkit.Chem import AllChem, Descriptors, Draw
-    RDKIT_AVAILABLE = True
-except ImportError:
-    logger.error("RDKit library not found. Please install it (e.g., via conda). Tool functionality will be limited.")
-    RDKIT_AVAILABLE = False
-
-try:
-    from PIL import Image
-    PILLOW_AVAILABLE = True
-except ImportError:
-    logger.warning("Pillow library not found. Molecule drawing to PNG will not work.")
-    PILLOW_AVAILABLE = False
 
 OUTPUT_DIR = os.path.join(os.getcwd(), 'outputs')
 
@@ -31,9 +21,6 @@ OUTPUT_DIR = os.path.join(os.getcwd(), 'outputs')
 
 def _load_molecule(smiles: str) -> Optional[Chem.Mol]:
     """Loads a molecule from SMILES, returning None on failure."""
-    if not RDKIT_AVAILABLE:
-        logger.error("RDKit is not available.")
-        return None
     if not smiles or not isinstance(smiles, str):
         logger.error("Invalid SMILES input: must be a non-empty string.")
         return None
@@ -48,7 +35,7 @@ def _load_molecule(smiles: str) -> Optional[Chem.Mol]:
         return None
 
 
-@rdkit_tool
+@rdkit_tool()
 async def parse_molecule(smiles: str) -> Dict[str, Union[str, int, float]]:
     """
     Parse a SMILES string into an RDKit molecule object and return basic properties.
@@ -83,7 +70,7 @@ async def parse_molecule(smiles: str) -> Dict[str, Union[str, int, float]]:
         raise ToolError(f"Error calculating properties for SMILES '{smiles}': {e}")
 
 
-@rdkit_tool
+@rdkit_tool()
 async def draw_molecule(smiles: str, width: int = 300, height: int = 300, file_name=None) -> Dict[str, str]:
     """
     Generates a PNG image representation of a molecule from its SMILES string.
@@ -99,9 +86,6 @@ async def draw_molecule(smiles: str, width: int = 300, height: int = 300, file_n
         Requires RDKit and Pillow libraries.
     """
     logger.info(f"Tool 'draw_molecule' called for SMILES: {smiles[:30]}...")
-    if not RDKIT_AVAILABLE or not PILLOW_AVAILABLE:
-        raise ToolError("RDKit or Pillow library not available for drawing.")
-
     mol = await asyncio.to_thread(_load_molecule, smiles)
     if mol is None:
         raise ToolError(f"Invalid or unparsable SMILES string: {smiles}")
@@ -134,7 +118,7 @@ async def draw_molecule(smiles: str, width: int = 300, height: int = 300, file_n
         raise ToolError(f"Error generating molecule image: {e}")
 
 
-@rdkit_tool
+@rdkit_tool()
 async def compute_fingerprint(smiles: str, method: str = "morgan", radius: int = 2, nBits: int = 2048) -> Dict[str, str]:
     """
     Computes a molecular fingerprint for a given SMILES string.
@@ -182,7 +166,7 @@ async def compute_fingerprint(smiles: str, method: str = "morgan", radius: int =
         raise ToolError(f"Error computing fingerprint: {e}")
 
 
-@rdkit_tool
+@rdkit_tool()
 async def tanimoto_similarity(smiles1: str, smiles2: str, method: str = "morgan", radius: int = 2, nBits: int = 2048) -> Dict[str, Union[str, float]]:
     """
     Calculates the Tanimoto similarity between two molecules based on their fingerprints.

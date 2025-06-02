@@ -1,4 +1,4 @@
-import os
+import argparse
 import logging
 from mcp.server.fastmcp import FastMCP
 
@@ -7,35 +7,31 @@ from .tools.register_tools import register_tools
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+parser = argparse.ArgumentParser(description="RDKit MCP Server")
+parser.add_argument("--port", type=int, help="Port to run the server on", default=8000)
+parser.add_argument("--transport", choices=["sse", "stdio"], help="Transport method (sse or stdio)", default="sse")
+parser.add_argument("--host", type=str, help="Host to run the server on", default="127.0.0.1")
 
 mcp = FastMCP("RDKit-MCP Server")
 
 
 async def main():
     """Main function to run the MCP server."""
-    # Determine transport method (default to stdio)
-    transport = os.getenv("MCP_TRANSPORT", "sse").lower()
-    host = os.getenv("MCP_HOST", "127.0.0.1")  # Default host for SSE
-    port_str = os.getenv("MCP_PORT", "8000")  # Default port for SSE
+    args, _ = parser.parse_known_args()
+    transport = args.transport
 
-    try:
-        port = int(port_str)
-    except ValueError:
-        logger.warning(f"Invalid MCP_PORT value '{port_str}'. Using default port 8000.")
-        port = 8000
-
-    logger.info("Registering tools with MCP server...")
     # TODO: Add settings to have whitelist and blacklist
     whitelist = []
     blacklist = []
+    logger.info("Registering tools with MCP server...")
     await register_tools(mcp, whitelist=whitelist, blacklist=blacklist)
 
     logger.info(f"Starting RDKit MCP Server with transport: {transport}")
     if transport == "sse":
-        logger.info(f"SSE transport selected. Listening on {host}:{port}")
+        logger.info(f"Server running on {args.host}:{args.port} using SSE transport.")
+        mcp.settings.host = args.host
+        mcp.settings.port = args.port
         await mcp.run_sse_async()
     elif transport == "stdio":
-        mcp.run_stdio_async()
-    else:
-        logger.error(f"Unsupported transport type: {transport}. Defaulting to sse.")
-        mcp.run_sse_async()
+        logger.info("Server running using stdio transport.")
+        await mcp.run_stdio_async()

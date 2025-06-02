@@ -1,7 +1,7 @@
 import logging
 import itertools
 from mcp.server.fastmcp import FastMCP
-from typing import List, Callable
+from typing import List
 
 from . import base_tools
 from .rdkit import get_rdkit_tools
