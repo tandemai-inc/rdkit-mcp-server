@@ -58,8 +58,7 @@ tests:
     assert:
       - type: llm-rubric
         value: "The final output states that the SMILES has 1 Donor hydrogen bond, and 2 Acceptors."
-  
-  # 
+
   - vars:
       prompt: |
         Which of these is more similar to this reference molecule

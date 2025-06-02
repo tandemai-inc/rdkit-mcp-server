@@ -35,7 +35,7 @@ def _load_molecule(smiles: str) -> Optional[Chem.Mol]:
         return None
 
 
-@rdkit_tool()
+@rdkit_tool(enabled=False)
 async def parse_molecule(smiles: str) -> Dict[str, Union[str, int, float]]:
     """
     Parse a SMILES string into an RDKit molecule object and return basic properties.
