@@ -31,6 +31,7 @@ async def run(mcp_server: MCPServer, prompt: str = None) -> Runner:
         model_settings=ModelSettings(tool_choice="required"),
     )
     result: Runner = await Runner.run(starting_agent=agent, input=prompt)
+    # function_calls = parse_function_calls(result)
     print(result.final_output)
     return result
 
@@ -54,6 +55,18 @@ async def main():
             with trace(workflow_name=prompt, trace_id=trace_id):
                 print(f"View trace: {OPENAI_TRACE_URL.format(trace_id)}\n")
                 await run(server, prompt)
+
+
+def parse_function_calls(runner: Runner):
+    """Parse function calls and outputs from the runner and return as a list."""
+    input_list = runner.to_input_list()
+    function_calls = []
+    for input_item in input_list:
+        function_types = ['function_call', 'function_call_output']
+        if 'type' in input_item and input_item['type'] in function_types:
+            function_calls.append(input_item)
+    return function_calls
+
 
 if __name__ == "__main__":
     asyncio.run(main())

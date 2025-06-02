@@ -14,9 +14,12 @@ providers:
 tests:
   - vars:
       smiles: "CC(=O)NC1=CC=C(C=C1)O"
-    description: "Verify molecular weight of `CC(=O)NC1=CC=C(C=C1)O` is approximately 180"
+      mol_weight: 151.165
+    description: "Verify molecular weight of `CC(=O)NC1=CC=C(C=C1)O`"
     assert:
       - type: llm-rubric
-        value: "The final output states the Molecular weight is 151.165"
+        value: "The final output states the Molecular weight is {{mol_weight}} g/mol."
       - type: llm-rubric
-        value: "The 'tool_calls' contains a call to `mol_wt` with the exact smiles `CC(=O)NC1=CC=C(C=C1)O` as an argument"
+        value: "The 'function_calls' key contains a call to `mol_wt` with the exact smiles `{{smiles}}` as an argument."
+      - type: llm-rubric
+        value: "The 'function_calls' key contains a function_call_output type which returns the value {{mol_weight}} g/mol."
