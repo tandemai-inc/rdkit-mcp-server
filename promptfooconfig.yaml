@@ -9,7 +9,7 @@ prompts:
 
 providers:
   - id: 'file://python_provider.py'
-    label: 'Python agent' # Optional display label for this provider
+    label: 'Python agent'
 
 tests:
   - vars:
