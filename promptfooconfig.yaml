@@ -24,6 +24,7 @@ tests:
         value: "There is a function call to `mol_wt` with the exact smiles `{{smiles}}` as an argument."
       - type: llm-rubric
         value: "mol_wt function call output returns the value {{expected_output}}"
+  
   - vars:
       prompt: "Give me the number of rotatable bonds in this SMILES: CCOC(=O)C1=CC=CC=C1?"
       smiles: "CCOC(=O)C1=CC=CC=C1"
@@ -33,13 +34,14 @@ tests:
       - type: llm-rubric
         value: "The final output states the number of rotatable bonds is {{expected_output}}."
       - type: llm-rubric
-        value: "The 'function_calls' key contains a function call with the exact smiles `{{smiles}}` as an argument."
+        value: "The response should contain a function call with the exact smiles `{{smiles}}` as an argument."
       - type: llm-rubric
-        value: "The 'function_calls' key contains a function_call_output type which returns the value {{expected_output}}."
+        value: "The response should contain an output type which returns the value {{expected_output}}."
+
   - vars:
       prompt: "Find all molecules in this list that contain a pyridine ring: C1=CC=CN=C1, C1=CC=CC=C1, CC(C)C1=CN=CC=C1"
       expected_output: ["C1=CC=CN=C1", "CC(C)C1=CN=CC=C1"]
     description: "Verify pyridine ring detection in a list of SMILES"
     assert:
       - type: llm-rubric
-        value: "The final output contains a list of SMILES that contain a pyridine ring. The list should matche {{expected_output}}."
+        value: "The final output states that the SMILES in {{expected_output}} contain pyridine rings."

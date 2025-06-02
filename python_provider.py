@@ -2,7 +2,7 @@ import logging
 from agents import Runner, gen_trace_id, trace
 from agents.mcp import MCPServerSse
 from typing import Dict, Any, Optional, Union, List
-from src.clients.openai import MCP_URL, MCP_NAME, OPENAI_TRACE_URL, run, parse_function_calls
+from src.clients.openai import MCP_URL, MCP_NAME, OPENAI_TRACE_URL, run, format_final_output
 logger = logging.getLogger(__name__)
 
 
@@ -58,20 +58,7 @@ class ProviderClassificationResponse:
 
 async def call_api(prompt: str, options: Dict[str, Any], context: Dict[str, Any]) -> ProviderResponse:
     result: Runner = await call_llm(prompt)
-
-    # Parse tool calls and return in result
-    function_calls = parse_function_calls(result)
-    # The result should be a dictionary with at least an 'output' field.
-    final_output = f'FINAL OUTPUT: {result.final_output}\n\n'
-    for call in function_calls:
-        if 'arguments' in call:
-            final_output += f"Function Call: {call.get('name', 'unknown')}\n"
-            # arguments = '\n'.join(f"{k}: {v}" for k, v in call['arguments'].items())
-            arguments = call['arguments']
-            final_output += f"Arguments: {arguments}\n"
-        if 'output' in call:
-            final_output += f"Output: {call['output']}\n"
-            final_output += "\n"
+    final_output = format_final_output(result)
     response = {
         "output": final_output
     }
