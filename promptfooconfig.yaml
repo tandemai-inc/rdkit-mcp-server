@@ -5,7 +5,7 @@
 description: "RDKit MCP Server Eval"
 
 prompts:
-  - "What is the molecular weight of {{smiles}}?"
+  - "{{prompt}}"
 
 providers:
   - id: 'file://python_provider.py'
@@ -13,13 +13,33 @@ providers:
 
 tests:
   - vars:
+      prompt: "What is the molecular weight of the compound with SMILES: {{smiles}}?"
       smiles: "CC(=O)NC1=CC=C(C=C1)O"
-      mol_weight: 151.165
+      expected_output: 151.165
     description: "Verify molecular weight of `CC(=O)NC1=CC=C(C=C1)O`"
     assert:
       - type: llm-rubric
-        value: "The final output states the Molecular weight is {{mol_weight}} g/mol."
+        value: "The final output states the Molecular weight is {{expected_output}} g/mol."
       - type: llm-rubric
-        value: "The 'function_calls' key contains a call to `mol_wt` with the exact smiles `{{smiles}}` as an argument."
+        value: "There is a function call to `mol_wt` with the exact smiles `{{smiles}}` as an argument."
       - type: llm-rubric
-        value: "The 'function_calls' key contains a function_call_output type which returns the value {{mol_weight}} g/mol."
+        value: "mol_wt function call output returns the value {{expected_output}}"
+  - vars:
+      prompt: "Give me the number of rotatable bonds in this SMILES: CCOC(=O)C1=CC=CC=C1?"
+      smiles: "CCOC(=O)C1=CC=CC=C1"
+      expected_output: 5
+    description: "Verify number of rotatable bonds in `CCOC(=O)C1=CC=CC=C1`"
+    assert:
+      - type: llm-rubric
+        value: "The final output states the number of rotatable bonds is {{expected_output}}."
+      - type: llm-rubric
+        value: "The 'function_calls' key contains a function call with the exact smiles `{{smiles}}` as an argument."
+      - type: llm-rubric
+        value: "The 'function_calls' key contains a function_call_output type which returns the value {{expected_output}}."
+  - vars:
+      prompt: "Find all molecules in this list that contain a pyridine ring: C1=CC=CN=C1, C1=CC=CC=C1, CC(C)C1=CN=CC=C1"
+      expected_output: ["C1=CC=CN=C1", "CC(C)C1=CN=CC=C1"]
+    description: "Verify pyridine ring detection in a list of SMILES"
+    assert:
+      - type: llm-rubric
+        value: "The final output contains a list of SMILES that contain a pyridine ring. The list should matche {{expected_output}}."
