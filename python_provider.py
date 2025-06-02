@@ -60,7 +60,7 @@ async def call_api(prompt: str, options: Dict[str, Any], context: Dict[str, Any]
     # The 'options' parameter contains additional configuration for the API call.
     config = options.get('config', None)
     model = config.get('model', None)
-    
+
     result: Runner = await call_llm(prompt, model=model)
     final_output = format_final_output(result)
     response = {

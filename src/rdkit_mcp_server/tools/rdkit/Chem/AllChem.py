@@ -1,7 +1,6 @@
 from ...utils import rdkit_tool, mol_to_sdf, sdf_to_mol
 
-from typing import Tuple, Sequence, Optional, Callable, Any, Iterator, List
-from rdkit import Chem
+from typing import Sequence, Optional, Iterator, List
 from rdkit.Chem import AllChem, rdchem, rdChemReactions
 from rdkit.Geometry import UniformGrid3D
 

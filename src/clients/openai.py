@@ -98,5 +98,6 @@ def format_final_output(runner: Runner) -> str:
         final_output += "\n"
     return final_output
 
+
 if __name__ == "__main__":
     asyncio.run(main())
