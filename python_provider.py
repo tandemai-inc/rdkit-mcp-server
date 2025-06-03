@@ -1,8 +1,11 @@
 import logging
+
 from agents import Runner, gen_trace_id, trace
 from agents.mcp import MCPServerSse
 from typing import Dict, Any, Optional, Union, List
 from src.clients.openai import MCP_URL, MCP_NAME, OPENAI_TRACE_URL, run, format_final_output
+
+
 logger = logging.getLogger(__name__)
 
 
