@@ -12,9 +12,14 @@ providers:
     config:
       model: 'gpt-4o'
   - id: 'file://python_provider.py'
-    label: 'o1'
+    label: 'o3-mini'
     config:
-      model: 'o1'
+      model: 'o3-mini'
+  - id: 'file://python_provider.py'
+    label: 'o4-mini'
+    config:
+      model: 'o4-mini'
+  
 
 tests:
   - vars:
