@@ -32,8 +32,7 @@ from rdkit.Chem.rdMolDescriptors import (
 )
 
 from ...tools.utils import rdkit_tool
-
-smiles_type = Annotated[str, Field(description="SMILES representation of a molecule")]
+from ...tools.types import Smiles
 
 
 @rdkit_tool(enabled=False)
@@ -42,14 +41,14 @@ def CalcExactMolWt(*args, **kwargs):
 
 
 @rdkit_tool(enabled=True, description=CalcMolFormula.__doc__)
-def CalcMolFormula(smiles: smiles_type) -> str:
+def CalcMolFormula(smiles: Smiles) -> str:
     mol = Chem.MolFromSmiles(smiles)
     return CalcMolFormula(mol)
 
 
 @rdkit_tool(enabled=True, description=CalcNumRings.__doc__)
 def CalcNumRings(
-    smiles: smiles_type,
+    smiles: Smiles,
 ) -> int:
     mol = Chem.MolFromSmiles(smiles)
     return CalcNumRings(mol)
@@ -57,7 +56,7 @@ def CalcNumRings(
 
 @rdkit_tool(enabled=True, description=CalcNumAromaticRings.__doc__)
 def CalcNumAromaticRings(
-    smiles: smiles_type,
+    smiles: Smiles,
 ) -> int:
     mol = Chem.MolFromSmiles(smiles)
     return CalcNumAromaticRings(mol)
@@ -70,7 +69,7 @@ def calc_num_aliphatic_rings(*args, **kwargs):
 
 @rdkit_tool(enabled=True, description=CalcNumRotatableBonds.__doc__)
 def CalcNumRotatableBonds(
-        smiles: smiles_type,
+        smiles: Smiles,
         strict: Annotated[bool, Field(description="Handles linkages between ring systems.")] = True) -> int:
     """Calculate the number of rotatable bonds in a molecule given its SMILES representation."""
     mol = Chem.MolFromSmiles(smiles)
@@ -144,7 +143,7 @@ def CalcNumHBD(*args, **kwargs):
 
 @rdkit_tool(enabled=True, description=CalcNumLipinskiHBA.__doc__)
 def CalcNumLipinskiHBA(
-    smiles: smiles_type
+    smiles: Smiles
 ) -> int:
     """Calculate the number of hydrogen bond acceptors according to Lipinski's rule of five."""
     mol = Chem.MolFromSmiles(smiles)
@@ -152,7 +151,7 @@ def CalcNumLipinskiHBA(
 
 
 @rdkit_tool(enabled=True, description=CalcNumLipinskiHBD.__doc__)
-def CalcNumLipinskiHBD(smiles: smiles_type) -> int:
+def CalcNumLipinskiHBD(smiles: Smiles) -> int:
     """Calculate the number of hydrogen bond donors according to Lipinski's rule of five."""
     mol = Chem.MolFromSmiles(smiles)
     return CalcNumLipinskiHBD(mol)
