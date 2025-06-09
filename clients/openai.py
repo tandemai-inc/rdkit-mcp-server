@@ -44,8 +44,8 @@ async def run(prompt: str = None, model: str = None, mcp_server: MCPServer = Non
 async def main():
     # Create a while loop that requests a prompt from a user, and then sends it to the agent to process
     while True:
-        prompt = input("Enter a prompt (or 'exit' to quit): ")
-        if prompt.lower() == "exit":
+        prompt = input("Enter a prompt or 'exit': ")
+        if prompt.lower().strip() == "exit":
             break
         if not prompt:
             prompt = DEFAULT_PROMPT
