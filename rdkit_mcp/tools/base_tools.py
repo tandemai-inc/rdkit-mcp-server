@@ -70,7 +70,7 @@ async def parse_molecule(smiles: Smiles) -> Dict[str, Union[str, int, float]]:
         raise ToolError(f"Error calculating properties for SMILES '{smiles}': {e}")
 
 
-@rdkit_tool()
+@rdkit_tool(enabled=False)
 async def draw_molecule(smiles: Smiles, width: int = 300, height: int = 300, file_name=None) -> Dict[str, str]:
     """
     Generates a PNG image representation of a molecule from its SMILES string.
