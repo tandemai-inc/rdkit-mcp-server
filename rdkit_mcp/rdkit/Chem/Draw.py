@@ -15,7 +15,6 @@ from rdkit.Chem.Draw import *
 logger = logging.getLogger(__name__)
 
 
-
 @rdkit_tool(description=Draw.MolToImage.__doc__, enabled=False)
 def MolToImage(smiles: Smiles, width: int = 300, height: int = 300):
     mol: Chem.Mol = Chem.MolFromSmiles(smiles)
