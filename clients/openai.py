@@ -29,7 +29,7 @@ async def run(prompt: str = None, model: str = None, mcp_server: MCPServer = Non
     mcp_servers = []
     if mcp_server:
         mcp_servers.append(mcp_server)
-    
+
     agent = Agent(
         name="RDKIT Agent",
         instructions=AGENT_INSTRUCTIONS,
@@ -59,7 +59,7 @@ async def main():
             trace_id = gen_trace_id()
             with trace(workflow_name=prompt, trace_id=trace_id):
                 print(f"View trace: {OPENAI_TRACE_URL.format(trace_id)}\n")
-                result: Runner = await run(server, prompt)
+                result: Runner = await run(prompt, mcp_server=server)
                 print(result.final_output)
 
 
