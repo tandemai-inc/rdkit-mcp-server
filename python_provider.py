@@ -3,13 +3,13 @@ import logging
 from agents import Runner, gen_trace_id, trace
 from agents.mcp import MCPServerSse
 from typing import Dict, Any, Optional, Union, List
-from src.clients.openai import MCP_URL, MCP_NAME, OPENAI_TRACE_URL, run, format_final_output
+from clients.openai import MCP_URL, MCP_NAME, OPENAI_TRACE_URL, run, format_final_output
 
 
 logger = logging.getLogger(__name__)
 
 
-async def call_llm(prompt: str, model=None) -> Runner:
+async def call_llm(prompt: str, model=None, use_mcp=True) -> Runner:
     async with MCPServerSse(
         name=MCP_NAME,
         params={
@@ -19,7 +19,10 @@ async def call_llm(prompt: str, model=None) -> Runner:
         trace_id = gen_trace_id()
         with trace(workflow_name=prompt, trace_id=trace_id):
             print(f"View trace: {OPENAI_TRACE_URL.format(trace_id)}\n")
-            result: Runner = await run(server, prompt, model=model)
+            if use_mcp:
+                result: Runner = await run(prompt, model=model, mcp_server=server)
+            else:
+                result: Runner = await run(prompt, model=model)
     return result
 
 
@@ -63,8 +66,9 @@ async def call_api(prompt: str, options: Dict[str, Any], context: Dict[str, Any]
     # The 'options' parameter contains additional configuration for the API call.
     config = options.get('config', None)
     model = config.get('model', None)
+    use_mcp = config.get('use_mcp', True)
 
-    result: Runner = await call_llm(prompt, model=model)
+    result: Runner = await call_llm(prompt, model=model, use_mcp=use_mcp)
     final_output = format_final_output(result)
     response = {
         "output": final_output
