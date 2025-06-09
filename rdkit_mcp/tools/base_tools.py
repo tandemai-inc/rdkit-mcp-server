@@ -7,7 +7,7 @@ from rdkit.Chem import AllChem, Descriptors, Draw
 from rdkit import Chem, DataStructs
 
 from .utils import rdkit_tool
-
+from .types import Smiles
 
 import logging
 
@@ -19,7 +19,7 @@ OUTPUT_DIR = os.path.join(os.getcwd(), 'outputs')
 # Helper function to handle RDKit molecule loading and errors
 
 
-def _load_molecule(smiles: str) -> Optional[Chem.Mol]:
+def _load_molecule(smiles: Smiles) -> Optional[Chem.Mol]:
     """Loads a molecule from SMILES, returning None on failure."""
     if not smiles or not isinstance(smiles, str):
         logger.error("Invalid SMILES input: must be a non-empty string.")
@@ -36,7 +36,7 @@ def _load_molecule(smiles: str) -> Optional[Chem.Mol]:
 
 
 @rdkit_tool(enabled=False)
-async def parse_molecule(smiles: str) -> Dict[str, Union[str, int, float]]:
+async def parse_molecule(smiles: Smiles) -> Dict[str, Union[str, int, float]]:
     """
     Parse a SMILES string into an RDKit molecule object and return basic properties.
 
@@ -71,7 +71,7 @@ async def parse_molecule(smiles: str) -> Dict[str, Union[str, int, float]]:
 
 
 @rdkit_tool()
-async def draw_molecule(smiles: str, width: int = 300, height: int = 300, file_name=None) -> Dict[str, str]:
+async def draw_molecule(smiles: Smiles, width: int = 300, height: int = 300, file_name=None) -> Dict[str, str]:
     """
     Generates a PNG image representation of a molecule from its SMILES string.
 
@@ -119,7 +119,7 @@ async def draw_molecule(smiles: str, width: int = 300, height: int = 300, file_n
 
 
 @rdkit_tool()
-async def compute_fingerprint(smiles: str, method: str = "morgan", radius: int = 2, nBits: int = 2048) -> Dict[str, str]:
+async def compute_fingerprint(smiles: Smiles, method: str = "morgan", radius: int = 2, nBits: int = 2048) -> Dict[str, str]:
     """
     Computes a molecular fingerprint for a given SMILES string.
 
@@ -167,7 +167,7 @@ async def compute_fingerprint(smiles: str, method: str = "morgan", radius: int =
 
 
 @rdkit_tool()
-async def tanimoto_similarity(smiles1: str, smiles2: str, method: str = "morgan", radius: int = 2, nBits: int = 2048) -> Dict[str, Union[str, float]]:
+async def tanimoto_similarity(smiles1: Smiles, smiles2: Smiles, method: str = "morgan", radius: int = 2, nBits: int = 2048) -> Dict[str, Union[str, float]]:
     """
     Calculates the Tanimoto similarity between two molecules based on their fingerprints.
 
