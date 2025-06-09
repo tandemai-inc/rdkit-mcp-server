@@ -6,7 +6,7 @@ from rdkit.Geometry import UniformGrid3D
 
 
 @rdkit_tool()
-def assign_bond_orders_from_template(
+def AssignBondOrdersFromTemplate(
     ref_sdf_str: str,
     mol_sdf_str: str
 ) -> str:
@@ -27,7 +27,7 @@ def assign_bond_orders_from_template(
 
 
 @rdkit_tool()
-def compute_mol_shape(
+def ComputeMolShape(
     sdf_str: str,
     conf_id: int = -1,
     box_dim: List[int] = None,
@@ -55,7 +55,7 @@ def compute_mol_shape(
 
 
 @rdkit_tool()
-def compute_mol_volume(
+def ComputeMolVolume(
     mol_sdf_str: str,
     conf_id: int = -1,
     grid_spacing: float = 0.2,
@@ -77,7 +77,7 @@ def compute_mol_volume(
 
 
 @rdkit_tool()
-def constrained_embed(
+def ConstrainedEmbed(
     mol_sdf_str: str,
     core_sdf: str,
     use_tethers: bool = True,
@@ -109,7 +109,7 @@ def constrained_embed(
 
 
 @rdkit_tool(enabled=False)
-def enumerate_library_from_reaction(
+def EnumerateLibraryFromReaction(
     reaction: rdChemReactions.ChemicalReaction,
     sidechain_sets: Sequence[Sequence[rdchem.Mol]],
     return_reactants: bool = False
@@ -126,7 +126,7 @@ def enumerate_library_from_reaction(
 
 
 @rdkit_tool()
-def get_conformer_rms(
+def GetConformerRMS(
     mol_sdf_str: str,
     conf_id1: int,
     conf_id2: int,
@@ -148,7 +148,7 @@ def get_conformer_rms(
 
 
 @rdkit_tool()
-def get_conformer_rms_matrix(
+def GetConformerRMSMatrix(
     mol_sdf_str: str,
     atom_ids: Optional[Sequence[int]] = None,
     prealigned: bool = False
@@ -173,8 +173,8 @@ def get_conformer_rms_matrix(
     return AllChem.GetConformerRMSMatrix(mol, atomIds=atom_ids, prealigned=prealigned)
 
 
-@rdkit_tool()
-def transform_mol(
+@rdkit_tool(enabled=False)
+def TransformMol(
     mol_sdf_str: str,
     transform: Sequence[Sequence[float]],
     conf_id: int = -1,
