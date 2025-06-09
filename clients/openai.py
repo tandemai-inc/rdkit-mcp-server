@@ -23,13 +23,18 @@ AGENT_INSTRUCTIONS = (
 DEFAULT_PROMPT = 'What tools are available?'
 
 
-async def run(mcp_server: MCPServer, prompt: str = None, model: str = None) -> Runner:
+async def run(prompt: str = None, model: str = None, mcp_server: MCPServer = None) -> Runner:
     prompt = prompt or ""
+
+    mcp_servers = []
+    if mcp_server:
+        mcp_servers.append(mcp_server)
+    
     agent = Agent(
         name="RDKIT Agent",
         instructions=AGENT_INSTRUCTIONS,
-        mcp_servers=[mcp_server],
-        model_settings=ModelSettings(tool_choice="required"),
+        mcp_servers=mcp_servers,
+        model_settings=ModelSettings(tool_choice="auto"),
         model=model
     )
     result: Runner = await Runner.run(starting_agent=agent, input=prompt)

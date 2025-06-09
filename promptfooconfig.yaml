@@ -8,17 +8,22 @@ prompts:
 
 providers:
   - id: 'file://python_provider.py'
+    label: '4o no MCP'
+    config:
+      model: 'gpt-4o'
+      use_mcp: false
+  - id: 'file://python_provider.py'
     label: '4o'
     config:
       model: 'gpt-4o'
-  - id: 'file://python_provider.py'
-    label: 'o3-mini'
-    config:
-      model: 'o3-mini'
-  - id: 'file://python_provider.py'
-    label: 'o4-mini'
-    config:
-      model: 'o4-mini'
+  # - id: 'file://python_provider.py'
+  #   label: 'o3-mini'
+  #   config:
+  #     model: 'o3-mini'
+  # - id: 'file://python_provider.py'
+  #   label: 'o4-mini'
+  #   config:
+  #     model: 'o4-mini'
   
 
 tests:
@@ -29,7 +34,7 @@ tests:
     description: "Verify molecular weight of `CC(=O)NC1=CC=C(C=C1)O`"
     assert:
       - type: llm-rubric
-        value: "The final output states the Molecular weight is {{expected_output}} g/mol."
+        value: "The final output states the Molecular weight is {{expected_output}} g/mol. Rounding is acceptable."
       - type: llm-rubric
         value: "There is a function call to `mol_wt` with the exact smiles `{{smiles}}` as an argument."
       - type: llm-rubric

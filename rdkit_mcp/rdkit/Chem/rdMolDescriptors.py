@@ -31,7 +31,7 @@ from rdkit.Chem.rdMolDescriptors import (
     GetUSR,
 )
 
-from ...utils import rdkit_tool
+from ...tools.utils import rdkit_tool
 
 smiles_type = Annotated[str, Field(description="SMILES representation of a molecule")]
 
