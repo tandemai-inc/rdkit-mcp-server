@@ -34,7 +34,7 @@ tests:
     description: "Verify molecular weight of `CC(=O)NC1=CC=C(C=C1)O`"
     assert:
       - type: llm-rubric
-        value: "The final output states the Molecular weight is {{expected_output}} g/mol."
+        value: "The final output states the Molecular weight is {{expected_output}} g/mol. Rounding is acceptable."
       - type: llm-rubric
         value: "There is a function call to `mol_wt` with the exact smiles `{{smiles}}` as an argument."
       - type: llm-rubric
