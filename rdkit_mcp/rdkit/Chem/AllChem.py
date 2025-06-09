@@ -1,4 +1,4 @@
-from ...utils import rdkit_tool, mol_to_sdf, sdf_to_mol
+from ...tools.utils import rdkit_tool, mol_to_sdf, sdf_to_mol
 
 from typing import Sequence, Optional, Iterator, List
 from rdkit.Chem import AllChem, rdchem, rdChemReactions

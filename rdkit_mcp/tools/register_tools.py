@@ -4,7 +4,7 @@ from mcp.server.fastmcp import FastMCP
 from typing import List
 
 from . import base_tools
-from .rdkit import get_rdkit_tools
+from ..rdkit import get_rdkit_tools
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +59,7 @@ async def register_tools(mcp: FastMCP, whitelist: List[str] = None, blacklist: L
             )
         except Exception as e:
             logger.error(f"Failed to register tool {tool_fn.__name__}: {e}")
-
-    if len(await mcp.list_tools()) == 0:
+    tool_count = len(await mcp.list_tools())
+    if tool_count == 0:
         raise RuntimeError("No tools registered with MCP server. Please check your whitelists/blacklists.")
+    logger.info(f"Registered {tool_count} tools with MCP server.")
