@@ -1,51 +1,11 @@
-from typing import Any, Callable, Optional
+import os
+from typing import Any, Callable
 from mcp.types import (
     AnyFunction,
     ToolAnnotations,
 )
-from io import StringIO
-from rdkit.Chem import rdchem, SDWriter, ForwardSDMolSupplier
 
-
-def mol_to_sdf(mol: rdchem.Mol) -> str:
-    """
-    Helper: Serialize an RDKit Mol object to an SDF string (including properties).
-
-    Args:
-      * mol: RDKit molecule to write
-
-    Returns:
-      * A complete SDF record string ending with '$$$$'.
-    """
-    sio = StringIO()
-    writer = SDWriter(sio)
-    # preserve any arbitrary RDKit properties as SDF tags
-    for prop in mol.GetPropNames():
-        writer.SetProps({prop: mol.GetProp(prop)})
-    writer.write(mol)
-    writer.close()
-    return sio.getvalue()
-
-
-def sdf_to_mol(
-    sdf_str: str,
-    sanitize: bool = True,
-    removeHs: bool = True
-) -> Optional[rdchem.Mol]:
-    """
-    Helper: Parse an SDF string into an RDKit Mol object.
-
-    Args:
-      * sdf_str: complete SDF record string(s), including '$$$$' delimiters.
-      * sanitize: whether to sanitize the molecule upon parsing.
-      * removeHs: whether to remove explicit hydrogens.
-
-    Returns:
-      * The first RDKit Mol parsed, or None if parsing fails.
-    """
-    supplier = ForwardSDMolSupplier(StringIO(sdf_str), sanitize=sanitize, removeHs=removeHs)
-    mols = list(supplier)
-    return mols[0] if mols else None
+OUTPUT_DIR = os.path.join(os.getcwd(), 'outputs')
 
 
 def rdkit_tool(
@@ -81,7 +41,6 @@ def rdkit_tool(
             await context.report_progress(50, 100)
             return str(x)
     """
-
     def decorator(fn: AnyFunction) -> AnyFunction:
         # Add attributes to the function to be used when registering the tool
         fn._is_rdkit_tool = True
