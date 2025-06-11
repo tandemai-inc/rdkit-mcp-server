@@ -15,15 +15,6 @@ from rdkit.Chem.Draw import *
 logger = logging.getLogger(__name__)
 
 
-@rdkit_tool(description=Draw.MolToImage.__doc__, enabled=False)
-def MolToImage(smiles: Smiles, width: int = 300, height: int = 300):
-    mol: Chem.Mol = Chem.MolFromSmiles(smiles)
-    if mol is None:
-        raise ToolError(f"Invalid or unparsable SMILES string: {smiles}")
-    image = Draw.MolToImage(mol, size=(width, height))
-    return image
-
-
 @rdkit_tool(description=Draw.MolToFile.__doc__)
 def MolToFile(smiles: Smiles, filepath: str, width: int = 300, height: int = 300):
     mol: Chem.Mol = Chem.MolFromSmiles(smiles)
