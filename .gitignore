@@ -4,3 +4,4 @@ outputs
 .vscode
 node_modules
 promptfoo-errors.log
+.DS_Store

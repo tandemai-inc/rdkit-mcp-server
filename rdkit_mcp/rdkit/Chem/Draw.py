@@ -44,7 +44,8 @@ def MolsMatrixToGridImage(
         raise ToolError("File path must be specified.")
 
     # Create the output directory if it doesn't exist
-    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    if os.path.dirname(file_path):
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
     # Convert all SMILES in molsMatrix to Chem.Mol objects
     mol_matrix = []
     for row in molsMatrix:
