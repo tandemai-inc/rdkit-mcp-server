@@ -5,7 +5,6 @@ import pkgutil
 import os
 
 
-
 def get_rdkit_tools() -> Iterable[Callable]:
     """Walk packages in the rdkit_mcp.rdkit package and yield all callable rdkit tools."""
     pkg_dir = os.path.dirname(__file__)
