@@ -1,9 +1,8 @@
 import asyncio
 import os
 from typing import Dict, Union, Optional
-from datetime import datetime
 from mcp.server.fastmcp.exceptions import ToolError
-from rdkit.Chem import AllChem, Descriptors, Draw
+from rdkit.Chem import AllChem
 from rdkit import Chem, DataStructs
 
 from .utils import rdkit_tool
@@ -69,7 +68,7 @@ async def compute_fingerprint(smiles: Smiles, method: str = "morgan", radius: in
             raise ToolError(f"Unsupported fingerprint method: {method}. Supported methods: 'morgan', 'rdkit'.")
 
         # Convert fingerprint to hex string
-        fp_hex = await asyncio.to_thread(fp.ToBitString)  # Get binary string first
+        # fp_hex = await asyncio.to_thread(fp.ToBitString)  # Get binary string first
         # Convert binary string to hex for better readability/storage if needed, though binary might be more standard
         # For simplicity, let's return the binary string representation directly.
         # fp_hex = fp.ToHex() # RDKit >= 2021.09 provides ToHex()
