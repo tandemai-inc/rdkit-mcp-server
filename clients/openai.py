@@ -70,47 +70,5 @@ async def main():
                 # Add assistant's response to history
                 conversation_history.append({"role": "assistant", "content": result.final_output})
 
-
-def parse_function_calls(runner: Runner):
-    """Parse function calls and outputs from the runner and return as a list."""
-    input_list = runner.to_input_list()
-    function_calls = []
-    for input_item in input_list:
-        function_types = ['function_call', 'function_call_output']
-        if 'type' in input_item and input_item['type'] in function_types:
-            function_calls.append(input_item)
-    return function_calls
-
-
-def format_final_output(runner: Runner) -> str:
-    """Format the final output of the runner in a human readable format."""
-    final_output = f'FINAL OUTPUT: {runner.final_output}\n\n'
-    function_calls = parse_function_calls(runner)
-    for call in function_calls:
-        if 'arguments' in call:
-            final_output += f"Function Call: {call.get('name', 'unknown')}\n"
-            try:
-                args = json.loads(call['arguments'])
-                if isinstance(args, list):
-                    arg_string = '\n'.join({f"arg_{i}": v for i, v in enumerate(args)})
-                else:
-                    arg_string = '\n'.join(f"{k}: {v}" for k, v in args.items())
-            except (json.JSONDecodeError, TypeError):
-                arg_string = str(call['arguments'])
-            final_output += f"Arguments: {arg_string}\n"
-        if 'output' in call:
-            try:
-                output = json.loads(call['output'])
-                if isinstance(args, list):
-                    output_str = '\n'.join({f"arg_{i}": v for i, v in enumerate(args)})
-                else:
-                    output_str = '\n'.join(f"{k}: {v}" for k, v in output.items())
-            except (json.JSONDecodeError, TypeError):
-                output_str = str(call['output'])
-            final_output += f"Output: {output_str}\n"
-        final_output += "\n"
-    return final_output
-
-
 if __name__ == "__main__":
     asyncio.run(main())
