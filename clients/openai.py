@@ -23,9 +23,8 @@ AGENT_INSTRUCTIONS = (
 DEFAULT_PROMPT = 'What tools are available?'
 
 
-async def run(prompt: str = None, model: str = None, mcp_server: MCPServer = None) -> Runner:
-    prompt = prompt or ""
-
+def create_agent(mcp_server: MCPServer = None, model: str = None) -> Agent:
+    """Create an agent with the specified MCP server and model."""
     mcp_servers = []
     if mcp_server:
         mcp_servers.append(mcp_server)
@@ -37,30 +36,39 @@ async def run(prompt: str = None, model: str = None, mcp_server: MCPServer = Non
         model_settings=ModelSettings(tool_choice="auto"),
         model=model
     )
-    result: Runner = await Runner.run(starting_agent=agent, input=prompt)
-    return result
+    return agent
 
 
 async def main():
-    # Create a while loop that requests a prompt from a user, and then sends it to the agent to process
-    while True:
-        prompt = input("Enter a prompt or 'exit': ")
-        if prompt.lower().strip() == "exit":
-            break
-        if not prompt:
-            prompt = DEFAULT_PROMPT
+    async with MCPServerSse(
+        name=MCP_NAME,
+        params={"url": MCP_URL},
+    ) as server:
+        agent = create_agent(mcp_server=server)
 
-        async with MCPServerSse(
-            name=MCP_NAME,
-            params={
-                "url": MCP_URL,
-            },
-        ) as server:
+        conversation_history = []
+        while True:
+            prompt = input("Enter a prompt or 'exit': ")
+            if prompt.lower().strip() == "exit":
+                break
+            if not prompt:
+                prompt = DEFAULT_PROMPT
+
+            # Append user's message to history
+            conversation_history.append({"role": "user", "content": prompt})
+
+            # Create a single input string from history
+            full_prompt = "\n".join(
+                [f"{msg['role']}: {msg['content']}" for msg in conversation_history]
+            )
+
             trace_id = gen_trace_id()
             with trace(workflow_name=prompt, trace_id=trace_id):
                 print(f"View trace: {OPENAI_TRACE_URL.format(trace_id)}\n")
-                result: Runner = await run(prompt, mcp_server=server)
-                print(result.final_output)
+                result: Runner = await Runner.run(starting_agent=agent, input=full_prompt)
+                print(f"\n{result.final_output}\n")
+                # Add assistant's response to history
+                conversation_history.append({"role": "assistant", "content": result.final_output})
 
 
 def parse_function_calls(runner: Runner):
