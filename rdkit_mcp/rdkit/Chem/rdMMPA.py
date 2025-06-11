@@ -5,7 +5,7 @@ from rdkit.Chem import rdMMPA
 from mcp.server.fastmcp.exceptions import ToolError
 from typing import List
 from ...tools.utils import rdkit_tool
-from ...tools.types import Smiles
+from ...tools.types import Smiles, MolFragments
 logger = logging.getLogger(__name__)
 
 
@@ -15,7 +15,7 @@ def FragmentMol(
     maxCuts: int = 3,
     maxCutBonds: int = 20,
     pattern: str = '[#6+0;!$(*=,#[!#6])]!@!=!#[*]'
-) -> List[List[Smiles]]:
+) -> List[MolFragments]:
     """Does the fragmentation necessary for an MMPA analysis.
 
     Parameters:
