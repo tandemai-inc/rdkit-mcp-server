@@ -1,28 +1,24 @@
-from .Chem import Descriptors, AllChem, Draw, rdMMPA, rdMolDescriptors, Scaffolds
-from .Chem.Scaffolds import MurckoScaffold
 from ..tools.utils import is_rdkit_tool
 from typing import Iterable, Callable
+import importlib
+import pkgutil
+import os
 
-
-# Add new modules wrapped in the MCP server here
-TOOL_MODULES = [
-    Descriptors,
-    AllChem,
-    rdMMPA,
-    rdMolDescriptors,
-    Scaffolds,
-    MurckoScaffold,
-    Draw,
-]
 
 
 def get_rdkit_tools() -> Iterable[Callable]:
-    for module in TOOL_MODULES:
-        tool_iter = (
-            getattr(module, func)
-            for func in dir(module)
-            if is_rdkit_tool(getattr(module, func))
-            # Tool is enabled
-            and getattr(getattr(module, func), "tool_enabled", True)
-        )
-        yield from tool_iter
+    """Walk packages in the rdkit_mcp.rdkit package and yield all callable rdkit tools."""
+    pkg_dir = os.path.dirname(__file__)
+    pkg_name = __package__ or "rdkit_mcp.rdkit"
+
+    # Recursively walk through all modules in the current package
+    for finder, name, ispkg in pkgutil.walk_packages([pkg_dir], prefix=pkg_name + "."):
+        try:
+            module = importlib.import_module(name)
+        except Exception:
+            continue  # Skip modules that fail to import
+
+        for attr_name in dir(module):
+            attr = getattr(module, attr_name)
+            if is_rdkit_tool(attr) and getattr(attr, "tool_enabled", True):
+                yield attr
