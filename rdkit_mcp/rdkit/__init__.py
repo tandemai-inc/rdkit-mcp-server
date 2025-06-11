@@ -1,4 +1,5 @@
-from .Chem import Descriptors, AllChem, Draw, rdMMPA, rdMolDescriptors
+from .Chem import Descriptors, AllChem, Draw, rdMMPA, rdMolDescriptors, Scaffolds
+from .Chem.Scaffolds import MurckoScaffold
 from ..tools.utils import is_rdkit_tool
 from typing import Iterable, Callable
 
@@ -9,7 +10,9 @@ TOOL_MODULES = [
     AllChem,
     rdMMPA,
     rdMolDescriptors,
-    Draw
+    Scaffolds,
+    MurckoScaffold,
+    Draw,
 ]
 
 
