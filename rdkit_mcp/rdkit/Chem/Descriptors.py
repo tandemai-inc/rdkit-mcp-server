@@ -5,11 +5,12 @@ from rdkit.Chem import Descriptors
 
 from mcp.server.fastmcp.exceptions import ToolError
 from ...tools.utils import rdkit_tool
+from ...tools.types import Smiles
 logger = logging.getLogger(__name__)
 
 
 @rdkit_tool()
-def exact_mol_wt(smiles: str) -> float:
+def exact_mol_wt(smiles: Smiles) -> float:
     """
     Calculates the exact molecular weight of a molecule using its SMILES representation.
 
@@ -30,9 +31,9 @@ def exact_mol_wt(smiles: str) -> float:
 
 
 @rdkit_tool()
-def fp_density_morgan1(smiles: str) -> str:
+def fp_density_morgan1(smiles: Smiles) -> str:
     """
-    Calculatess the fingerprint density using Morgan fingerprints of radius 1.
+    Calculates the fingerprint density using Morgan fingerprints of radius 1.
 
     Parameters:
     - smiles (str): The SMILES string of the molecule.
@@ -51,7 +52,7 @@ def fp_density_morgan1(smiles: str) -> str:
 
 
 @rdkit_tool()
-def fp_density_morgan2(smiles: str) -> float:
+def fp_density_morgan2(smiles: Smiles) -> float:
     """
     Calculates the fingerprint density using Morgan fingerprints of radius 2.
 
@@ -72,7 +73,7 @@ def fp_density_morgan2(smiles: str) -> float:
 
 
 @rdkit_tool()
-def fp_density_morgan3(smiles: str) -> float:
+def fp_density_morgan3(smiles: Smiles) -> float:
     """
     Calculates the fingerprint density using Morgan fingerprints of radius 3.
 
@@ -93,7 +94,7 @@ def fp_density_morgan3(smiles: str) -> float:
 
 
 @rdkit_tool()
-def heavy_atom_mol_wt(smiles: str) -> float:
+def heavy_atom_mol_wt(smiles: Smiles) -> float:
     """
     Calculates the molecular weight of a molecule excluding hydrogen atoms.
 
@@ -114,7 +115,7 @@ def heavy_atom_mol_wt(smiles: str) -> float:
 
 
 @rdkit_tool()
-def max_abs_partial_charge(smiles: str) -> dict:
+def max_abs_partial_charge(smiles: Smiles) -> dict:
     """
     Calculates the maximum absolute partial charge of a molecule.
 
@@ -135,7 +136,7 @@ def max_abs_partial_charge(smiles: str) -> dict:
 
 
 @rdkit_tool()
-def max_partial_charge(smiles: str) -> float:
+def max_partial_charge(smiles: Smiles) -> float:
     """
     Calculates the maximum partial charge of a molecule.
 
@@ -156,7 +157,7 @@ def max_partial_charge(smiles: str) -> float:
 
 
 @rdkit_tool()
-def min_abs_partial_charge(smiles: str) -> float:
+def min_abs_partial_charge(smiles: Smiles) -> float:
     """
     Calculates the minimum absolute partial charge of a molecule.
 
@@ -177,7 +178,7 @@ def min_abs_partial_charge(smiles: str) -> float:
 
 
 @rdkit_tool()
-def min_partial_charge(smiles: str) -> float:
+def min_partial_charge(smiles: Smiles) -> float:
     """
     Calculates the minimum partial charge of a molecule.
 
@@ -198,7 +199,7 @@ def min_partial_charge(smiles: str) -> float:
 
 
 @rdkit_tool()
-def mol_wt(smiles: str) -> float:
+def mol_wt(smiles: Smiles) -> float:
     """
     Calculates the molecular weight of a molecule including hydrogen atoms.
 
@@ -222,7 +223,7 @@ def mol_wt(smiles: str) -> float:
 
 
 @rdkit_tool()
-def num_radical_electrons(smiles: str) -> int:
+def num_radical_electrons(smiles: Smiles) -> int:
     """
     Calculates the number of radical electrons in a molecule from its SMILES representation.
 
@@ -245,7 +246,7 @@ def num_radical_electrons(smiles: str) -> int:
 
 
 @rdkit_tool()
-def num_valence_electrons(smiles: str) -> int:
+def num_valence_electrons(smiles: Smiles) -> int:
     """
     Calculates the number of valence electrons in a molecule from its SMILES representation.
 

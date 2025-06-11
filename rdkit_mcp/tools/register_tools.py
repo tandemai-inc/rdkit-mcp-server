@@ -41,11 +41,14 @@ async def register_tools(mcp: FastMCP, whitelist: List[str] = None, blacklist: L
     for tool_fn in all_tools:
         try:
             tool_name = getattr(tool_fn, 'tool_name', tool_fn.__name__)
+            if not tool_fn.tool_enabled:
+                logger.debug(f"Tool {tool_name} is disabled. Skipping.")
+                continue
             if filter_list == 'whitelist' and tool_name not in whitelist:
-                logger.warning(f"Tool {tool_name} not in whitelist. Skipping.")
+                logger.debug(f"Tool {tool_name} not in whitelist. Skipping.")
                 continue
             if filter_list == 'blacklist' and tool_name in blacklist:
-                logger.warning(f"Tool {tool_name} in blacklist. Skipping.")
+                logger.debug(f"Tool {tool_name} in blacklist. Skipping.")
                 continue
             # Add tool the MCP Server
             # These properties on the function are set by the rdkit_tool decorator
