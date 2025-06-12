@@ -1,6 +1,7 @@
 import asyncio
-import json
 import logging
+import openai
+import time
 
 from agents import Agent, Runner, gen_trace_id, trace
 from agents.mcp import MCPServer, MCPServerSse
@@ -65,7 +66,15 @@ async def main():
             trace_id = gen_trace_id()
             with trace(workflow_name=prompt, trace_id=trace_id):
                 print(f"View trace: {OPENAI_TRACE_URL.format(trace_id)}\n")
-                result: Runner = await Runner.run(starting_agent=agent, input=full_prompt)
+                retry_attempts = 5
+                for i in range(retry_attempts):
+                    try:
+                        result: Runner = await Runner.run(starting_agent=agent, input=full_prompt)
+                        break
+                    except openai.RateLimitError:
+                        wait = 2 ** (i + 5)
+                        logger.error(f"Rate limit hit. Retrying in {wait} seconds...")
+                        time.sleep(wait)
                 print(f"\n{result.final_output}\n")
                 # Add assistant's response to history
                 conversation_history.append({"role": "assistant", "content": result.final_output})

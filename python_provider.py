@@ -1,5 +1,7 @@
-import logging
 import json
+import logging
+import openai
+import time
 
 from agents import Runner, gen_trace_id, trace
 from agents.mcp import MCPServerSse
@@ -23,8 +25,17 @@ async def call_llm(prompt: str, model=None, use_mcp=True) -> Runner:
             if use_mcp:
                 kwargs["mcp_server"] = server
             agent = create_agent(model=model, **kwargs)
-            result: Runner = await Runner.run(starting_agent=agent, input=prompt)
-    return result
+            result: Runner = None
+            retry_attempts = 5
+            for i in range(retry_attempts):
+                try:
+                    result: Runner = await Runner.run(starting_agent=agent, input=prompt)
+                    break
+                except openai.RateLimitError:
+                    wait = 2 ** (i + 5)  # Exponential backoff. Start at 32 seconds
+                    logger.error(f"Rate limit hit. Retrying in {wait} seconds...")
+                    time.sleep(wait)
+            return result
 
 
 def parse_function_calls(runner: Runner):
@@ -111,7 +122,10 @@ async def call_api(prompt: str, options: Dict[str, Any], context: Dict[str, Any]
     use_mcp = config.get('use_mcp', True)
 
     result: Runner = await call_llm(prompt, model=model, use_mcp=use_mcp)
-    final_output = format_final_output(result)
+    if result:
+        final_output = format_final_output(result)
+    else:
+        final_output = "Error: No result returned from the LLM."
     response = {
         "output": final_output
     }
