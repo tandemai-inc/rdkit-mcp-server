@@ -9,11 +9,11 @@ from ...tools.types import Smiles
 from rdkit.DataStructs import ExplicitBitVect
 
 
-async def compute_fingerprint(
+def compute_fingerprint(
     mol: Chem.Mol,
     radius: int = 2,
     nBits: int = 2048
-) -> str:
+) -> ExplicitBitVect:
     """
     Computes a molecular fingerprint for a given SMILES string.
 
@@ -28,13 +28,13 @@ async def compute_fingerprint(
     try:
         # Compute fingerprint
         fp: ExplicitBitVect = AllChem.GetMorganFingerprintAsBitVect(mol, radius, nBits=nBits)
-        return fp.ToBitString()
+        return fp
     except Exception as e:
         raise ToolError(f"Error computing fingerprint: {e}")
 
 
 @rdkit_tool()
-async def tanimoto_similarity(smiles1: Smiles, smiles2: Smiles, radius: int = 2, nBits: int = 2048) -> float:
+async def TanimotoSimilarity(smiles1: Smiles, smiles2: Smiles, radius: int = 2, nBits: int = 2048) -> float:
     """
     Calculates the Tanimoto similarity between two molecules based on their fingerprints.
 
@@ -57,8 +57,8 @@ async def tanimoto_similarity(smiles1: Smiles, smiles2: Smiles, radius: int = 2,
         raise ToolError(f"Invalid or unparsable SMILES string for molecule 2: {smiles2}")
 
     try:
-        fp1: str = compute_fingerprint(mol1, radius, nBits)
-        fp2: str = compute_fingerprint(mol2, radius, nBits)
+        fp1: ExplicitBitVect = compute_fingerprint(mol1, radius, nBits)
+        fp2: ExplicitBitVect = compute_fingerprint(mol2, radius, nBits)
         similarity = await asyncio.to_thread(DataStructs.TanimotoSimilarity, fp1, fp2)
         return round(similarity, 4)
     except ValueError as ve:
