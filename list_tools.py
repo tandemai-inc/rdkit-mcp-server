@@ -2,6 +2,7 @@ import asyncio
 from rdkit_mcp.server import mcp
 from rdkit_mcp.tools.register_tools import register_tools
 
+
 async def list_tools():
     """Prints the names and descriptions of all tools registered to the MCP server."""
     print("Registered tools:")
