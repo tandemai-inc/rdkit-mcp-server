@@ -1,9 +1,10 @@
 import logging
+import json
 
 from agents import Runner, gen_trace_id, trace
 from agents.mcp import MCPServerSse
 from typing import Dict, Any, Optional, Union, List
-from clients.openai import MCP_URL, MCP_NAME, OPENAI_TRACE_URL, run, format_final_output
+from clients.openai import MCP_URL, MCP_NAME, create_agent
 
 
 logger = logging.getLogger(__name__)
@@ -18,12 +19,53 @@ async def call_llm(prompt: str, model=None, use_mcp=True) -> Runner:
     ) as server:
         trace_id = gen_trace_id()
         with trace(workflow_name=prompt, trace_id=trace_id):
-            print(f"View trace: {OPENAI_TRACE_URL.format(trace_id)}\n")
+            kwargs = {}
             if use_mcp:
-                result: Runner = await run(prompt, model=model, mcp_server=server)
-            else:
-                result: Runner = await run(prompt, model=model)
+                kwargs["mcp_server"] = server
+            agent = create_agent(model=model, **kwargs)
+            result: Runner = await Runner.run(starting_agent=agent, input=prompt)
     return result
+
+
+def parse_function_calls(runner: Runner):
+    """Parse function calls and outputs from the runner and return as a list."""
+    input_list = runner.to_input_list()
+    function_calls = []
+    for input_item in input_list:
+        function_types = ['function_call', 'function_call_output']
+        if 'type' in input_item and input_item['type'] in function_types:
+            function_calls.append(input_item)
+    return function_calls
+
+
+def format_final_output(runner: Runner) -> str:
+    """Format the final output of the runner in a human readable format."""
+    final_output = f'FINAL OUTPUT: {runner.final_output}\n\n'
+    function_calls = parse_function_calls(runner)
+    for call in function_calls:
+        if 'arguments' in call:
+            final_output += f"Function Call: {call.get('name', 'unknown')}\n"
+            try:
+                args = json.loads(call['arguments'])
+                if isinstance(args, list):
+                    arg_string = '\n'.join({f"arg_{i}": v for i, v in enumerate(args)})
+                else:
+                    arg_string = '\n'.join(f"{k}: {v}" for k, v in args.items())
+            except (json.JSONDecodeError, TypeError):
+                arg_string = str(call['arguments'])
+            final_output += f"Arguments: {arg_string}\n"
+        if 'output' in call:
+            try:
+                output = json.loads(call['output'])
+                if isinstance(output, dict):
+                    output_str = '\n'.join(f"{k}: {v}" for k, v in output.items())
+                else:
+                    output_str = str(output)
+            except (json.JSONDecodeError, TypeError):
+                output_str = str(call['output'])
+            final_output += f"Output: {output_str}\n"
+        final_output += "\n"
+    return final_output
 
 
 class ProviderOptions:
