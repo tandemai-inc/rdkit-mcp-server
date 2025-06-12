@@ -11,7 +11,7 @@ from .types import Smiles
 logger = logging.getLogger(__name__)
 
 
-@rdkit_tool()
+@rdkit_tool(enabled=False)
 def smiles_to_sdf(smiles: Smiles) -> Path:
     """
     Converts a SMILES string to an SDF file.
@@ -35,7 +35,7 @@ def smiles_to_sdf(smiles: Smiles) -> Path:
     return output_path
 
 
-@rdkit_tool()
+@rdkit_tool(enabled=False)
 def sdf_to_smiles(sdf_path: Union[str, Path]) -> Smiles:
     """
     Converts an SDF file to a SMILES string.
