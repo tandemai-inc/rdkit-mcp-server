@@ -57,10 +57,10 @@ def format_final_output(runner: Runner) -> str:
         if 'output' in call:
             try:
                 output = json.loads(call['output'])
-                if isinstance(output, list):
-                    output_str = '\n'.join({f"arg_{i}": v for i, v in enumerate(output)})
-                else:
+                if isinstance(output, dict):
                     output_str = '\n'.join(f"{k}: {v}" for k, v in output.items())
+                else:
+                    output_str = str(output)
             except (json.JSONDecodeError, TypeError):
                 output_str = str(call['output'])
             final_output += f"Output: {output_str}\n"
