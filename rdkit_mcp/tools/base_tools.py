@@ -72,6 +72,3 @@ def get_base_tools():
         smiles_to_sdf,
         sdf_to_smiles,
     ]
-
-
-z
