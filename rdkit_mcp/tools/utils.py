@@ -41,6 +41,7 @@ def rdkit_tool(
             await context.report_progress(50, 100)
             return str(x)
     """
+
     def decorator(fn: AnyFunction) -> AnyFunction:
         # Add attributes to the function to be used when registering the tool
         fn._is_rdkit_tool = True
