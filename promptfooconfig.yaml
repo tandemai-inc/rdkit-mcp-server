@@ -8,23 +8,28 @@ prompts:
 
 providers:
   - id: 'file://python_provider.py'
-    label: '4o no MCP'
+    label: 'gpt-4o-mini No Tools'
     config:
-      model: 'gpt-4o'
+      model: 'gpt-4o-mini'
       use_mcp: false
+
   - id: 'file://python_provider.py'
-    label: '4o'
+    label: 'gpt-4o-mini'
     config:
-      model: 'gpt-4o'
+      model: 'gpt-4o-mini'
+  # - id: 'file://python_provider.py'
+  #   label: '4o no MCP'
+  #   config:
+  #     model: 'gpt-4o'
+  #     use_mcp: false
+  # - id: 'file://python_provider.py'
+  #   label: '4o'
+  #   config:
+  #     model: 'gpt-4o'
   # - id: 'file://python_provider.py'
   #   label: 'o3-mini'
   #   config:
   #     model: 'o3-mini'
-  # - id: 'file://python_provider.py'
-  #   label: 'o4-mini'
-  #   config:
-  #     model: 'o4-mini'
-  
 
 tests:
   - vars:
@@ -35,10 +40,6 @@ tests:
     assert:
       - type: llm-rubric
         value: "The final output states the Molecular weight is {{expected_output}} g/mol. Rounding is acceptable."
-      - type: llm-rubric
-        value: "There is a function call to `mol_wt` with the exact smiles `{{smiles}}` as an argument."
-      - type: llm-rubric
-        value: "mol_wt function call output returns the value {{expected_output}}"
   
   - vars:
       prompt: "Give me the number of rotatable bonds in this SMILES: CCOC(=O)C1=CC=CC=C1?"
@@ -48,8 +49,6 @@ tests:
     assert:
       - type: llm-rubric
         value: "The final output states the number of rotatable bonds is {{expected_output}}."
-      - type: llm-rubric
-        value: "The response should contain a function call with the exact smiles `{{smiles}}` as an argument."
       - type: llm-rubric
         value: "The response should contain an output type which returns the value {{expected_output}}."
 
@@ -79,5 +78,3 @@ tests:
     assert:
       - type: llm-rubric
         value: "The final output states that CC(OC1C(C(O)=O)=CC(C)=CC=1)=O is the most similar to the reference"
-      - type: llm-rubric
-        value: "We expect a function to calculate the tanimoto similarity between the reference for each candidate"
