@@ -5,8 +5,8 @@ from rdkit import Chem
 from rdkit.Chem import Draw
 from typing import List
 
-from ...tools.utils import rdkit_tool, OUTPUT_DIR
-from ...tools.types import Smiles
+from ..utils import rdkit_tool, OUTPUT_DIR
+from ..types import Smiles
 
 import logging
 from rdkit.Chem.Draw import *

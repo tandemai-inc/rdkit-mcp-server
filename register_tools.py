@@ -3,8 +3,8 @@ import itertools
 from mcp.server.fastmcp import FastMCP
 from typing import List
 
-from . import base_tools
-from ..rdkit_mcp import get_rdkit_tools
+from rdkit_mcp import base_tools
+from rdkit_mcp import get_rdkit_tools
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +40,8 @@ async def register_tools(mcp: FastMCP, whitelist: List[str] = None, blacklist: L
     # Loop through all tools and register them with the MCP server
     for tool_fn in all_tools:
         try:
-            tool_name = getattr(tool_fn, 'tool_name', tool_fn.__name__)
+            tool_name = f"{getattr(tool_fn, '__module__', None)}.{tool_fn.__name__}"
+            # tool_name = getattr(tool_fn, '__module__', tool_fn.__name__)
             if not tool_fn.tool_enabled:
                 logger.debug(f"Tool {tool_name} is disabled. Skipping.")
                 continue

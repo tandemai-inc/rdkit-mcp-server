@@ -42,8 +42,8 @@ from rdkit.Chem.rdMolDescriptors import (
 
 )
 
-from ...tools.utils import rdkit_tool
-from ...tools.types import Smiles
+from ..utils import rdkit_tool
+from ..types import Smiles
 
 
 @rdkit_tool(enabled=False)
