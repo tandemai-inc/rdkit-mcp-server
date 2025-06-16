@@ -1,9 +1,6 @@
 import logging
-import itertools
 from mcp.server.fastmcp import FastMCP
-from typing import List
-
-from rdkit_mcp import base_tools
+from typing import Callable, Iterable, List
 from rdkit_mcp import get_rdkit_tools
 
 logger = logging.getLogger(__name__)
@@ -27,18 +24,10 @@ async def register_tools(mcp: FastMCP, whitelist: List[str] = None, blacklist: L
     if whitelist and blacklist:
         logger.warning("Both whitelist and blacklist of tools provided. Using whitelist.")
 
-    # Aggregate all the tool sources into one iterable
-    # base tools will eventually be removed, so this is a temporary solution
-    # the rdkit wrapper module will be the only source of tools
-    base_tool_iter = base_tools.get_base_tools()
-    rdkit_tool_iter = get_rdkit_tools()
-    all_tools = itertools.chain(
-        base_tool_iter,
-        rdkit_tool_iter
-    )
+    rdkit_tool_iter: Iterable[Callable] = get_rdkit_tools()
 
     # Loop through all tools and register them with the MCP server
-    for tool_fn in all_tools:
+    for tool_fn in rdkit_tool_iter:
         try:
             tool_name = getattr(tool_fn, 'tool_name', tool_fn.__name__)
             if not tool_fn.tool_enabled:
