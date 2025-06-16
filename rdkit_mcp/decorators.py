@@ -4,6 +4,7 @@ from mcp.types import (
     ToolAnnotations,
 )
 
+
 def rdkit_tool(
     name: str | None = None,
     description: str | None = None,

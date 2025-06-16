@@ -4,7 +4,7 @@ from run_server import mcp
 
 
 async def list_tools():
-    """Prints the names and descriptions of all tools registered to the MCP server."""
+    """Prints the module path of all tools registered to the MCP server."""
     print("Registered tools:")
     whitelist = []
     blacklist = []
