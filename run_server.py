@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from rdkit_mcp.server import main, logger
+from rdkit_mcp_server.server import main, logger
 
 if __name__ == "__main__":
     # Configure logging for the script

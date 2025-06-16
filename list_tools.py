@@ -1,6 +1,6 @@
 import asyncio
-from rdkit_mcp.server import mcp
-from rdkit_mcp.tools.register_tools import register_tools
+from rdkit_mcp_server.server import mcp
+from rdkit_mcp_server.tools.register_tools import register_tools
 
 
 async def list_tools():
