@@ -4,7 +4,7 @@ from mcp.server.fastmcp import FastMCP
 from typing import List
 
 from . import base_tools
-from ..rdkit import get_rdkit_tools
+from ..rdkit_mcp import get_rdkit_tools
 
 logger = logging.getLogger(__name__)
 
