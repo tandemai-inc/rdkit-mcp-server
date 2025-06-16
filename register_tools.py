@@ -54,7 +54,7 @@ async def register_tools(mcp: FastMCP, whitelist: List[str] = None, blacklist: L
             # These properties on the function are set by the rdkit_tool decorator
             tool_description = getattr(tool_fn, 'tool_description', tool_fn.__doc__)
             tool_annotations = getattr(tool_fn, 'tool_annotations', None)
-            
+
             mcp.add_tool(
                 tool_fn,
                 name=tool_name,

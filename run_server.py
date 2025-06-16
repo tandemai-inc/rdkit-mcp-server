@@ -15,6 +15,7 @@ parser.add_argument("--host", type=str, help="Host to run the server on", defaul
 
 mcp = FastMCP("RDKit-MCP Server")
 
+
 async def main():
     """Main function to run the MCP server."""
     args, _ = parser.parse_known_args()

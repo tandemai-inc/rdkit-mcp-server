@@ -48,13 +48,13 @@ def rdkit_tool(
         fn.tool_name = name or fn.__name__
         fn.tool_description = description or fn.__doc__
         fn.tool_enabled = enabled
-        
+
         # Write module path as Annotation
         tool_module_path = f'{fn.__module__}.{fn.__name__}'
         fn.tool_annotations = {
             "module": ToolAnnotations(title=tool_module_path)
         }
-        
+
         return fn
     return decorator
 

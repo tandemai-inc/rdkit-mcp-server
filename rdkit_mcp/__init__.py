@@ -25,4 +25,3 @@ def get_rdkit_tools() -> Iterable[Callable]:
             attr = getattr(module, attr_name)
             if is_rdkit_tool(attr) and getattr(attr, "tool_enabled", True):
                 yield attr
-
