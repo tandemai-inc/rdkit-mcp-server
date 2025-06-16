@@ -4,7 +4,7 @@ from mcp.server.fastmcp.exceptions import ToolError
 from rdkit.Chem import AllChem
 from rdkit import Chem, DataStructs
 
-from ..utils import rdkit_tool
+from ..decorators import rdkit_tool
 from ..types import Smiles
 from rdkit.DataStructs import ExplicitBitVect
 

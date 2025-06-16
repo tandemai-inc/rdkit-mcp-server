@@ -5,7 +5,8 @@ from mcp.server.fastmcp.exceptions import ToolError
 from pathlib import Path
 from rdkit import Chem
 
-from .utils import rdkit_tool, OUTPUT_DIR
+from .utils import OUTPUT_DIR
+from .decorators import rdkit_tool
 from .types import Smiles
 
 logger = logging.getLogger(__name__)

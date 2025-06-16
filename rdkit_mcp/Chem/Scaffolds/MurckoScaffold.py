@@ -2,7 +2,7 @@ from mcp.server.fastmcp.exceptions import ToolError
 from rdkit import Chem
 from rdkit.Chem.Scaffolds import MurckoScaffold
 
-from ...utils import rdkit_tool
+from ...decorators import rdkit_tool
 from ...types import Smiles
 
 

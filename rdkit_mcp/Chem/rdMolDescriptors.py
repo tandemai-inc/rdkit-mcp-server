@@ -42,7 +42,7 @@ from rdkit.Chem.rdMolDescriptors import (
 
 )
 
-from ..utils import rdkit_tool
+from ..decorators import rdkit_tool
 from ..types import Smiles
 
 
