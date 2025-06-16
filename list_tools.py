@@ -11,8 +11,8 @@ async def list_tools():
     await register_tools(mcp, whitelist=whitelist, blacklist=blacklist)
     tool_list = await mcp.list_tools()
     for tool in tool_list:
-        name = getattr(tool, 'name', str(tool))
-        print(f"- {name}")
+        module_path = tool.annotations.module.title
+        print(f"- {module_path}")
 
 if __name__ == "__main__":
     asyncio.run(list_tools())
