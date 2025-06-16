@@ -4,8 +4,8 @@ from rdkit import Chem
 from rdkit.Chem import rdMMPA
 from mcp.server.fastmcp.exceptions import ToolError
 from typing import List
-from ...tools.utils import rdkit_tool
-from ...tools.types import Smiles, MolFragments
+from ..decorators import rdkit_tool
+from ..types import Smiles, MolFragments
 logger = logging.getLogger(__name__)
 
 

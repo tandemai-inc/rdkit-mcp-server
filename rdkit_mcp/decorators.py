@@ -1,11 +1,8 @@
-import os
 from typing import Any, Callable
 from mcp.types import (
     AnyFunction,
     ToolAnnotations,
 )
-
-OUTPUT_DIR = os.path.join(os.getcwd(), 'outputs')
 
 
 def rdkit_tool(
@@ -47,15 +44,14 @@ def rdkit_tool(
         fn._is_rdkit_tool = True
         fn.tool_name = name or fn.__name__
         fn.tool_description = description or fn.__doc__
-        fn.tool_annotations = annotations or {}
         fn.tool_enabled = enabled
+
+        # Write module path as Annotation
+        tool_module_path = f'{fn.__module__}.{fn.__name__}'
+        fn.tool_annotations = {
+            "module": ToolAnnotations(title=tool_module_path),
+            **(annotations or {}),
+        }
+
         return fn
     return decorator
-
-
-def is_rdkit_tool(func: Callable) -> bool:
-    """Check if a function is decorated with @rdkit_tool."""
-    # Access the original function in case of multiple wrappers
-    while hasattr(func, "__wrapped__"):
-        func = func.__wrapped__
-    return hasattr(func, "_is_rdkit_tool")
