@@ -1,8 +1,9 @@
+import argparse
 import asyncio
+import yaml
+
 from register_tools import register_tools
 from run_server import mcp
-import argparse
-import yaml
 
 
 def parse_args():
