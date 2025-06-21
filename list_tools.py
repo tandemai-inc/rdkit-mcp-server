@@ -1,14 +1,38 @@
 import asyncio
 from register_tools import register_tools
 from run_server import mcp
+import argparse
+import yaml
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="List registered tools from MCP server.")
+    parser.add_argument(
+        "--settings",
+        type=str,
+        required=False,
+        help="Path to a YAML settings file."
+    )
+    return parser.parse_args()
+
+
+def load_settings(settings_path):
+    if settings_path:
+        with open(settings_path, "r") as f:
+            return yaml.safe_load(f)
+    return {}
+
+
+args = parse_args()
+settings = load_settings(args.settings)
 
 
 async def list_tools():
     """Prints the module path of all tools registered to the MCP server."""
     print("Registered tools:")
-    whitelist = []
-    blacklist = []
-    await register_tools(mcp, whitelist=whitelist, blacklist=blacklist)
+    allow_list = settings.get("allow_list", [])
+    black_list = settings.get("black_list", [])
+    await register_tools(mcp, allow_list=allow_list, black_list=black_list)
     tool_list = await mcp.list_tools()
     for tool in tool_list:
         module_path = tool.annotations.module.title

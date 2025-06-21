@@ -17,7 +17,6 @@ def get_rdkit_tools() -> Iterable[Callable]:
         try:
             module = importlib.import_module(name)
         except Exception as e:
-            breakpoint()
             logger.debug(f"Failed to import module {name}: {e}")
             continue  # Skip modules that fail to import
 

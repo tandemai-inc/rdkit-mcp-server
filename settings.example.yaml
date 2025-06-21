@@ -1,0 +1,6 @@
+allow_list:
+  # You can specify a tool name without specifying module
+  - ExactMolWt
+  # You can specify a module to allow all nested tools.
+  - rdkit_mcp.Chem.Descriptors
+block_list:
