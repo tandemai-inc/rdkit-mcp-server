@@ -1,33 +1,39 @@
 # RDKit MCP Server
 
-MCP Server providing RDKit cheminformatics tools.
+🚀 Introducing RDKit Copilot: Agentic Access to RDKit for LLMs
+ 
+🧰 RDKit Copilot is our new open-source MCP server that gives any LLM seamless, agent-level access to RDKit using natural language. No coding required.
+
+🥅 Goal: Expose every function in RDKit 2025.3.1 through an MCP Server
+ 
+🔗 Contribute to making RDKit accessible to LLMs through an open MCP server
+
+💬 Contribute, test, suggest features. We are building it with you.
+
 
 ## Installation
 
 ```bash
-# Installation instructions will go here
-# Note: RDKit installation might require specific steps (e.g., via conda)
-pip install .
+pip install -e .
 ```
 
 ## Usage
 
 ### Start server
 ```bash
-python run_server.py
+# settings flag optional
+python run_server.py --settings=settings.yaml
 ```
 
-### Start client in another terminal
+### Start CLI client in another terminal
 ```bash
 export OPENAI_API_KEY="sk-proj-xxx"
 python run_client.py
 ```
 
-This will start the server using SSE transport by default.
-
 ## Available Tools
+```bash
+# settings flag optional
+python list_tools.py --settings=settings.yaml
+```
 
-- `parse_molecule`: Parses a SMILES string and returns basic properties.
-- `draw_molecule`: Generates a PNG image of a molecule from SMILES and returns a file URI.
-- `compute_fingerprint`: Computes a molecular fingerprint (default: Morgan).
-- `tanimoto_similarity`: Calculates Tanimoto similarity between two molecules.
