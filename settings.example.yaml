@@ -1,13 +1,13 @@
 # Allow list specifies which tools will be registered
 allow_list:
-  # You can specify a tool name without specifying module
+  # You can specify a tool name to allow
   - ExactMolWt
-  # You can specify a module to block all tools in the module.
+  # You can specify a module to allow all tools in that module.
   - rdkit_mcp.Chem.Descriptors
 
 # Block list specifies tools to exclude from registration
 block_list:
-  # You can specify a tool name without specifying module
+  # You can specify a tool name to block
   - ExactMolWt
-  # You can specify a module to block all tools in the module.
+  # You can specify a module to block all tools in that module.
   - rdkit_mcp.Chem.Descriptors
