@@ -32,8 +32,8 @@ async def list_tools():
     """Prints the module path of all tools registered to the MCP server."""
     print("Registered tools:")
     allow_list = settings.get("allow_list", [])
-    black_list = settings.get("black_list", [])
-    await register_tools(mcp, allow_list=allow_list, black_list=black_list)
+    block_list = settings.get("block_list", [])
+    await register_tools(mcp, allow_list=allow_list, block_list=block_list)
     tool_list = await mcp.list_tools()
     for tool in tool_list:
         module_path = tool.annotations.module.title

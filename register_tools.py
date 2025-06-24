@@ -18,7 +18,7 @@ def _tool_module_matches(name: str, patterns: List[str]) -> bool:
     return any(pattern in name for pattern in patterns)
 
 
-async def register_tools(mcp: FastMCP, allow_list: List[str] = None, black_list: List[str] = None) -> None:
+async def register_tools(mcp: FastMCP, allow_list: List[str] = None, block_list: List[str] = None) -> None:
     """
     Register tools with the MCP server.
 
@@ -28,10 +28,10 @@ async def register_tools(mcp: FastMCP, allow_list: List[str] = None, black_list:
     filter_list = ''
     if allow_list:
         filter_list = 'allow_list'
-    elif black_list:
-        filter_list = 'black_list'
-    if allow_list and black_list:
-        logger.warning("Both allow_list and black_list of tools provided. Using allow_list.")
+    elif block_list:
+        filter_list = 'block_list'
+    if allow_list and block_list:
+        logger.warning("Both allow_list and block_list of tools provided. Using allow_list.")
 
     rdkit_tool_iter: Iterable[Callable] = get_rdkit_tools()
     # Loop through all tools and register them with the MCP server
@@ -45,8 +45,8 @@ async def register_tools(mcp: FastMCP, allow_list: List[str] = None, black_list:
             if filter_list == 'allow_list' and not _tool_module_matches(tool_module, allow_list):
                 logger.debug(f"Tool {tool_name} not matched by allow_list. Skipping.")
                 continue
-            if filter_list == 'black_list' and _tool_module_matches(tool_module, black_list):
-                logger.debug(f"Tool {tool_name} matched by black_list. Skipping.")
+            if filter_list == 'block_list' and _tool_module_matches(tool_module, block_list):
+                logger.debug(f"Tool {tool_name} matched by block_list. Skipping.")
                 continue
             # Add tool the MCP Server
             # These properties on the function are set by the rdkit_tool decorator
@@ -62,5 +62,5 @@ async def register_tools(mcp: FastMCP, allow_list: List[str] = None, black_list:
             logger.error(f"Failed to register tool {tool_fn.__name__}: {e}")
     tool_count = len(await mcp.list_tools())
     if tool_count == 0:
-        raise RuntimeError("No tools registered with MCP server. Please check your allow_lists/black_lists.")
+        raise RuntimeError("No tools registered with MCP server. Please check your allow_lists/block_lists.")
     logger.info(f"Registered {tool_count} tools with MCP server.")

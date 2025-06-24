@@ -29,11 +29,11 @@ async def main():
             settings = yaml.safe_load(f)
         logger.info(f"Loaded settings from {args.settings}: {settings}")
 
-    # TODO: Add settings to have allow_list and black_list
+    # TODO: Add settings to have allow_list and block_list
     allow_list = settings.get("allow_list", [])
-    black_list = settings.get("black_list", [])
+    block_list = settings.get("block_list", [])
     logger.info("Registering tools with MCP server...")
-    await register_tools(mcp, allow_list=allow_list, black_list=black_list)
+    await register_tools(mcp, allow_list=allow_list, block_list=block_list)
 
     logger.info(f"Starting RDKit MCP Server with transport: {transport}")
     if transport == "sse":
