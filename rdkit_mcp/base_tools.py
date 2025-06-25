@@ -5,7 +5,7 @@ from mcp.server.fastmcp.exceptions import ToolError
 from pathlib import Path
 from rdkit import Chem
 
-from .utils import OUTPUT_DIR
+from app.settings import get_app_settings
 from .decorators import rdkit_tool
 from .types import Smiles
 
@@ -30,7 +30,9 @@ def smiles_to_sdf(smiles: Smiles) -> Path:
     sdf_string = Chem.MolToMolBlock(mol)
     # Write to SDF file
     filename = f"{Chem.MolToSmiles(mol)}.sdf"
-    output_path = Path(os.path.join(OUTPUT_DIR, filename))
+    settings = get_app_settings()
+
+    output_path = Path(os.path.join(settings.file_dir, filename))
     with open(output_path, "w") as f:
         f.write(sdf_string)
     return output_path

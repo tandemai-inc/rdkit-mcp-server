@@ -1,8 +1,4 @@
-import os
 from typing import Callable
-
-OUTPUT_DIR = os.path.join(os.getcwd(), 'outputs')
-
 
 def is_rdkit_tool(func: Callable) -> bool:
     """Check if a function is decorated with @rdkit_tool."""

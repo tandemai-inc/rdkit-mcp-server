@@ -6,7 +6,7 @@ from rdkit.Chem import Draw
 from typing import List
 
 from ..decorators import rdkit_tool
-from ..utils import OUTPUT_DIR
+from app.settings import get_app_settings
 from ..types import Smiles
 
 import logging
@@ -24,7 +24,8 @@ def MolToFile(smiles: Smiles, filename: str, width: int = 300, height: int = 300
     if not filename.endswith('.png'):
         filename += '.png'
 
-    output_path = os.path.join(OUTPUT_DIR, filename)
+    settings = get_app_settings()
+    output_path = os.path.join(settings.file_dir, filename)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     Draw.MolToFile(mol, output_path, size=(width, height))
     return Path(output_path)
@@ -67,6 +68,7 @@ def MolsMatrixToGridImage(
         returnPNG=returnPNG)
 
     # Save the image to the specified file path
-    file_path = os.path.join(OUTPUT_DIR, filename)
+    settings = get_app_settings()
+    file_path = os.path.join(settings.file_dir, filename)
     img.save(file_path)
     return Path(file_path)
