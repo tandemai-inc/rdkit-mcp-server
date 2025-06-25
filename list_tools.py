@@ -27,8 +27,6 @@ def load_settings(settings_path) -> AppSettings:
     return get_app_settings()
 
 
-
-
 async def list_tools():
     """Prints the module path of all tools registered to the MCP server."""
     args = parse_args()
