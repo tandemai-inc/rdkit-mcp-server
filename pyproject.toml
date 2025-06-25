@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "rdkit-mcp-server"
-version = "0.0.1"
+version = "0.1.0"
 description = "MCP Server providing RDKit cheminformatics tools."
 readme = "README.md"
 requires-python = ">=3.8"
@@ -22,7 +22,7 @@ dependencies = [
     "mcp==1.9.0", # The MCP SDK
     "rdkit==2025.3.1",              # RDKit library (installation might need specific handling)
     "Pillow==11.2.1",             # For image generation with RDKit
-    "openai-agents==0.0.14"
+    "openai-agents==0.1.04"
 ]
 
 [project.urls]
