@@ -9,34 +9,6 @@ logger = logging.getLogger(__name__)
 __all__ = ["register_tools", "collect_tools"]
 
 
-def _tool_module_matches(tool_module: str, filter_list: List[str]) -> bool:
-    """
-    Returns True if any pattern in filter_list is a substring of name.
-    """
-    tool_module_fn_name = tool_module.split('.')[-1]
-
-    match_found = False
-    for pattern in filter_list:
-        # Check for straight match of the function name.
-        if tool_module in filter_list:
-            match_found = True
-            break
-        # Check if the tool_module is an exact match with the last part of the module path.
-        # Example: if tool_module is 'MolWt' it should match rdkit_mcp.Chem.Descriptors.MolWt,
-        # but not `rdkit_mcp.Chem.Descriptors.ExactMolWt`
-        pattern_fn_name = pattern.split('.')[-1]
-        if tool_module_fn_name == pattern_fn_name:
-            match_found = True
-            break
-        # Check if the tool is in a module that is being filtered
-        # For Example, `rdkit_mcp.Chem.rdMolDescriptors` in the filter_list
-        # should match `rdkit_mcp.Chem.rdMolDescriptors.CalcPBF`
-        if tool_module.startswith(pattern):
-            match_found = True
-            break
-    return match_found
-
-
 def collect_tools(allow_list: List[str] = None, block_list: List[str] = None) -> Iterable[Callable]:
     """
     Collect tools based on allow_list and block_list.
@@ -100,3 +72,31 @@ async def register_tools(mcp: FastMCP, allow_list: List[str] = None, block_list:
     if tool_count == 0:
         raise RuntimeError("No tools registered with MCP server. Please check your allow_lists/block_lists.")
     logger.info(f"Registered {tool_count} tools with MCP server.")
+
+
+def _tool_module_matches(tool_module: str, filter_list: List[str]) -> bool:
+    """
+    Returns True if any pattern in filter_list is a substring of name.
+    """
+    tool_module_fn_name = tool_module.split('.')[-1]
+
+    match_found = False
+    for pattern in filter_list:
+        # Check for straight match of the function name.
+        if tool_module in filter_list:
+            match_found = True
+            break
+        # Check if the tool_module is an exact match with the last part of the module path.
+        # Example: if tool_module is 'MolWt' it should match rdkit_mcp.Chem.Descriptors.MolWt,
+        # but not `rdkit_mcp.Chem.Descriptors.ExactMolWt`
+        pattern_fn_name = pattern.split('.')[-1]
+        if tool_module_fn_name == pattern_fn_name:
+            match_found = True
+            break
+        # Check if the tool is in a module that is being filtered
+        # For Example, `rdkit_mcp.Chem.rdMolDescriptors` in the filter_list
+        # should match `rdkit_mcp.Chem.rdMolDescriptors.CalcPBF`
+        if tool_module.startswith(pattern):
+            match_found = True
+            break
+    return match_found
