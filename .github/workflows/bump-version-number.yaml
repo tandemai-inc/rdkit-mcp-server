@@ -33,13 +33,13 @@ jobs:
           echo "current_version=$version" >> $GITHUB_OUTPUT
       - name: Write bumpversion config
         run: |
-            cat > setup.cfg <<EOF
-            [bumpversion]
-            current_version = ${{ steps.get_version.outputs.current_version }}
-            commit = True
-            tag = True
-            [bumpversion:file:pyproject.toml]
-            EOF
+          cat > setup.cfg <<EOF
+          [bumpversion]
+          current_version = ${{ steps.get_version.outputs.current_version }}
+          commit = True
+          tag = True
+          [bumpversion:file:pyproject.toml]
+          EOF
       - name: Run bump2version
         run: |
             pip install bump2version
