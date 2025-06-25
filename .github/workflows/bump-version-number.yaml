@@ -26,18 +26,18 @@ jobs:
         run: |
           git config --global user.name 'tandem-ai'
           git config --global user.email 'hello@tandemai.com'
-      - name: Get project version from pyproject.toml
-        id: get_version
-        run: |
-          version=$(cat pyproject.toml | grep version | awk -F "=" '{print $2}' | xargs)
-          echo "current_version=$version" >> $GITHUB_OUTPUT
       - name: Run bump2version
         run: |
           pip install bump2version
           bump2version ${{ github.event.inputs.version_part }}
+      - name: get new version number
+        id: new_version_number
+        run: |
+          new_ver=$(cat setup.cfg | grep current_version | awk -F "=" '{print $2}' | xargs)
+          echo "version_number=$new_ver" >> $GITHUB_OUTPUT
       - name: Tag the commit
         run: |
-          git tag -a v${{ steps.get_version.outputs.current_version }} -m "Bump version to ${{ steps.get_version.outputs.current_version }}"
+          git tag -a v${{ steps.new_version_number.outputs.version_number }} -m "Bump version to ${{ steps.new_version_number.outputs.version_number }}"
       - name: Push to GitHub
         run: |
           git push --follow-tags
