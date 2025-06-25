@@ -23,7 +23,7 @@ dependencies = [
     "rdkit==2025.3.1",              # RDKit library (installation might need specific handling)
     "Pillow==11.2.1",             # For image generation with RDKit
     "openai-agents==0.0.14",
-    "ruamel.yaml"
+    "pyyaml"
 ]
 
 [project.urls]
