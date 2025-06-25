@@ -1,10 +1,11 @@
 import argparse
 import asyncio
 import logging
+import yaml
 from mcp.server.fastmcp import FastMCP
 
 from rdkit_mcp.register_tools import register_tools
-import yaml
+from app.settings import AppSettings, create_app_settings, get_app_settings
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -22,16 +23,17 @@ async def main():
     """Main function to run the MCP server."""
     args, _ = parser.parse_known_args()
     transport = args.transport
-
-    settings = {}
-    if args.settings:
+    if not args.settings:
+        logger.debug("No settings file provided, using default settings.")
+        settings: AppSettings = get_app_settings()
+    else:
         with open(args.settings, "r") as f:
-            settings = yaml.safe_load(f)
-        logger.info(f"Loaded settings from {args.settings}: {settings}")
+            yaml_settings = yaml.safe_load(f)
+        settings: AppSettings = create_app_settings(yaml_settings)
+        logger.info(f"Loaded settings from {args.settings}: {yaml_settings}")
 
-    # TODO: Add settings to have allow_list and block_list
-    allow_list = settings.get("allow_list", [])
-    block_list = settings.get("block_list", [])
+    allow_list = settings.allow_list
+    block_list = settings.block_list
     logger.info("Registering tools with MCP server...")
     await register_tools(mcp, allow_list=allow_list, block_list=block_list)
 
@@ -44,6 +46,7 @@ async def main():
     elif transport == "stdio":
         logger.info("Server running using stdio transport.")
         await mcp.run_stdio_async()
+
 
 if __name__ == "__main__":
     # Configure logging for the script
