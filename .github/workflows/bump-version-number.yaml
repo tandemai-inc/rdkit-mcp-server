@@ -35,9 +35,6 @@ jobs:
         run: |
           new_ver=$(cat setup.cfg | grep current_version | awk -F "=" '{print $2}' | xargs)
           echo "version_number=$new_ver" >> $GITHUB_OUTPUT
-      - name: Tag the commit
-        run: |
-          git tag -a v${{ steps.new_version_number.outputs.version_number }} -m "Bump version to ${{ steps.new_version_number.outputs.version_number }}"
       - name: Push to GitHub
         run: |
           git push --follow-tags
