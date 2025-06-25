@@ -2,7 +2,7 @@ import argparse
 import asyncio
 import yaml
 
-from register_tools import register_tools
+from register_tools import collect_tools
 from run_server import mcp
 
 
@@ -24,20 +24,25 @@ def load_settings(settings_path):
     return {}
 
 
-args = parse_args()
-settings = load_settings(args.settings)
-
-
-async def list_tools():
+async def list_tools(allow_list=None, block_list=None):
     """Prints the module path of all tools registered to the MCP server."""
-    print("Registered tools:")
-    allow_list = settings.get("allow_list", [])
-    block_list = settings.get("block_list", [])
-    await register_tools(mcp, allow_list=allow_list, block_list=block_list)
-    tool_list = await mcp.list_tools()
+    allow_list = allow_list or []
+    block_list = block_list or []
+    tool_list = collect_tools(allow_list=allow_list, block_list=block_list)
+
+    output = []
     for tool in tool_list:
-        module_path = tool.annotations.module.title
-        print(f"- {module_path}")
+        module_path = f'{tool.__module__}.{tool.__name__}'
+        output.append(module_path)
+    return output
+
 
 if __name__ == "__main__":
-    asyncio.run(list_tools())
+    args = parse_args()
+    settings = load_settings(args.settings)
+    allow_list = settings.get("allow_list", [])
+    block_list = settings.get("block_list", [])
+    tool_list = asyncio.run(list_tools(allow_list=allow_list, block_list=block_list))
+    print(f"Registered Tools: {len(tool_list)}")
+    for tool in tool_list:
+        print(f"- {tool}")
