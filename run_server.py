@@ -36,7 +36,7 @@ async def main():
     block_list = settings.block_list
     logger.info("Registering tools with MCP server...")
     await register_tools(mcp, allow_list=allow_list, block_list=block_list)
-
+    tool_list = await mcp.list_tools()
     logger.info(f"Starting RDKit MCP Server with transport: {transport}")
     if transport == "sse":
         logger.info(f"Server running on {args.host}:{args.port} using SSE transport.")

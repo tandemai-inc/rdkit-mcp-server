@@ -37,8 +37,17 @@ async def list_tools():
     await register_tools(mcp, allow_list=allow_list, block_list=block_list)
     tool_list = await mcp.list_tools()
     for tool in tool_list:
-        module_path = tool.annotations.module.title
-        print(f"- {module_path}")
+        module_path = f'{tool.__module__}.{tool.__name__}'
+        output.append(module_path)
+    return output
+
 
 if __name__ == "__main__":
-    asyncio.run(list_tools())
+    args = parse_args()
+    settings = load_settings(args.settings)
+    allow_list = settings.get("allow_list", [])
+    block_list = settings.get("block_list", [])
+    tool_list = asyncio.run(list_tools(allow_list=allow_list, block_list=block_list))
+    print(f"Registered Tools: {len(tool_list)}")
+    for tool in tool_list:
+        print(f"- {tool}")

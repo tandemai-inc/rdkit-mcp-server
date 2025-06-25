@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "rdkit-mcp-server"
-version = "0.1.0"
+version = "0.1.1"
 description = "MCP Server providing RDKit cheminformatics tools."
 readme = "README.md"
 requires-python = ">=3.8"
@@ -26,6 +26,7 @@ dependencies = [
     "openai-agents==0.0.14",
     "pydantic==2.11.5",
     "pydantic-settings==2.9.1",
+    "pyyaml"
 ]
 
 [project.urls]
