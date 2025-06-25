@@ -26,6 +26,8 @@ jobs:
         run: |
           pip install -e .
           pip install pytest pytest-asyncio
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=$PWD" >> $GITHUB_ENV
       - name: Run tests with pytest
         run: |
           pytest
