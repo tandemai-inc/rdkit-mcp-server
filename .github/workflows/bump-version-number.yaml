@@ -33,7 +33,7 @@ jobs:
           echo "current_version=$version" >> $GITHUB_OUTPUT
       - name: Write bumpversion config
         run: |
-          cat > setup.cfg <<EOF
+          cat > .bumpversion.cfg <<EOF
           [bumpversion]
           current_version = ${{ steps.get_version.outputs.current_version }}
           commit = True
@@ -46,7 +46,7 @@ jobs:
             if [ $# -eq 0 ]; then
                 echo "To bump version, pass major/minor/patch "
             else
-                bump2version ${{ github.event.inputs.version_part }} --config-file setup.cfg
+                bump2version ${{ github.event.inputs.version_part }}
             fi
       - name: Tag the commit
         run: |
