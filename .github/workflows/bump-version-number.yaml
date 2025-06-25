@@ -43,11 +43,7 @@ jobs:
       - name: Run bump2version
         run: |
             pip install bump2version
-            if [ $# -eq 0 ]; then
-                echo "To bump version, pass major/minor/patch "
-            else
-                bump2version ${{ github.event.inputs.version_part }}
-            fi
+            bump2version ${{ github.event.inputs.version_part }}
       - name: Tag the commit
         run: |
           git tag -a v${{ steps.get_version.outputs.current_version }} -m "Bump version to ${{ steps.get_version.outputs.current_version }}"
