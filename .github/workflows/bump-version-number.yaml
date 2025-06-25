@@ -42,8 +42,8 @@ jobs:
           EOF
       - name: Run bump2version
         run: |
-            pip install bump2version
-            bump2version ${{ github.event.inputs.version_part }}
+          pip install bump2version
+          bump2version ${{ github.event.inputs.version_part }}
       - name: Tag the commit
         run: |
           git tag -a v${{ steps.get_version.outputs.current_version }} -m "Bump version to ${{ steps.get_version.outputs.current_version }}"
