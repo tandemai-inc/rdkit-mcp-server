@@ -16,17 +16,17 @@ async def test_list_tools_allow_list():
     ]
     tool_list = await list_tools(allow_list=allow_list)
     assert isinstance(tool_list, list)
-    assert len(tool_list) == 1
+    assert len(tool_list) == len(allow_list)
 
 
 @pytest.mark.asyncio
 async def test_list_tools_block_list():
     block_list = [
         "CalcNumUnspecifiedAtomStereoCenters",
-        "rdkit_mcp.Chem.rdMolDescriptors.CalcPBF"
+        "rdkit_mcp.Chem.rdMolDescriptors.CalcPBF",
+        "MolWt"
     ]
     # Get full list of tools
-    breakpoint()
     full_tool_list = await list_tools()
     full_tool_count = len(full_tool_list)
 
