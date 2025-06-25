@@ -2,7 +2,7 @@ import argparse
 import asyncio
 import yaml
 
-from register_tools import register_tools
+from rdkit_mcp.register_tools import register_tools
 from run_server import mcp
 
 
