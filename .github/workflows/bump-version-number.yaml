@@ -1,0 +1,62 @@
+name: Bump version number
+on:
+  workflow_dispatch:
+    inputs:
+      version_part:
+        type: choice
+        description: Part of version number to bump
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version_number: ${{steps.new_version_number.outputs.version_number}}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: git setup
+        run: |
+          git config --global user.name 'tandem-ai'
+          git config --global user.email 'hello@tandemai.com'
+      - name: Get project version from pyproject.toml
+        id: get_version
+        run: |
+          version=$(cat pyproject.toml | grep version | awk -F "=" '{print $2}' | xargs)
+          echo "current_version=$version" >> $GITHUB_OUTPUT
+      - name: Write bumpversion config
+        run: |
+            cat > setup.cfg <<EOF
+            [bumpversion]
+            current_version = ${{ steps.get_version.outputs.current_version }}
+            commit = True
+            tag = True
+            [bumpversion:file:pyproject.toml]
+            EOF
+      - name: Run bump2version
+        run: |
+          pip install bump2version
+          if [ $# -eq 0 ]; then
+                echo "To bump version, pass major/minor/patch "
+            else
+                bump2version $1
+            fi
+            EOF
+      - name: Tag the commit
+        run: |
+          git tag -a v${{ steps.get_version.outputs.current_version }} -m "Bump version to ${{ steps.get_version.outputs.current_version }}"
+      - name: get new version number
+        id: new_version_number
+        run: |
+          new_ver=$(cat setup.cfg | grep current_version | awk -F "=" '{print $2}' | xargs)
+          echo "version_number=$new_ver" >> $GITHUB_OUTPUT
+      - name: Push to GitHub
+        run: |
+          git push --follow-tags
