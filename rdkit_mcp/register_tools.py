@@ -9,15 +9,6 @@ logger = logging.getLogger(__name__)
 __all__ = ["register_tools"]
 
 
-def _tool_module_matches(name: str, patterns: List[str]) -> bool:
-    """
-    Returns True if any pattern in patterns is a substring of name.
-    """
-    if not patterns:
-        return False
-    return any(pattern in name for pattern in patterns)
-
-
 async def register_tools(mcp: FastMCP, allow_list: List[str] = None, block_list: List[str] = None) -> None:
     """
     Register tools with the MCP server.
@@ -64,3 +55,12 @@ async def register_tools(mcp: FastMCP, allow_list: List[str] = None, block_list:
     if tool_count == 0:
         raise RuntimeError("No tools registered with MCP server. Please check your allow_lists/block_lists.")
     logger.info(f"Registered {tool_count} tools with MCP server.")
+
+
+def _tool_module_matches(name: str, patterns: List[str]) -> bool:
+    """
+    Returns True if any pattern in patterns is a substring of name.
+    """
+    if not patterns:
+        return False
+    return any(pattern in name for pattern in patterns)
