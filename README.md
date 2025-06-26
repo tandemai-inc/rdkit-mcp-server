@@ -59,6 +59,6 @@ python list_tools.py [--settings settings.yaml]
 
 We welcome contributions, feature requests, and bug reports:
 
-See `CONTRIB.md` forguidelines on how to get started.
+See `CONTRIB.md` for guidelines on how to get started.
 
 Together, we can make RDKit accessible to a wider range of applications through natural language interfaces.
