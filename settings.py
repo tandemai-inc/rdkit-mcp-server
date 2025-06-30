@@ -3,7 +3,11 @@ from typing import List
 from pydantic import BaseModel, Field, DirectoryPath
 
 
+default_file_dir = os.path.join(os.getcwd(), "outputs")
+
+
 def singleton(cls):
+    """Add to a class to make it a singleton."""
     instances = {}
 
     def get_instance(*args, **kwargs):
@@ -11,9 +15,6 @@ def singleton(cls):
             instances[cls] = cls(*args, **kwargs)
         return instances[cls]
     return get_instance
-
-
-default_file_dir = os.path.join(os.getcwd(), "outputs")
 
 
 @singleton

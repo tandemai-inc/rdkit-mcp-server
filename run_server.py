@@ -47,7 +47,6 @@ async def main():
         await mcp.run_stdio_async()
 
 
-
 if __name__ == "__main__":
     # Configure logging for the script
     logger.info("Starting the RDKit MCP Server...")
