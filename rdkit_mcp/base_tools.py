@@ -5,7 +5,7 @@ from mcp.server.fastmcp.exceptions import ToolError
 from pathlib import Path
 from rdkit import Chem
 
-from settings import get_app_settings
+from rdkit_mcp.settings import get_app_settings
 from .decorators import rdkit_tool
 from .types import Smiles
 

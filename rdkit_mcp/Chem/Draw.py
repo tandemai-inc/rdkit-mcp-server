@@ -1,3 +1,4 @@
+import logging
 import os
 from mcp.server.fastmcp.exceptions import ToolError
 from pathlib import Path
@@ -6,10 +7,9 @@ from rdkit.Chem import Draw
 from typing import List
 
 from ..decorators import rdkit_tool
-from settings import get_app_settings
+from rdkit_mcp.settings import get_app_settings
 from ..types import Smiles
 
-import logging
 from rdkit.Chem.Draw import *
 
 logger = logging.getLogger(__name__)
