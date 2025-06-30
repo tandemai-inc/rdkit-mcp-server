@@ -1,13 +1,11 @@
 import asyncio
 import argparse
 import logging
-import yaml
-from mcp.server.fastmcp import FastMCP
+from mcp import FastMCP
 
 from rdkit_mcp.register_tools import register_tools
 from settings import AppSettings, create_app_settings, get_app_settings
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 parser = argparse.ArgumentParser(description="RDKit MCP Server")
