@@ -10,7 +10,8 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = { file = "LICENSE" } # Optional: Add a license file if desired
 authors = [
-    { name = "Your Name", email = "your.email@example.com" }, # Replace with actual details
+    { name = "Fred Parsons", email = "frederick.parsons@tandemai.com" },
+    { name = "Mike Rosengrant", email = "michael.rosengrant@tandemai.com" },
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -23,15 +24,17 @@ dependencies = [
     "rdkit==2025.3.1",              # RDKit library (installation might need specific handling)
     "Pillow==11.2.1",             # For image generation with RDKit
     "openai-agents==0.0.14",
+    "pydantic==2.11.5",
+    "pydantic-settings==2.9.1",
     "pyyaml"
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/rdkit-mcp-server" # Replace with actual URL
-Repository = "https://github.com/yourusername/rdkit-mcp-server" # Replace with actual URL
+Homepage = "https://github.com/tandem-ai-inc/rdkit-mcp-server"
+Repository = "https://github.com/tandem-ai-inc/rdkit-mcp-server"
 
 [project.scripts]
 rdkit-mcp-server = "rdkit_mcp_server.__main__:main" # If we want a console script
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/rdkit_mcp_server"]
+packages = ["rdkit_mcp"]

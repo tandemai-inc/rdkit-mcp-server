@@ -20,9 +20,6 @@ AGENT_INSTRUCTIONS = (
     "The final output will be read in a terminal; do not use Markdown or any other formatting. "
 )
 
-# Default prompt makes testing more convenient
-DEFAULT_PROMPT = 'What tools are available?'
-
 
 def create_agent(mcp_server: MCPServer = None, model: str = None) -> Agent:
     """Create an agent with the specified MCP server and model."""
@@ -40,7 +37,9 @@ def create_agent(mcp_server: MCPServer = None, model: str = None) -> Agent:
     return agent
 
 
-async def main():
+async def main(prompt: str = None):
+    prompt = prompt or ""
+
     async with MCPServerSse(
         name=MCP_NAME,
         params={"url": MCP_URL},
@@ -49,12 +48,10 @@ async def main():
 
         conversation_history = []
         while True:
-            prompt = input("Enter a prompt or 'exit': ")
+            if not prompt:
+                prompt = input("Enter a prompt or 'exit': ")
             if prompt.lower().strip() == "exit":
                 break
-            if not prompt:
-                prompt = DEFAULT_PROMPT
-
             # Append user's message to history
             conversation_history.append({"role": "user", "content": prompt})
 
@@ -78,6 +75,7 @@ async def main():
                 print(f"\n{result.final_output}\n")
                 # Add assistant's response to history
                 conversation_history.append({"role": "assistant", "content": result.final_output})
+                prompt = ""
 
 if __name__ == "__main__":
     asyncio.run(main())
