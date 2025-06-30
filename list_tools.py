@@ -3,7 +3,7 @@ import asyncio
 import yaml
 
 from rdkit_mcp.register_tools import collect_tools
-from rdkit_mcp.settings import AppSettings
+from rdkit_mcp.settings import ToolSettings
 
 
 def parse_args():
@@ -17,13 +17,13 @@ def parse_args():
     return parser.parse_args()
 
 
-def load_settings(settings_path) -> AppSettings:
+def load_settings(settings_path) -> ToolSettings:
     """Load settings from a YAML file or return default settings."""
     yaml_data = {}
     if settings_path:
         with open(settings_path, "r") as f:
             yaml_data = yaml.safe_load(f)
-    return AppSettings(**yaml_data)
+    return ToolSettings(**yaml_data)
 
 
 async def list_tools(allow_list=None, block_list=None):
@@ -40,7 +40,7 @@ async def list_tools(allow_list=None, block_list=None):
 
 if __name__ == "__main__":
     args = parse_args()
-    settings: AppSettings = load_settings(args.settings)
+    settings: ToolSettings = load_settings(args.settings)
     allow_list = settings.ALLOW_LIST
     block_list = settings.BLOCK_LIST
     tool_list = asyncio.run(list_tools(allow_list=allow_list, block_list=block_list))

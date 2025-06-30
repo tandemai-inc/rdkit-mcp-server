@@ -5,7 +5,7 @@ import yaml
 from mcp.server.fastmcp import FastMCP
 
 from rdkit_mcp.register_tools import register_tools
-from rdkit_mcp.settings import AppSettings
+from rdkit_mcp.settings import ToolSettings
 
 logging.basicConfig(
     level=logging.INFO,
@@ -39,7 +39,7 @@ async def main():
             logger.error(f"Settings file not found: {args.settings}")
         except yaml.YAMLError as e:
             logger.error(f"Error parsing YAML settings file: {e}")
-    settings: AppSettings = AppSettings(**settings_data)
+    settings: ToolSettings = ToolSettings(**settings_data)
 
     # Register tools with the MCP server
     allow_list = settings.ALLOW_LIST

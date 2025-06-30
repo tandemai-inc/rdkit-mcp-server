@@ -23,7 +23,7 @@ def singleton(cls):
             instances[cls] = cls(*args, **kwargs)
         elif kwargs and instances[cls] is not None:
             # If kwargs are provided, create a new instance
-            # This fixes issue where AppSettings can be instantiated before yaml is loaded,
+            # This fixes issue where ToolSettings can be instantiated before yaml is loaded,
             # and then we can never get the correct settings.
             logger.debug("Overwriting singleton instance of %s with kwargs: %s", cls.__name__, kwargs)
             instances[cls] = cls(*args, **kwargs)
