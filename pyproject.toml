@@ -10,8 +10,8 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = { file = "LICENSE" } # Optional: Add a license file if desired
 authors = [
-    { name = "Mike Rosengrant", email = "michael.rosengrant@tandemai.com" },
     { name = "Fred Parsons", email = "frederick.parsons@tandemai.com" },
+    { name = "Mike Rosengrant", email = "michael.rosengrant@tandemai.com" },
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
