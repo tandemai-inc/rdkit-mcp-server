@@ -5,7 +5,7 @@ from mcp.server.fastmcp.exceptions import ToolError
 from pathlib import Path
 from rdkit import Chem
 
-from server.settings import get_app_settings
+from settings import get_app_settings
 from .decorators import rdkit_tool
 from .types import PickledMol, Smiles
 import pickle
