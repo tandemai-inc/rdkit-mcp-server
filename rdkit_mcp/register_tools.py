@@ -71,7 +71,9 @@ async def register_tools(mcp: FastMCP, allow_list: List[str] = None, block_list:
     tool_count = len(await mcp.list_tools())
     if tool_count == 0:
         raise RuntimeError("No tools registered with MCP server. Please check your allow_lists/block_lists.")
-    logger.info(f"Registered {tool_count} tools with MCP server.")
+
+    tool_or_tools = "tool" if tool_count == 1 else "tools"
+    logger.info(f"Registered {tool_count} {tool_or_tools} with MCP server.")
 
 
 def _tool_module_matches(tool_module: str, filter_list: List[str]) -> bool:
