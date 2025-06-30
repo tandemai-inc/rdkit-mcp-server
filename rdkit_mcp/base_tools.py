@@ -7,9 +7,40 @@ from rdkit import Chem
 
 from server.settings import get_app_settings
 from .decorators import rdkit_tool
-from .types import Smiles
+from .types import PickledMol, Smiles
+import pickle
 
 logger = logging.getLogger(__name__)
+
+
+@rdkit_tool(description="Converts a SMILES string to an RDKit mol, and store in file.")
+def smiles_to_mol(smiles: Smiles) -> Chem.Mol:
+    """
+    Converts a SMILES string to an RDKit mol object.
+    """
+    mol = Chem.MolFromSmiles(smiles)
+    if mol is None:
+        raise ToolError(f"Invalid or unparsable SMILES string: {smiles}")
+
+    pkl_file = f'{smiles}.pkl'
+    with open(pkl_file, "wb") as f:
+        pickle.dump(mol, f)
+    return pkl_file
+
+
+@rdkit_tool(description="Converts a pickled RDKit mol object to a SMILES string.")
+def mol_to_smiles(pkl_file: PickledMol) -> Smiles:
+    """
+    Converts a pickled RDKit mol object to a SMILES string.
+    """
+    with open(pkl_file, "rb") as f:
+        mol = pickle.load(f)
+
+    if mol is None:
+        raise ToolError(f"Failed to load molecule from pickle file: {pkl_file}")
+
+    smiles = Chem.MolToSmiles(mol)
+    return smiles
 
 
 @rdkit_tool(enabled=False)
