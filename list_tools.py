@@ -45,7 +45,6 @@ async def list_tools():
 
 if __name__ == "__main__":
     args = parse_args()
-    breakpoint()
     settings = load_settings(args.settings)
     tool_list = asyncio.run(list_tools())
     print(f"Registered Tools: {len(tool_list)}")
