@@ -2,6 +2,8 @@
 
 Thank you for your interest in contributing to this project! Your help is greatly appreciated.
 
+We welcome contributions, feature requests, and bug reports
+
 ## How to Contribute
 
 1. **Fork the repository** and create your branch from `master`.
