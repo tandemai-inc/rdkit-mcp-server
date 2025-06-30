@@ -32,7 +32,7 @@ def smiles_to_sdf(smiles: Smiles) -> Path:
     filename = f"{Chem.MolToSmiles(mol)}.sdf"
     settings = get_app_settings()
 
-    output_path = Path(os.path.join(settings.file_dir, filename))
+    output_path = Path(os.path.join(settings.FILE_DIR, filename))
     with open(output_path, "w") as f:
         f.write(sdf_string)
     return output_path

@@ -25,7 +25,7 @@ def MolToFile(smiles: Smiles, filename: str, width: int = 300, height: int = 300
         filename += '.png'
 
     settings = get_app_settings()
-    output_path = os.path.join(settings.file_dir, filename)
+    output_path = os.path.join(settings.FILE_DIR, filename)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     Draw.MolToFile(mol, output_path, size=(width, height))
     return Path(output_path)
@@ -69,6 +69,6 @@ def MolsMatrixToGridImage(
 
     # Save the image to the specified file path
     settings = get_app_settings()
-    file_path = os.path.join(settings.file_dir, filename)
+    file_path = os.path.join(settings.FILE_DIR, filename)
     img.save(file_path)
     return Path(file_path)

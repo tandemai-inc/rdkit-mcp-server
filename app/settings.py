@@ -13,15 +13,15 @@ def singleton(cls):
     return get_instance
 
 
-default_file_dir = os.path.join(os.getcwd(), "output")
+default_file_dir = os.path.join(os.getcwd(), "outputs")
 
 
 @singleton
 class AppSettings(BaseModel):
-    allow_list: List[str] = Field(default_factory=list, description="List of allowed tools")
-    block_list: List[str] = Field(default_factory=list, description="List of blocked tools")
-    file_dir: DirectoryPath = Field(default=DirectoryPath(default_file_dir), description="Directory where files are stored")
-    file_expire: int = Field(default=3600, description="Time in seconds before files expire")
+    ALLOW_LIST: List[str] = Field(default_factory=list, description="List of allowed tools")
+    BLOCK_LIST: List[str] = Field(default_factory=list, description="List of blocked tools")
+    FILE_DIR: DirectoryPath = Field(default=DirectoryPath(default_file_dir), description="Directory where files are stored")
+    FILE_EXPIRE: int = Field(default=3600, description="Time in seconds before files expire")
 
 
 def create_app_settings(yaml_data: dict) -> AppSettings:

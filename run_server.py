@@ -32,8 +32,8 @@ async def main():
         settings: AppSettings = create_app_settings(yaml_settings)
         logger.info(f"Loaded settings from {args.settings}: {yaml_settings}")
 
-    allow_list = settings.allow_list
-    block_list = settings.block_list
+    allow_list = settings.ALLOW_LIST
+    block_list = settings.BLOCK_LIST
     logger.info("Registering tools with MCP server...")
     await register_tools(mcp, allow_list=allow_list, block_list=block_list)
     tool_list = await mcp.list_tools()
