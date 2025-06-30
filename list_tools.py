@@ -3,7 +3,7 @@ import asyncio
 import yaml
 
 from rdkit_mcp.register_tools import register_tools
-from app.settings import AppSettings, create_app_settings, get_app_settings
+from server.settings import AppSettings, create_app_settings, get_app_settings
 from run_server import mcp
 
 

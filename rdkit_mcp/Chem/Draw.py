@@ -6,7 +6,7 @@ from rdkit.Chem import Draw
 from typing import List
 
 from ..decorators import rdkit_tool
-from app.settings import get_app_settings
+from server.settings import get_app_settings
 from ..types import Smiles
 
 import logging
