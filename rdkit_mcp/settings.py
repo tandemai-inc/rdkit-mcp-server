@@ -24,25 +24,3 @@ class AppSettings(BaseModel):
     FILE_DIR: DirectoryPath = Field(default=DirectoryPath(default_file_dir), description="Directory where files are stored")
     FILE_EXPIRE: int = Field(default=3600, description="Time in seconds before files expire")
 
-
-def create_app_settings(yaml_data: dict) -> AppSettings:
-    """
-    Create an AppSettings instance from a dictionary.
-
-    Args:
-        yaml_data (dict): Dictionary containing settings data.
-
-    Returns:
-        AppSettings: An instance of AppSettings populated with the provided data.
-    """
-    return AppSettings(**yaml_data)
-
-
-def get_app_settings() -> AppSettings:
-    """
-    Get the singleton instance of AppSettings.
-
-    Returns:
-        AppSettings: The singleton instance of AppSettings.
-    """
-    return AppSettings()

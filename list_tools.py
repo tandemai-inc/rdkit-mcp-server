@@ -3,8 +3,7 @@ import asyncio
 import yaml
 
 from rdkit_mcp.register_tools import collect_tools
-from rdkit_mcp.settings import AppSettings, create_app_settings, get_app_settings
-from run_server import mcp
+from rdkit_mcp.settings import AppSettings
 
 
 def parse_args():
@@ -19,16 +18,17 @@ def parse_args():
 
 
 def load_settings(settings_path) -> AppSettings:
+    """Load settings from a YAML file or return default settings."""
+    yaml_data = {}
     if settings_path:
         with open(settings_path, "r") as f:
             yaml_data = yaml.safe_load(f)
-            return create_app_settings(yaml_data)
+    return AppSettings(**yaml_data)
 
-    return get_app_settings()
 
 
 async def list_tools(allow_list=None, block_list=None):
-    """Prints the module path of all tools registered to the MCP server."""
+    """Returns the list of modules for all tools being registered to the MCP server."""
     allow_list = allow_list or []
     block_list = block_list or []
     tool_list = collect_tools(allow_list=allow_list, block_list=block_list)
