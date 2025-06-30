@@ -26,7 +26,6 @@ def load_settings(settings_path) -> AppSettings:
     return AppSettings(**yaml_data)
 
 
-
 async def list_tools(allow_list=None, block_list=None):
     """Returns the list of modules for all tools being registered to the MCP server."""
     allow_list = allow_list or []
