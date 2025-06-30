@@ -32,14 +32,11 @@ from rdkit.Chem.rdMolDescriptors import (
     CalcNumHeterocycles as _CalcNumHeterocycles,
     CalcNumHeavyAtoms as _CalcNumHeavyAtoms,
     CalcNumHeteroatoms as _CalcNumHeteroatoms,
-    CalcNumHeterocycles as _CalcNumHeterocycles,
     CalcNumSaturatedCarbocycles as _CalcNumSaturatedCarbocycles,
     CalcNumSaturatedRings as _CalcNumSaturatedRings,
     CalcNumSpiroAtoms as _CalcNumSpiroAtoms,
     CalcNumUnspecifiedAtomStereoCenters as _CalcNumUnspecifiedAtomStereoCenters,
     CalcOxidationNumbers as _CalcOxidationNumbers,
-    CalcPBF as _CalcPBF,
-
 )
 
 from ..decorators import rdkit_tool
@@ -235,13 +232,6 @@ def CalcNumHeteroatoms(smiles: Smiles) -> int:
     return _CalcNumHeteroatoms(mol)
 
 
-@rdkit_tool(description=_CalcNumHeterocycles.__doc__)
-def CalcNumHeterocycles(smiles: Smiles) -> int:
-    """Calculate the number of heterocycles in a molecule given its SMILES representation."""
-    mol = Chem.MolFromSmiles(smiles)
-    return _CalcNumHeterocycles(mol)
-
-
 @rdkit_tool(description=_CalcNumSaturatedCarbocycles.__doc__)
 def CalcNumSaturatedCarbocycles(smiles: Smiles) -> int:
     """Calculate the number of saturated carbocycles in a molecule given its SMILES representation."""
@@ -270,8 +260,8 @@ def CalcNumUnspecifiedAtomStereoCenters(smiles: Smiles) -> int:
     return _CalcNumUnspecifiedAtomStereoCenters(mol)
 
 
-@rdkit_tool(description=_CalcPBF.__doc__)
-def CalcPBF(smiles: Smiles) -> float:
-    """Calculate the PBF (Polarizability, Basicity, and Flexibility) descriptor for a molecule given its SMILES representation."""
+@rdkit_tool(description=_CalcOxidationNumbers.__doc__)
+def CalcOxidationNumbers(smiles: Smiles) -> float:
+    """Calculate the oxidation numbers for a molecule given its SMILES representation."""
     mol = Chem.MolFromSmiles(smiles)
-    return _CalcPBF(mol)
+    return _CalcOxidationNumbers(mol)
