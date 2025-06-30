@@ -46,6 +46,7 @@ async def main():
         logger.info("Server running using stdio transport.")
         await mcp.run_stdio_async()
 
+
 if __name__ == "__main__":
     # Configure logging for the script
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
