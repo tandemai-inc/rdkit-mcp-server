@@ -5,7 +5,7 @@ import yaml
 from mcp.server.fastmcp import FastMCP
 
 from rdkit_mcp.register_tools import register_tools
-from server.settings import AppSettings, create_app_settings, get_app_settings
+from rdkit_mcp.settings import ToolSettings
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -25,11 +25,11 @@ async def main():
     transport = args.transport
     if not args.settings:
         logger.debug("No settings file provided, using default settings.")
-        settings: AppSettings = get_app_settings()
+        settings: ToolSettings = ToolSettings()
     else:
         with open(args.settings, "r") as f:
             yaml_settings = yaml.safe_load(f)
-        settings: AppSettings = create_app_settings(yaml_settings)
+        settings: ToolSettings = ToolSettings(**yaml_settings)
         logger.info(f"Loaded settings from {args.settings}: {yaml_settings}")
 
     allow_list = settings.ALLOW_LIST
