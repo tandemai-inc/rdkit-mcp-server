@@ -2,9 +2,8 @@ import argparse
 import asyncio
 import yaml
 
-from rdkit_mcp.register_tools import register_tools
-from settings import AppSettings, create_app_settings, get_app_settings
-from run_server import mcp
+from rdkit_mcp.register_tools import collect_tools
+from rdkit_mcp.settings import ToolSettings
 
 
 def parse_args():
@@ -18,24 +17,20 @@ def parse_args():
     return parser.parse_args()
 
 
-def load_settings(settings_path) -> AppSettings:
+def load_settings(settings_path) -> ToolSettings:
+    """Load settings from a YAML file or return default settings."""
+    yaml_data = {}
     if settings_path:
         with open(settings_path, "r") as f:
             yaml_data = yaml.safe_load(f)
-            return create_app_settings(yaml_data)
-
-    return get_app_settings()
+    return ToolSettings(**yaml_data)
 
 
-async def list_tools():
-    """Prints the module path of all tools registered to the MCP server."""
-    args = parse_args()
-    settings: AppSettings = load_settings(args.settings)
-    print("Registered tools:")
-    allow_list = settings.ALLOW_LIST
-    block_list = settings.BLOCK_LIST
-    await register_tools(mcp, allow_list=allow_list, block_list=block_list)
-    tool_list = await mcp.list_tools()
+async def list_tools(allow_list=None, block_list=None):
+    """Returns the list of modules for all tools being registered to the MCP server."""
+    allow_list = allow_list or []
+    block_list = block_list or []
+    tool_list = collect_tools(allow_list=allow_list, block_list=block_list)
     output = []
     for tool in tool_list:
         module_path = tool.annotations.module.title
@@ -45,8 +40,10 @@ async def list_tools():
 
 if __name__ == "__main__":
     args = parse_args()
-    settings = load_settings(args.settings)
-    tool_list = asyncio.run(list_tools())
+    settings: ToolSettings = load_settings(args.settings)
+    allow_list = settings.ALLOW_LIST
+    block_list = settings.BLOCK_LIST
+    tool_list = asyncio.run(list_tools(allow_list=allow_list, block_list=block_list))
     print(f"Registered Tools: {len(tool_list)}")
     for tool in tool_list:
         print(f"- {tool}")
