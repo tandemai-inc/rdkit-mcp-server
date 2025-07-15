@@ -1,6 +1,7 @@
 import argparse
 import asyncio
 import yaml
+from typing import Callable, Iterable
 
 from rdkit_mcp.register_tools import collect_tools
 from rdkit_mcp.settings import ToolSettings
@@ -30,7 +31,7 @@ async def list_tools(allow_list=None, block_list=None):
     """Returns the list of modules for all tools being registered to the MCP server."""
     allow_list = allow_list or []
     block_list = block_list or []
-    tool_list = collect_tools(allow_list=allow_list, block_list=block_list)
+    tool_list: Iterable[Callable] = collect_tools(allow_list=allow_list, block_list=block_list)
     output = []
     for tool in tool_list:
         module_path = tool.annotations.module.title
