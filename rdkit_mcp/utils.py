@@ -1,5 +1,10 @@
-from typing import Callable
+import base64
 import logging
+import pickle
+from rdkit import Chem
+from typing import Callable
+
+from .types import PickledMol
 
 
 logger = logging.getLogger(__name__)
@@ -29,3 +34,35 @@ def singleton(cls):
             instances[cls] = cls(*args, **kwargs)
         return instances[cls]
     return get_instance
+
+
+def decode_mol(b64_pickled_mol: str) -> Chem.Mol:
+    """
+    Decode a base64 encoded pickled RDKit Mol object.
+
+    Args:
+        pickled_mol (str): Base64 encoded string of a pickled RDKit Mol object.
+
+    Returns:
+        Chem.Mol: The decoded RDKit Mol object.
+    """
+    pkl_data = base64.b64decode(b64_pickled_mol)
+    mol = pickle.loads(pkl_data)
+    if mol is None:
+        raise ValueError("Failed to decode the molecule from the provided pickled data.")
+    return mol
+
+
+def encode_mol(mol: Chem.Mol) -> PickledMol:
+    """
+    Encode an RDKit Mol object into a base64 encoded pickled string.
+
+    Args:
+        mol (Chem.Mol): The RDKit Mol object to encode.
+
+    Returns:
+        str: Base64 encoded string of the pickled RDKit Mol object.
+    """
+    pkl_mol_data = pickle.dumps(mol)
+    encoded_mol = base64.b64encode(pkl_mol_data).decode('utf-8')
+    return encoded_mol

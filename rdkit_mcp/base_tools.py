@@ -8,37 +8,31 @@ from rdkit import Chem
 from rdkit_mcp.settings import ToolSettings
 from .decorators import rdkit_tool
 from .types import PickledMol, Smiles
-import pickle
+from .utils import encode_mol, decode_mol
 
 logger = logging.getLogger(__name__)
 
 
-@rdkit_tool(description="Converts a SMILES string to an RDKit mol, and store in file.")
-def smiles_to_mol(smiles: Smiles) -> Chem.Mol:
+@rdkit_tool()
+def smiles_to_mol(smiles: Smiles) -> PickledMol:
     """
-    Converts a SMILES string to an RDKit mol object.
+    Converts a SMILES string into a base 64 encoded pickled RDKit Mol object.
     """
     mol = Chem.MolFromSmiles(smiles)
     if mol is None:
         raise ToolError(f"Invalid or unparsable SMILES string: {smiles}")
-
-    pkl_file = f'{smiles}.pkl'
-    with open(pkl_file, "wb") as f:
-        pickle.dump(mol, f)
-    return pkl_file
+    encoded_mol = encode_mol(mol)
+    return encoded_mol
 
 
 @rdkit_tool(description="Converts a pickled RDKit mol object to a SMILES string.")
-def mol_to_smiles(pkl_file: PickledMol) -> Smiles:
+def mol_to_smiles(pmol: PickledMol) -> Smiles:
     """
     Converts a pickled RDKit mol object to a SMILES string.
     """
-    with open(pkl_file, "rb") as f:
-        mol = pickle.load(f)
-
+    mol = decode_mol(pmol)
     if mol is None:
-        raise ToolError(f"Failed to load molecule from pickle file: {pkl_file}")
-
+        raise ToolError(f"Failed to decode the pickled RDKit Mol object.")
     smiles = Chem.MolToSmiles(mol)
     return smiles
 
@@ -93,16 +87,3 @@ def sdf_to_smiles(sdf_path: Union[str, Path]) -> Smiles:
 
     smiles = Chem.MolToSmiles(mol)
     return smiles
-
-
-def get_base_tools():
-    """
-    Get all base tools defined in this module.
-
-    Returns:
-        A list of tool functions.
-    """
-    return [
-        smiles_to_sdf,
-        sdf_to_smiles,
-    ]
