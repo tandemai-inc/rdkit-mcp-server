@@ -6,9 +6,11 @@ from rdkit import Chem
 from rdkit.Chem import Draw
 from typing import List
 
+from rdkit_mcp.utils import decode_mol
+
 from ..decorators import rdkit_tool
 from rdkit_mcp.settings import ToolSettings
-from ..types import Smiles
+from ..types import PickledMol, Smiles
 
 from rdkit.Chem.Draw import *
 
@@ -16,8 +18,8 @@ logger = logging.getLogger(__name__)
 
 
 @rdkit_tool(description=Draw.MolToFile.__doc__)
-def MolToFile(smiles: Smiles, filename: str, width: int = 300, height: int = 300) -> Path:
-    mol: Chem.Mol = Chem.MolFromSmiles(smiles)
+def MolToFile(pmol: PickledMol, filename: str, width: int = 300, height: int = 300) -> Path:
+    mol: Chem.Mol = decode_mol(pmol)
     if mol is None:
         raise ToolError(f"Invalid or unparsable SMILES string: {smiles}")
 

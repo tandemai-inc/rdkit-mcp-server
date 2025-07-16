@@ -37,14 +37,14 @@ def create_agent(mcp_server: MCPServer = None, model: str = None) -> Agent:
     return agent
 
 
-async def main(prompt: str = None):
+async def main(prompt: str = None, model: str = "4o-mini"):
     prompt = prompt or ""
 
     async with MCPServerSse(
         name=MCP_NAME,
         params={"url": MCP_URL},
     ) as server:
-        agent = create_agent(mcp_server=server)
+        agent = create_agent(mcp_server=server, model=model)
 
         conversation_history = []
         while True:

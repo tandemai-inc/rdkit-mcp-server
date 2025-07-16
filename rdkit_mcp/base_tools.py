@@ -87,3 +87,30 @@ def sdf_to_smiles(sdf_path: Union[str, Path]) -> Smiles:
 
     smiles = Chem.MolToSmiles(mol)
     return smiles
+
+
+@rdkit_tool(description="Writes a pickled RDKit Mol object to an SDF file and returns the file path.")
+def mol_to_sdf(pmol: PickledMol, filename=None) -> Path:
+    """
+    Writes a pickled RDKit Mol object to an SDF file.
+
+    Args:
+        pmol: The pickled and base64-encoded RDKit Mol object.
+    Returns:
+        The path to the written SDF file.
+    """
+    mol = decode_mol(pmol)
+    if mol is None:
+        raise ToolError("Failed to decode the pickled RDKit Mol object.")
+
+    sdf_string = Chem.MolToMolBlock(mol)
+
+    if filename is None:
+        filename = f"{Chem.MolToSmiles(mol)}.sdf"
+    if not filename.endswith('.sdf'):
+        filename += '.sdf'
+    settings = ToolSettings()
+    output_path = Path(os.path.join(settings.FILE_DIR, filename))
+    with open(output_path, "w") as f:
+        f.write(sdf_string)
+    return output_path
