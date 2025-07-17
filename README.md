@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/tandemai-inc-rdkit-mcp-server-badge.png)](https://mseep.ai/app/tandemai-inc-rdkit-mcp-server)
+
 # RDKit MCP Server: Agentic Access to RDKit for LLMs
 
 RDKit MCP Server is an open-source MCP server that enables language models to interact with RDKit through natural language. The goal is to provide agent-level access to every function in RDKit 2025.3.1 without writing any code.
