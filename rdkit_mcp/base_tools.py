@@ -7,9 +7,34 @@ from rdkit import Chem
 
 from rdkit_mcp.settings import ToolSettings
 from .decorators import rdkit_tool
-from .types import Smiles
+from .types import PickledMol, Smiles
+from .utils import encode_mol, decode_mol
 
 logger = logging.getLogger(__name__)
+
+
+@rdkit_tool()
+def smiles_to_mol(smiles: Smiles) -> PickledMol:
+    """
+    Converts a SMILES string into a base 64 encoded pickled RDKit Mol object.
+    """
+    mol = Chem.MolFromSmiles(smiles)
+    if mol is None:
+        raise ToolError(f"Invalid or unparsable SMILES string: {smiles}")
+    encoded_mol = encode_mol(mol)
+    return encoded_mol
+
+
+@rdkit_tool(description="Converts a pickled RDKit mol object to a SMILES string.")
+def mol_to_smiles(pmol: PickledMol) -> Smiles:
+    """
+    Converts a pickled RDKit mol object to a SMILES string.
+    """
+    mol = decode_mol(pmol)
+    if mol is None:
+        raise ToolError(f"Failed to decode the pickled RDKit Mol object.")
+    smiles = Chem.MolToSmiles(mol)
+    return smiles
 
 
 @rdkit_tool(enabled=False)
@@ -64,14 +89,28 @@ def sdf_to_smiles(sdf_path: Union[str, Path]) -> Smiles:
     return smiles
 
 
-def get_base_tools():
+@rdkit_tool(description="Writes a pickled RDKit Mol object to an SDF file and returns the file path.")
+def mol_to_sdf(pmol: PickledMol, filename=None) -> Path:
     """
-    Get all base tools defined in this module.
+    Writes a pickled RDKit Mol object to an SDF file.
 
+    Args:
+        pmol: The pickled and base64-encoded RDKit Mol object.
     Returns:
-        A list of tool functions.
+        The path to the written SDF file.
     """
-    return [
-        smiles_to_sdf,
-        sdf_to_smiles,
-    ]
+    mol = decode_mol(pmol)
+    if mol is None:
+        raise ToolError("Failed to decode the pickled RDKit Mol object.")
+
+    sdf_string = Chem.MolToMolBlock(mol)
+
+    if filename is None:
+        filename = f"{Chem.MolToSmiles(mol)}.sdf"
+    if not filename.endswith('.sdf'):
+        filename += '.sdf'
+    settings = ToolSettings()
+    output_path = Path(os.path.join(settings.FILE_DIR, filename))
+    with open(output_path, "w") as f:
+        f.write(sdf_string)
+    return output_path
