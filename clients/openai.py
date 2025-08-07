@@ -64,6 +64,7 @@ async def main(prompt: str = None, model: str = "4o-mini"):
             with trace(workflow_name=prompt, trace_id=trace_id):
                 print(f"View trace: {OPENAI_TRACE_URL.format(trace_id)}\n")
                 retry_attempts = 5
+                result = None
                 for i in range(retry_attempts):
                     try:
                         result: Runner = await Runner.run(starting_agent=agent, input=full_prompt)
@@ -72,9 +73,11 @@ async def main(prompt: str = None, model: str = "4o-mini"):
                         wait = 2 ** (i + 5)
                         logger.error(f"Rate limit hit. Retrying in {wait} seconds...")
                         time.sleep(wait)
-                print(f"\n{result.final_output}\n")
-                # Add assistant's response to history
-                conversation_history.append({"role": "assistant", "content": result.final_output})
+
+                if result:
+                    print(f"\n{result.final_output}\n")
+                    # Add assistant's response to history
+                    conversation_history.append({"role": "assistant", "content": result.final_output})
                 prompt = ""
 
 if __name__ == "__main__":

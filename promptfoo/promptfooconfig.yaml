@@ -30,6 +30,11 @@ providers:
   #   label: 'o3-mini'
   #   config:
   #     model: 'o3-mini'
+  # - id: 'file://python_provider.py'
+  #   label: 'o3-mini No Tools'
+  #   config:
+  #     model: 'o3-mini'
+  #     use_mcp: false
 
 tests:
   - vars:
@@ -78,3 +83,16 @@ tests:
     assert:
       - type: llm-rubric
         value: "The final output states that CC(OC1C(C(O)=O)=CC(C)=CC=1)=O is the most similar to the reference"
+  - vars:
+      prompt: "Render an image of this SMILES, and highlight atom 1: CC(=O)NC1=CC=CC=C1"
+    description: "Highlight atom 1"
+    assert:
+      - type: llm-rubric
+        value: "The final output should render an image with atom 1 highlighted in the molecule CC(=O)NC1=CC=CC=C1."
+
+  - vars:
+      prompt: "Highlight the amide substructure in this compound: CC(=O)NC1=CC=CC=C1"
+    description: "Highlight amide substructure"
+    assert:
+      - type: llm-rubric
+        value: "The final output should render an image with the amide substructure highlighted in the molecule CC(=O)NC1=CC=CC=C1."

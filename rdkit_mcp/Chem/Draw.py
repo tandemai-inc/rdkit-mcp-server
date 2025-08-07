@@ -1,10 +1,11 @@
 import logging
 import os
+from datetime import datetime
 from mcp.server.fastmcp.exceptions import ToolError
 from pathlib import Path
 from rdkit import Chem
 from rdkit.Chem import Draw
-from typing import List
+from typing import List, Annotated
 
 from rdkit_mcp.utils import decode_mol
 
@@ -12,7 +13,6 @@ from ..decorators import rdkit_tool
 from rdkit_mcp.settings import ToolSettings
 from ..types import PickledMol, Smiles
 
-from rdkit.Chem.Draw import *
 
 logger = logging.getLogger(__name__)
 
@@ -36,13 +36,13 @@ def MolToFile(pmol: PickledMol, filename: str, width: int = 300, height: int = 3
 @rdkit_tool(description=Draw.MolsMatrixToGridImage.__doc__)
 def MolsMatrixToGridImage(
     molsMatrix: List[List[Smiles]],
-    subImgSize: tuple = (200, 200),
+    subImgSize: Annotated[list[int], "2 dimensional image size for each sub-image in matrix"] = [200, 200],
     legendsMatrix: List[List[str]] = None,
     highlightAtomListsMatrix: List[List[int]] = None,
     highlightBondListsMatrix: List[List[int]] = None,
     useSVG: bool = False,
     returnPNG: bool = False,
-    filename: str = None,
+    filename: Annotated[str, "output filename"] = None,
 ) -> Path:
     if filename is None:
         raise ToolError("File path must be specified.")
@@ -74,3 +74,47 @@ def MolsMatrixToGridImage(
     file_path = os.path.join(settings.FILE_DIR, filename)
     img.save(file_path)
     return Path(file_path)
+
+
+@rdkit_tool(description=Draw.MolToImage.__doc__)
+def MolToImage(
+    pmol: PickledMol,
+    size: list[int, int]=[300, 300],
+    kekulize: bool=True,
+    wedgeBonds: bool=True,
+    fitImage: bool=False,
+    # options=None,
+    filename: Annotated[str, "output filename"] = None,
+    highlightAtoms: Annotated[list[int], "List of atom ids to highlight in image"] = None,
+    highlightBonds: Annotated[list[int], "List of bond ids to highlight in image"] = None,
+    highlightColor: Annotated[list[float], "Highlight RGB color"] = [1, 0, 0],
+    **kwargs
+) -> Path:
+    if highlightAtoms is None:
+        highlightAtoms = ()
+    if highlightBonds is None:
+        highlightBonds = ()
+    if highlightColor is None:
+        highlightColor = (1, 0, 0)
+
+    if filename is None:
+        filename = f"mol_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+    mol: Chem.Mol = decode_mol(pmol)
+    if mol is None:
+        raise ToolError(f"Invalid or unparsable SMILES string: {smiles}")
+
+    img = Draw.MolToImage(
+        mol,
+        size=size,
+        kekulize=kekulize,
+        wedgeBonds=wedgeBonds,
+        fitImage=fitImage,
+        # options=options,
+        highlightAtoms=highlightAtoms,
+        highlightBonds=highlightBonds,
+        highlightColor=highlightColor,
+        **kwargs
+    )
+    filepath = os.path.join(ToolSettings().FILE_DIR, filename)
+    img.save(filepath)
+    return Path(filepath)
