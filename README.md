@@ -16,8 +16,9 @@ RDKit MCP Server is an open-source MCP server that enables language models to in
   * [Start the Server](#start-the-server)
   * [CLI Client](#cli-client)
 * [Available Tools](#available-tools)
-* [Contributing](#contributing)
 * [Evaluating with Promptfoo](#evaluating-with-promptfoo)
+* [Contributing](#contributing)
+
 
 ## Installation
 
