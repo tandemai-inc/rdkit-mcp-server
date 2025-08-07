@@ -7,11 +7,11 @@ prompts:
   - "{{prompt}}"
 
 providers:
-  # - id: 'file://python_provider.py'
-  #   label: 'gpt-4o-mini No Tools'
-  #   config:
-  #     model: 'gpt-4o-mini'
-  #     use_mcp: false
+  - id: 'file://python_provider.py'
+    label: 'gpt-4o-mini No Tools'
+    config:
+      model: 'gpt-4o-mini'
+      use_mcp: false
 
   - id: 'file://python_provider.py'
     label: 'gpt-4o-mini'
