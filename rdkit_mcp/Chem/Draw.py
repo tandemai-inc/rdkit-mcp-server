@@ -1,5 +1,6 @@
 import logging
 import os
+from datetime import datetime
 from mcp.server.fastmcp.exceptions import ToolError
 from pathlib import Path
 from rdkit import Chem
@@ -12,7 +13,6 @@ from ..decorators import rdkit_tool
 from rdkit_mcp.settings import ToolSettings
 from ..types import PickledMol, Smiles
 
-from rdkit.Chem.Draw import *
 
 logger = logging.getLogger(__name__)
 
@@ -85,26 +85,20 @@ def MolToImage(
     fitImage: bool=False,
     # options=None,
     filename: Annotated[str, "output filename"] = None,
-    highlightAtoms: list[int] = None,
-    highlightBonds: list[int] = None,
+    highlightAtoms: Annotated[list[int], "List of atom ids to highlight in image"] = None,
+    highlightBonds: Annotated[list[int], "List of bond ids to highlight in image"] = None,
     highlightColor: Annotated[list[float], "Highlight RGB color"] = [1, 0, 0],
     **kwargs
 ) -> Path:
-    if isinstance(highlightAtoms, list):
-        highlightAtoms = tuple(highlightAtoms)
-    elif highlightAtoms is None:
+    if highlightAtoms is None:
         highlightAtoms = ()
-    if isinstance(highlightBonds, list):
-        highlightBonds = tuple(highlightBonds)
-    elif highlightBonds is None:
+    if highlightBonds is None:
         highlightBonds = ()
-    if isinstance(highlightColor, list):
-        highlightColor = tuple(highlightColor)
-    elif highlightColor is None:
+    if highlightColor is None:
         highlightColor = (1, 0, 0)
 
-    if filename is not None:
-        raise ToolError("The 'filename' was not set")
+    if filename is None:
+        filename = f"mol_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
     mol: Chem.Mol = decode_mol(pmol)
     if mol is None:
         raise ToolError(f"Invalid or unparsable SMILES string: {smiles}")
