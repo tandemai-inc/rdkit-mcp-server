@@ -16,7 +16,9 @@ RDKit MCP Server is an open-source MCP server that enables language models to in
   * [Start the Server](#start-the-server)
   * [CLI Client](#cli-client)
 * [Available Tools](#available-tools)
+* [Evaluating with Promptfoo](#evaluating-with-promptfoo)
 * [Contributing](#contributing)
+
 
 ## Installation
 
@@ -54,6 +56,41 @@ List all available RDKit tools exposed by the server:
 ```bash
 python list_tools.py [--settings settings.yaml]
 ```
+
+## Evaluating with Promptfoo
+
+We have provided examples configurations for using [Promptfoo](https://promptfoo.dev/) to evaluate the quality of RDKit tool outputs and agent responses against various models. The `eval` directory contains example configs and test cases.
+
+### Install Promptfoo
+
+First, install Promptfoo globally using npm:
+
+```bash
+npm install -g promptfoo
+```
+
+### Install RDKit mcp server
+```bash
+pip install .
+```
+
+### Run Evaluation
+
+To run an evaluation using the config in the `eval` directory:
+
+```bash
+cd eval
+promptfoo eval
+```
+
+This will execute the tests defined in `eval/promptfooconfig.yaml` and report the results. You can customize the config and add your own test cases as needed.
+
+The test results can be viewed using
+```bash
+promptfoo view
+```
+
+For more details, see the [Promptfoo documentation](https://promptfoo.dev/docs/).
 
 ## Contributing
 
