@@ -26,39 +26,86 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}:${{ env.PYTHONPATH }}
 
-      - name: Install Promptfoo
-        run: npm install -g promptfoo
+      - name: Install Promptfoo and jq
+        run: |
+          npm install -g promptfoo
+          sudo apt-get update -y
+          sudo apt-get install -y jq
+
 
       - name: Run Promptfoo evals
-        # working-directory: evals
         run: promptfoo eval --config evals/promptfooconfig.yaml --filter-providers "^gpt-4o-mini$"
         continue-on-error: true
         env:
           PYTHONPATH: ${{ github.workspace }}:${{ env.PYTHONPATH }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
-      - name: Get Promptfoo results
-        id: promptfoo-results
+      - name: Get latest eval id
+        id: latest_eval
+        working-directory: evals
+        shell: bash
         run: |
-          promptfoo show > results.txt
-          echo "RESULTS<<EOF" >> $GITHUB_ENV
-          cat results.txt >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          set -euo pipefail
+          # Get list and persist for debugging
+          LIST_JSON="$(promptfoo list evals)"
+          echo "${LIST_JSON}" > promptfoo-evals-list.json
+
+          # If the list is empty, bail out gracefully
+          if [ "$(echo "${LIST_JSON}" | jq 'length')" -eq 0 ]; then
+            echo "No evals found in promptfoo list output"
+            echo "id=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Take the most recent item (last element). Format is [["eval-...","..."], ...]
+          ID="$(echo "${LIST_JSON}" | jq -r '.[-1][0]')"
+          echo "Latest eval id: ${ID}"
+
+          echo "id=${ID}" >> $GITHUB_OUTPUT
+
+      - name: Export latest eval to JSON
+        id: export_eval
+        if: ${{ steps.latest_eval.outputs.id != '' }}
+        working-directory: evals
+        shell: bash
+        run: |
+          set -euo pipefail
+          ID="${{ steps.latest_eval.outputs.id }}"
+          # Export JSON to file (capture stdout)
+          promptfoo export "${ID}" > promptfoo-results.json
+
+          # Pull stats
+          PASSES="$(jq -r '.stats.successes' promptfoo-results.json)"
+          FAILS="$(jq -r '.stats.failures' promptfoo-results.json)"
+
+          echo "passes=${PASSES}" >> $GITHUB_OUTPUT
+          echo "fails=${FAILS}" >> $GITHUB_OUTPUT
+
+          # Compose comment body
+          {
+            echo "body<<'EOF'"
+            echo "### 📊 Promptfoo Evals"
+            echo ""
+            echo "- **Eval ID:** \`${ID}\`"
+            echo "- ✅ **Successes:** ${PASSES}"
+            echo "- ❌ **Failures:** ${FAILS}"
+            echo ""
+            echo "_Artifacts:_ \`promptfoo-results.json\`, \`promptfoo-evals-list.json\`"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
 
       - name: Comment results on PR
         uses: actions/github-script@v7
         if: github.event_name == 'pull_request'
         with:
           script: |
-            const results = process.env.RESULTS;
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
+            const body = `${{ toJSON(steps.export_eval.outputs.body) }}`;
+            await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `Promptfoo Results:\n\n${results}`
+              issue_number: context.issue.number,
+              body
             });
-      - name: Show server logs
-        run: cat nohup.out || echo "No logs found"
 
 permissions:
   pull-requests: write
