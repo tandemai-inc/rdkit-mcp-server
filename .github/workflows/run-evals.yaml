@@ -59,3 +59,6 @@ jobs:
             });
       - name: Show server logs
         run: cat nohup.out || echo "No logs found"
+
+permissions:
+  pull-requests: write
