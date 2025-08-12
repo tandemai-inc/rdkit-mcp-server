@@ -19,7 +19,7 @@ jobs:
       - name: Install application
         run: pip install .
         env:
-          PYTHONPATH: ${{ github.workspace }}
+          PYTHONPATH: ${{ github.workspace }}:${{ env.PYTHONPATH }}
 
     #   - name: Set up Node.js
     #     uses: actions/setup-node@v4
@@ -37,4 +37,4 @@ jobs:
         # working-directory: evals
         run: promptfoo eval --config evals/promptfooconfig.yaml
         env:
-          PYTHONPATH: ${{ github.workspace }}
+          PYTHONPATH: ${{ github.workspace }}:${{ env.PYTHONPATH }}
