@@ -32,5 +32,5 @@ jobs:
         run: npm install -g promptfoo
 
       - name: Run Promptfoo evals
-        working-directory: evals
-        run: promptfoo eval --config promptfooconfig.yaml
+        # working-directory: evals
+        run: promptfoo eval --config evals/promptfooconfig.yaml
