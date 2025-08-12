@@ -34,3 +34,5 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}:${{ env.PYTHONPATH }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      - name: Show server logs
+        run: cat nohup.out || echo "No logs found"
