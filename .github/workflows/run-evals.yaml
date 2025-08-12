@@ -1,0 +1,111 @@
+name: Run Promptfoo Evals
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened] # Run on PR open/update/reopen
+  workflow_dispatch:
+jobs:
+  run-evals:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install application
+        run: pip install .
+        env:
+          PYTHONPATH: ${{ github.workspace }}:${{ env.PYTHONPATH }}
+
+      - name: Start application in background
+        run: nohup python run_server.py > nohup.txt 2>&1 &
+        env:
+          PYTHONPATH: ${{ github.workspace }}:${{ env.PYTHONPATH }}
+
+      - name: Install Promptfoo and jq
+        run: |
+          npm install -g promptfoo
+          sudo apt-get update -y
+          sudo apt-get install -y jq
+
+
+      - name: Run Promptfoo evals
+        run: promptfoo eval --config evals/promptfooconfig.yaml --filter-providers "^gpt-4o-mini$"
+        continue-on-error: true
+        env:
+          PYTHONPATH: ${{ github.workspace }}:${{ env.PYTHONPATH }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+      - name: Get latest eval id
+        id: latest_eval
+        working-directory: evals
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Get list and persist for debugging
+          LIST_JSON="$(promptfoo list evals)"
+          echo "${LIST_JSON}" > promptfoo-evals-list.json
+
+          # If the list is empty, bail out gracefully
+          if [ "$(echo "${LIST_JSON}" | jq 'length')" -eq 0 ]; then
+            echo "No evals found in promptfoo list output"
+            echo "id=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Take the most recent item (last element). Format is [["eval-...","..."], ...]
+          ID="$(echo "${LIST_JSON}" | jq -r '.[-1][0]')"
+          echo "Latest eval id: ${ID}"
+
+          echo "id=${ID}" >> $GITHUB_OUTPUT
+
+      - name: Export latest eval to JSON
+        id: export_eval
+        if: ${{ steps.latest_eval.outputs.id != '' }}
+        working-directory: evals
+        shell: bash
+        run: |
+          set -euo pipefail
+          ID="${{ steps.latest_eval.outputs.id }}"
+          # Export JSON to file (capture stdout)
+          promptfoo export "${ID}" > promptfoo-results.json
+
+          # Pull stats
+          PASSES="$(jq -r '.stats.successes' promptfoo-results.json)"
+          FAILS="$(jq -r '.stats.failures' promptfoo-results.json)"
+
+          echo "passes=${PASSES}" >> $GITHUB_OUTPUT
+          echo "fails=${FAILS}" >> $GITHUB_OUTPUT
+
+          # Compose comment body
+          {
+            echo "body<<'EOF'"
+            echo "### 📊 Promptfoo Evals"
+            echo ""
+            echo "- **Eval ID:** \`${ID}\`"
+            echo "- ✅ **Successes:** ${PASSES}"
+            echo "- ❌ **Failures:** ${FAILS}"
+            echo ""
+            echo "_Artifacts:_ \`promptfoo-results.json\`, \`promptfoo-evals-list.json\`"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+      - name: Comment results on PR
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            const body = `${{ toJSON(steps.export_eval.outputs.body) }}`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body
+            });
+
+permissions:
+  pull-requests: write
