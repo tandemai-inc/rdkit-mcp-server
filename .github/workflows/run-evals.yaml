@@ -21,6 +21,11 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}:${{ env.PYTHONPATH }}
 
+      - name: Start application in background
+        run: nohup python run_server.py &
+        env:
+          PYTHONPATH: ${{ github.workspace }}:${{ env.PYTHONPATH }}
+
     #   - name: Set up Node.js
     #     uses: actions/setup-node@v4
     #     with:
