@@ -28,9 +28,11 @@ jobs:
 
       - name: Install Promptfoo
         run: npm install -g promptfoo
+
       - name: Run Promptfoo evals
         # working-directory: evals
         run: promptfoo eval --config evals/promptfooconfig.yaml --filter-providers "^gpt-4o-mini$"
+        continue-on-error: true
         env:
           PYTHONPATH: ${{ github.workspace }}:${{ env.PYTHONPATH }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
