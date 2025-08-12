@@ -1,0 +1,28 @@
+name: Run Promptfoo Evals
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened] # Run on PR open/update/reopen
+  workflow_dispatch:
+jobs:
+  run-evals:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # or your project's Node.js version
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Promptfoo
+        run: npm install -g promptfoo
+
+      - name: Run Promptfoo evals
+        working-directory: evals
+        run: promptfoo eval --config promptfooconfig.yaml
