@@ -1,7 +1,7 @@
 import argparse
 import asyncio
 
-from clients.openai import main as openai_client_main
+from rdkit_mcp_clients.openai import main as openai_client_main
 
 
 parser = argparse.ArgumentParser(description="Run the OpenAI client with a prompt.")

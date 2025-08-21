@@ -37,4 +37,4 @@ Repository = "https://github.com/tandem-ai-inc/rdkit-mcp-server"
 rdkit-mcp-server = "rdkit_mcp_server.__main__:main" # If we want a console script
 
 [tool.hatch.build.targets.wheel]
-packages = ["rdkit_mcp", "clients"]
+packages = ["rdkit_mcp", "rdkit_mcp_clients"]
