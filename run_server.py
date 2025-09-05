@@ -1,7 +1,11 @@
 import asyncio
 import argparse
 import logging
+import os
 import yaml
+
+from fastapi import Request, Response
+from fastapi.responses import FileResponse, JSONResponse
 from mcp.server.fastmcp import FastMCP
 
 from rdkit_mcp.register_tools import register_tools
@@ -21,6 +25,28 @@ parser.add_argument("--settings", type=str, help="Path to YAML settings file", d
 parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose (debug) logging")
 
 mcp = FastMCP("RDKit-MCP Server")
+
+
+@mcp.custom_route("/files", methods=["GET"])
+async def list_files(request: Request):
+    settings = ToolSettings()
+    file_dir = str(settings.FILE_DIR)
+    try:
+        files = os.listdir(file_dir)
+        return JSONResponse({"files": files})
+    except Exception as e:
+        return JSONResponse({"error": str(e)})
+
+
+@mcp.custom_route("/files/{filename}", methods=["GET"])
+async def get_file(request: Request):
+    filename = request.path_params.get("filename")
+    settings = ToolSettings()
+    file_dir = str(settings.FILE_DIR)
+    file_path = os.path.join(file_dir, filename)
+    if not os.path.isfile(file_path):
+        return JSONResponse(status_code=404, content={"error": "File not found"})
+    return FileResponse(path=file_path, filename=filename)    
 
 
 async def main():
