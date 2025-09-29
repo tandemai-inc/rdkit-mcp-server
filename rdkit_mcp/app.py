@@ -31,5 +31,4 @@ async def get_file(request: Request):
     file_path = os.path.join(file_dir, filename)
     if not os.path.isfile(file_path):
         return JSONResponse(status_code=404, content={"error": "File not found"})
-    return FileResponse(path=file_path, filename=filename)    
-
+    return FileResponse(path=file_path, filename=filename)

@@ -79,10 +79,10 @@ def MolsMatrixToGridImage(
 @rdkit_tool(description=Draw.MolToImage.__doc__)
 def MolToImage(
     pmol: PickledMol,
-    size: list[int, int]=[300, 300],
-    kekulize: bool=True,
-    wedgeBonds: bool=True,
-    fitImage: bool=False,
+    size: list[int, int] = [300, 300],
+    kekulize: bool = True,
+    wedgeBonds: bool = True,
+    fitImage: bool = False,
     # options=None,
     filename: Annotated[str, "output filename"] = None,
     highlightAtoms: Annotated[list[int], "List of atom ids to highlight in image"] = None,

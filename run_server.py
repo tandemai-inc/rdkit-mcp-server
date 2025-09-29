@@ -21,6 +21,7 @@ parser.add_argument("--host", type=str, help="Host to run the server on", defaul
 parser.add_argument("--settings", type=str, help="Path to YAML settings file", default=None)
 parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose (debug) logging")
 
+
 async def main():
     """Main function to run the MCP server."""
     args, _ = parser.parse_known_args()
