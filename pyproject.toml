@@ -20,6 +20,7 @@ classifiers = [
     "Framework :: AsyncIO",
 ]
 dependencies = [
+    "fastapi==0.116.1",
     "mcp==1.11.0", # The MCP SDK
     "rdkit==2025.3.1",              # RDKit library (installation might need specific handling)
     "Pillow==11.2.1",             # For image generation with RDKit
