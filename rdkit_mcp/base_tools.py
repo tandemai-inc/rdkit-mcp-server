@@ -114,3 +114,54 @@ def mol_to_sdf(pmol: PickledMol, filename=None) -> Path:
     with open(output_path, "w") as f:
         f.write(sdf_string)
     return output_path
+
+
+@rdkit_tool(description="Converts a PDB file to a pickled RDKit Mol object.")
+def pdb_to_mol(pdb_path: Union[str, Path]) -> PickledMol:
+    """
+    Converts a PDB file to a pickled RDKit Mol object.
+
+    Args:
+        pdb_path: The path to the PDB file.
+    Returns:
+        A base64 encoded pickled RDKit Mol object.
+    """
+    if isinstance(pdb_path, str):
+        pdb_path = Path(pdb_path)
+
+    if not pdb_path.exists():
+        raise ToolError(f"PDB file does not exist: {pdb_path}")
+
+    mol = Chem.MolFromPDBFile(str(pdb_path))
+    if mol is None:
+        raise ToolError(f"Failed to read molecule from PDB file: {pdb_path}")
+
+    encoded_mol = encode_mol(mol)
+    return encoded_mol
+
+
+@rdkit_tool(description="Converts a pickled RDKit Mol object to a PDB file and returns the file path.")
+def mol_to_pdb(pmol: PickledMol, filename=None) -> Path:
+    """
+    Converts a pickled RDKit Mol object to a PDB file.
+
+    Args:
+        pmol: The pickled and base64-encoded RDKit Mol object.
+    Returns:
+        The path to the written PDB file.
+    """
+    mol = decode_mol(pmol)
+    if mol is None:
+        raise ToolError("Failed to decode the pickled RDKit Mol object.")
+
+    pdb_string = Chem.MolToPDBBlock(mol)
+
+    if filename is None:
+        filename = f"{Chem.MolToSmiles(mol)}.pdb"
+    if not filename.endswith('.pdb'):
+        filename += '.pdb'
+    settings = ToolSettings()
+    output_path = Path(os.path.join(settings.FILE_DIR, filename))
+    with open(output_path, "w") as f:
+        f.write(pdb_string)
+    return output_path
