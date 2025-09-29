@@ -7,8 +7,8 @@ from rdkit import Chem
 
 from rdkit_mcp.settings import ToolSettings
 from .decorators import rdkit_tool
-from .types import PickledMol, Smiles
-from .utils import encode_mol, decode_mol
+from .types import PickledMol, Smiles, EncodedFile
+from .utils import encode_mol, decode_mol, encode_file_contents, decode_file_contents
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ def mol_to_smiles(pmol: PickledMol) -> Smiles:
 
 
 @rdkit_tool(enabled=False)
-def smiles_to_sdf(smiles: Smiles) -> Path:
+def smiles_to_sdf(smiles: Smiles) -> EncodedFile:
     """
     Converts a SMILES string to an SDF file.
 
@@ -53,14 +53,8 @@ def smiles_to_sdf(smiles: Smiles) -> Path:
         raise ToolError(f"Invalid or unparsable SMILES string: {smiles}")
 
     sdf_string = Chem.MolToMolBlock(mol)
-    # Write to SDF file
-    filename = f"{Chem.MolToSmiles(mol)}.sdf"
-    settings = ToolSettings()
 
-    output_path = Path(os.path.join(settings.FILE_DIR, filename))
-    with open(output_path, "w") as f:
-        f.write(sdf_string)
-    return output_path
+    return encode_file_contents(sdf_string)
 
 
 @rdkit_tool(enabled=False)
@@ -90,7 +84,7 @@ def sdf_to_smiles(sdf_path: Union[str, Path]) -> Smiles:
 
 
 @rdkit_tool(description="Writes a pickled RDKit Mol object to an SDF file and returns the file path.")
-def mol_to_sdf(pmol: PickledMol, filename=None) -> Path:
+def mol_to_sdf(pmol: PickledMol, filename=None) -> EncodedFile:
     """
     Writes a pickled RDKit Mol object to an SDF file.
 
@@ -109,11 +103,7 @@ def mol_to_sdf(pmol: PickledMol, filename=None) -> Path:
         filename = f"{Chem.MolToSmiles(mol)}.sdf"
     if not filename.endswith('.sdf'):
         filename += '.sdf'
-    settings = ToolSettings()
-    output_path = Path(os.path.join(settings.FILE_DIR, filename))
-    with open(output_path, "w") as f:
-        f.write(sdf_string)
-    return output_path
+    return encode_file_contents(sdf_string)
 
 
 @rdkit_tool(description="Converts a PDB file to a pickled RDKit Mol object.")
@@ -141,7 +131,7 @@ def pdb_to_mol(pdb_path: Union[str, Path]) -> PickledMol:
 
 
 @rdkit_tool(description="Converts a pickled RDKit Mol object to a PDB file and returns the file path.")
-def mol_to_pdb(pmol: PickledMol, filename=None) -> Path:
+def mol_to_pdb(pmol: PickledMol, filename=None) -> EncodedFile:
     """
     Converts a pickled RDKit Mol object to a PDB file.
 
@@ -160,8 +150,4 @@ def mol_to_pdb(pmol: PickledMol, filename=None) -> Path:
         filename = f"{Chem.MolToSmiles(mol)}.pdb"
     if not filename.endswith('.pdb'):
         filename += '.pdb'
-    settings = ToolSettings()
-    output_path = Path(os.path.join(settings.FILE_DIR, filename))
-    with open(output_path, "w") as f:
-        f.write(pdb_string)
-    return output_path
+    return encode_file_contents(pdb_string)

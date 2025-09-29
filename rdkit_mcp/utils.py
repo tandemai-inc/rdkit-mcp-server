@@ -4,7 +4,7 @@ import pickle
 from rdkit import Chem
 from typing import Callable
 
-from .types import PickledMol
+from .types import PickledMol, EncodedFile
 
 
 logger = logging.getLogger(__name__)
@@ -66,3 +66,34 @@ def encode_mol(mol: Chem.Mol) -> PickledMol:
     pkl_mol_data = pickle.dumps(mol)
     encoded_mol = base64.b64encode(pkl_mol_data).decode('utf-8')
     return encoded_mol
+
+
+def encode_file_contents(file_path: str) -> EncodedFile:
+    """
+    Encode a file into a base64 encoded string.
+
+    Args:
+        file_path (str): The path to the file to encode.
+
+    Returns:
+        str: Base64 encoded string of the file contents.
+    """
+    with open(file_path, "rb") as f:
+        file_data = f.read()
+    encoded_file = base64.b64encode(file_data).decode('utf-8')
+    return encoded_file
+
+
+def decode_file_contents(b64_file: EncodedFile) -> str:
+    """
+    Decode a base64 encoded file and write it to the specified output path.
+
+    Args:
+        b64_file (EncodedFile): The base64 encoded file contents.
+        output_path (str): The path to write the decoded file.
+
+    Returns:
+        str: Contents of the file as a string.
+    """
+    file_data: bytes = base64.b64decode(b64_file)
+    return file_data.decode('utf-8')
