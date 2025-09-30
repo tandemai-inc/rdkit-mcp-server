@@ -6,7 +6,7 @@ import time
 from agents import Runner, gen_trace_id, trace
 from agents.mcp import MCPServerSse
 from typing import Dict, Any, Optional, Union, List
-from clients.openai import MCP_URL, MCP_NAME, create_agent
+from rdkit_mcp_clients.openai import MCP_URL, MCP_NAME, create_agent
 
 
 logger = logging.getLogger(__name__)
