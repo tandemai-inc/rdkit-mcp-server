@@ -10,8 +10,9 @@ from typing import List, Annotated
 from rdkit_mcp.utils import decode_mol
 
 from ..decorators import rdkit_tool
+from ..types import PickledMol, Smiles, EncodedFile
+from ..utils import encode_file_contents
 from rdkit_mcp.settings import ToolSettings
-from ..types import PickledMol, Smiles
 
 
 logger = logging.getLogger(__name__)
@@ -43,7 +44,7 @@ def MolsMatrixToGridImage(
     useSVG: bool = False,
     returnPNG: bool = False,
     filename: Annotated[str, "output filename"] = None,
-) -> Path:
+) -> EncodedFile:
     if filename is None:
         raise ToolError("File path must be specified.")
 
@@ -73,7 +74,7 @@ def MolsMatrixToGridImage(
     settings = ToolSettings()
     file_path = os.path.join(settings.FILE_DIR, filename)
     img.save(file_path)
-    return Path(file_path)
+    return encode_file_contents(file_path)
 
 
 @rdkit_tool(description=Draw.MolToImage.__doc__)
@@ -89,7 +90,7 @@ def MolToImage(
     highlightBonds: Annotated[list[int], "List of bond ids to highlight in image"] = None,
     highlightColor: Annotated[list[float], "Highlight RGB color"] = [1, 0, 0],
     **kwargs
-) -> Path:
+) -> EncodedFile:
     if highlightAtoms is None:
         highlightAtoms = ()
     if highlightBonds is None:
@@ -117,4 +118,4 @@ def MolToImage(
     )
     filepath = os.path.join(ToolSettings().FILE_DIR, filename)
     img.save(filepath)
-    return Path(filepath)
+    return encode_file_contents(filepath)
