@@ -1,5 +1,7 @@
+from io import BytesIO
 import logging
 import os
+
 from datetime import datetime
 from mcp.server.fastmcp.exceptions import ToolError
 from pathlib import Path
@@ -7,19 +9,18 @@ from rdkit import Chem
 from rdkit.Chem import Draw
 from typing import List, Annotated
 
-from rdkit_mcp.utils import decode_mol
-
 from ..decorators import rdkit_tool
 from ..types import PickledMol, Smiles, EncodedFile
 from ..utils import encode_file_contents
 from rdkit_mcp.settings import ToolSettings
+from rdkit_mcp.utils import decode_mol
 
 
 logger = logging.getLogger(__name__)
 
 
 @rdkit_tool(description=Draw.MolToFile.__doc__)
-def MolToFile(pmol: PickledMol, filename: str, width: int = 300, height: int = 300) -> Path:
+def MolToFile(pmol: PickledMol, filename: str, width: int = 300, height: int = 300) -> EncodedFile:
     mol: Chem.Mol = decode_mol(pmol)
     if mol is None:
         raise ToolError(f"Invalid or unparsable SMILES string: {smiles}")
@@ -30,8 +31,9 @@ def MolToFile(pmol: PickledMol, filename: str, width: int = 300, height: int = 3
     settings = ToolSettings()
     output_path = os.path.join(settings.FILE_DIR, filename)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    Draw.MolToFile(mol, output_path, size=(width, height))
-    return Path(output_path)
+    buffer = BytesIO()
+    Draw.MolToFile(mol, buffer, size=(width, height))
+    return encode_file_contents(buffer, filename=filename)
 
 
 @rdkit_tool(description=Draw.MolsMatrixToGridImage.__doc__)
@@ -70,11 +72,9 @@ def MolsMatrixToGridImage(
         useSVG=useSVG,
         returnPNG=returnPNG)
 
-    # Save the image to the specified file path
-    settings = ToolSettings()
-    file_path = os.path.join(settings.FILE_DIR, filename)
-    img.save(file_path)
-    return encode_file_contents(file_path)
+    buffer = BytesIO()
+    img.save(buffer, format="PNG")
+    return encode_file_contents(buffer, filename=filename)
 
 
 @rdkit_tool(description=Draw.MolToImage.__doc__)
@@ -97,6 +97,12 @@ def MolToImage(
         highlightBonds = ()
     if highlightColor is None:
         highlightColor = (1, 0, 0)
+    if isinstance(highlightAtoms, list):
+        highlightAtoms = tuple(highlightAtoms)
+    if isinstance(highlightBonds, list):
+        highlightBonds = tuple(highlightBonds)
+    if isinstance(highlightColor, list):
+        highlightColor = tuple(highlightColor)
 
     if filename is None:
         filename = f"mol_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
@@ -116,6 +122,6 @@ def MolToImage(
         highlightColor=highlightColor,
         **kwargs
     )
-    filepath = os.path.join(ToolSettings().FILE_DIR, filename)
-    img.save(filepath)
-    return encode_file_contents(filepath)
+    buffer = BytesIO()
+    img.save(buffer, format="PNG")
+    return encode_file_contents(buffer, filename=filename)
