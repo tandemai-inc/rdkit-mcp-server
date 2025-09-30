@@ -7,6 +7,9 @@ from agents import Agent, Runner, gen_trace_id, trace
 from agents.mcp import MCPServer, MCPServerSse
 from agents.model_settings import ModelSettings
 
+from agents.tool import function_tool
+
+
 logger = logging.getLogger(__name__)
 
 MCP_URL = "http://localhost:8000/sse"
@@ -18,7 +21,21 @@ AGENT_INSTRUCTIONS = (
     "You have access to a set of tools that can be used to perform various cheminformatics tasks. "
     "Use the tools to answer the user's questions. All numeric values in response must be based on the output of the tools. "
     "The final output will be read in a terminal; do not use Markdown or any other formatting. "
+    "If the final output is a file, use the WriteFileTool to write the file and return the file path in the final output. "
 )
+
+
+@function_tool(description_override="Reads the contents of a file at the given absolute file path.")
+def read_file(filepath: str) -> str:
+    with open(filepath, "r") as f:
+        return f.read()
+
+
+@function_tool(description_override="Writes string content to the given absolute file path.")
+def write_file(filepath: str, content: str) -> str:
+    with open(filepath, "w") as f:
+        f.write(content)
+    return f"Successfully wrote to {filepath}"
 
 
 def create_agent(mcp_server: MCPServer = None, model: str = None) -> Agent:
@@ -34,6 +51,8 @@ def create_agent(mcp_server: MCPServer = None, model: str = None) -> Agent:
         model_settings=ModelSettings(tool_choice="auto"),
         model=model
     )
+    agent.tools.append(read_file)
+    agent.tools.append(write_file)
     return agent
 
 
