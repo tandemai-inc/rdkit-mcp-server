@@ -1,14 +1,12 @@
 import logging
-import os
 from typing import Union
 from mcp.server.fastmcp.exceptions import ToolError
 from pathlib import Path
 from rdkit import Chem
 
-from rdkit_mcp.settings import ToolSettings
 from .decorators import rdkit_tool
 from .types import PickledMol, Smiles, EncodedFile
-from .utils import encode_mol, decode_mol, encode_file_contents, decode_file_contents
+from .utils import encode_mol, decode_mol, encode_file_contents
 
 logger = logging.getLogger(__name__)
 
@@ -37,53 +35,7 @@ def mol_to_smiles(pmol: PickledMol) -> Smiles:
     return smiles
 
 
-@rdkit_tool(enabled=False)
-def smiles_to_sdf(smiles: Smiles) -> EncodedFile:
-    """
-    Converts a SMILES string to an SDF file.
-
-    Args:
-        smiles: The SMILES representation of the molecule.
-    Returns:
-        An SDF string representation of the molecule.
-    """
-    logger.info(f"Converting SMILES to SDF: {smiles[:30]}...")
-    mol = Chem.MolFromSmiles(smiles)
-    if mol is None:
-        raise ToolError(f"Invalid or unparsable SMILES string: {smiles}")
-
-    sdf_string = Chem.MolToMolBlock(mol)
-
-    return encode_file_contents(sdf_string)
-
-
-@rdkit_tool(enabled=False)
-def sdf_to_smiles(sdf_path: Union[str, Path]) -> Smiles:
-    """
-    Converts an SDF file to a SMILES string.
-
-    Args:
-        sdf_path: The path to the SDF file.
-    Returns:
-        The SMILES representation of the molecule.
-    """
-    logger.info(f"Converting SDF to SMILES: {sdf_path}")
-    if isinstance(sdf_path, str):
-        sdf_path = Path(sdf_path)
-
-    if not sdf_path.exists():
-        raise ToolError(f"SDF file does not exist: {sdf_path}")
-
-    suppl = Chem.SDMolSupplier(str(sdf_path))
-    mol = next((m for m in suppl if m is not None), None)
-    if mol is None:
-        raise ToolError(f"Failed to read any valid molecule from SDF file: {sdf_path}")
-
-    smiles = Chem.MolToSmiles(mol)
-    return smiles
-
-
-@rdkit_tool(description="Writes a pickled RDKit Mol object to an SDF file and returns the file path.")
+@rdkit_tool()
 def mol_to_sdf(pmol: PickledMol, filename=None) -> EncodedFile:
     """
     Writes a pickled RDKit Mol object to an SDF file.
@@ -91,7 +43,7 @@ def mol_to_sdf(pmol: PickledMol, filename=None) -> EncodedFile:
     Args:
         pmol: The pickled and base64-encoded RDKit Mol object.
     Returns:
-        The path to the written SDF file.
+        A base64 encoded contents of an SDF file.
     """
     mol = decode_mol(pmol)
     if mol is None:
@@ -106,7 +58,7 @@ def mol_to_sdf(pmol: PickledMol, filename=None) -> EncodedFile:
     return encode_file_contents(sdf_string)
 
 
-@rdkit_tool(description="Converts a PDB file to a pickled RDKit Mol object.")
+@rdkit_tool()
 def pdb_to_mol(pdb_path: Union[str, Path]) -> PickledMol:
     """
     Converts a PDB file to a pickled RDKit Mol object.
@@ -130,7 +82,7 @@ def pdb_to_mol(pdb_path: Union[str, Path]) -> PickledMol:
     return encoded_mol
 
 
-@rdkit_tool(description="Converts a pickled RDKit Mol object to a PDB file and returns the file path.")
+@rdkit_tool()
 def mol_to_pdb(pmol: PickledMol, filename=None) -> EncodedFile:
     """
     Converts a pickled RDKit Mol object to a PDB file.
@@ -138,7 +90,7 @@ def mol_to_pdb(pmol: PickledMol, filename=None) -> EncodedFile:
     Args:
         pmol: The pickled and base64-encoded RDKit Mol object.
     Returns:
-        The path to the written PDB file.
+       A base64 encoded contents of an PDB file.
     """
     mol = decode_mol(pmol)
     if mol is None:
@@ -153,7 +105,7 @@ def mol_to_pdb(pmol: PickledMol, filename=None) -> EncodedFile:
     return encode_file_contents(pdb_string)
 
 
-@rdkit_tool(description="Converts an SDF file to a pickled RDKit Mol object.")
+@rdkit_tool()
 def sdf_to_mol(sdf_path: Union[str, Path]) -> PickledMol:
     """
     Converts an SDF file to a pickled RDKit Mol object.
@@ -176,26 +128,3 @@ def sdf_to_mol(sdf_path: Union[str, Path]) -> PickledMol:
 
     encoded_mol = encode_mol(mol)
     return encoded_mol
-
-
-@rdkit_tool(description="Converts a pickled RDKit Mol object to an SDF file and returns the file path.")
-def mol_to_sdf(pmol: PickledMol, filename=None) -> EncodedFile:
-    """
-    Converts a pickled RDKit Mol object to an SDF file.
-
-    Args:
-        pmol: The pickled and base64-encoded RDKit Mol object.
-    Returns:
-        The path to the written SDF file.
-    """
-    mol = decode_mol(pmol)
-    if mol is None:
-        raise ToolError("Failed to decode the pickled RDKit Mol object.")
-
-    sdf_string = Chem.MolToMolBlock(mol)
-
-    if filename is None:
-        filename = f"{Chem.MolToSmiles(mol)}.sdf"
-    if not filename.endswith('.sdf'):
-        filename += '.sdf'
-    return encode_file_contents(sdf_string)
