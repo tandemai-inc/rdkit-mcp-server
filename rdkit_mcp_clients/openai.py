@@ -1,5 +1,7 @@
 import asyncio
 import logging
+import os
+from typing import Annotated
 import openai
 import time
 
@@ -8,7 +10,9 @@ from agents.mcp import MCPServer, MCPServerSse
 from agents.model_settings import ModelSettings
 
 from agents.tool import function_tool
+import base64
 
+from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 
@@ -21,8 +25,13 @@ AGENT_INSTRUCTIONS = (
     "You have access to a set of tools that can be used to perform various cheminformatics tasks. "
     "Use the tools to answer the user's questions. All numeric values in response must be based on the output of the tools. "
     "The final output will be read in a terminal; do not use Markdown or any other formatting. "
-    "If the final output is a file, use the WriteFileTool to write the file and return the file path in the final output. "
+    "If the final output is a file, use the write_file tool to write the file and return the file path in the final output. "
 )
+
+
+class EncodedFileModel(BaseModel):
+    filename: Annotated[str, Field(description="Name of the file.")]
+    content: Annotated[str, Field(description="Base 64 encoded bytes containing contents of the file.")]
 
 
 @function_tool(description_override="Reads the contents of a file at the given absolute file path.")
@@ -31,11 +40,23 @@ def read_file(filepath: str) -> str:
         return f.read()
 
 
-@function_tool(description_override="Writes string content to the given absolute file path.")
-def write_file(filepath: str, content: str) -> str:
-    with open(filepath, "w") as f:
-        f.write(content)
-    return f"Successfully wrote to {filepath}"
+@function_tool(
+    description_override=(
+        "Writes a base64-encoded file to the specified directory. "
+        "Provide the target directory and an EncodedFileModel containing the filename and base64-encoded content. "
+        "Returns the absolute path to the written file."
+    )
+)
+def write_file(directory: str, encoded_file: EncodedFileModel) -> str:
+    try:
+        decoded_content = base64.b64decode(encoded_file.content)
+    except Exception as e:
+        raise ValueError(f"Failed to decode file content: {e}")
+
+    filepath = os.path.join(directory, encoded_file.filename)
+    with open(filepath, "wb") as f:
+        f.write(decoded_content)
+    return f"Successfully wrote file to {filepath}"
 
 
 def create_agent(mcp_server: MCPServer = None, model: str = None) -> Agent:

@@ -1,10 +1,9 @@
-from io import BytesIO
 import logging
 import os
 
 from datetime import datetime
+import tempfile
 from mcp.server.fastmcp.exceptions import ToolError
-from pathlib import Path
 from rdkit import Chem
 from rdkit.Chem import Draw
 from typing import List, Annotated
@@ -31,9 +30,10 @@ def MolToFile(pmol: PickledMol, filename: str, width: int = 300, height: int = 3
     settings = ToolSettings()
     output_path = os.path.join(settings.FILE_DIR, filename)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    buffer = BytesIO()
-    Draw.MolToFile(mol, buffer, size=(width, height))
-    return encode_file_contents(buffer, filename=filename)
+    
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
+        Draw.MolToFile(mol, tmp_file, size=(width, height))
+        return encode_file_contents(tmp_file.name)
 
 
 @rdkit_tool(description=Draw.MolsMatrixToGridImage.__doc__)
@@ -71,10 +71,9 @@ def MolsMatrixToGridImage(
         highlightBondListsMatrix=highlightBondListsMatrix,
         useSVG=useSVG,
         returnPNG=returnPNG)
-
-    buffer = BytesIO()
-    img.save(buffer, format="PNG")
-    return encode_file_contents(buffer, filename=filename)
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
+        img.save(tmp_file.name, format="PNG")
+        return encode_file_contents(tmp_file.name)
 
 
 @rdkit_tool(description=Draw.MolToImage.__doc__)
@@ -89,7 +88,7 @@ def MolToImage(
     highlightAtoms: Annotated[list[int], "List of atom ids to highlight in image"] = None,
     highlightBonds: Annotated[list[int], "List of bond ids to highlight in image"] = None,
     highlightColor: Annotated[list[float], "Highlight RGB color"] = [1, 0, 0],
-    **kwargs
+
 ) -> EncodedFile:
     if highlightAtoms is None:
         highlightAtoms = ()
@@ -120,8 +119,8 @@ def MolToImage(
         highlightAtoms=highlightAtoms,
         highlightBonds=highlightBonds,
         highlightColor=highlightColor,
-        **kwargs
+        # **kwargs
     )
-    buffer = BytesIO()
-    img.save(buffer, format="PNG")
-    return encode_file_contents(buffer, filename=filename)
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
+        img.save(tmp_file.name, format="PNG")
+        return encode_file_contents(tmp_file.name)
