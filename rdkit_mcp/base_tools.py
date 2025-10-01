@@ -1,4 +1,5 @@
 import logging
+import tempfile
 from typing import Union
 from mcp.server.fastmcp.exceptions import ToolError
 from pathlib import Path
@@ -36,12 +37,13 @@ def mol_to_smiles(pmol: PickledMol) -> Smiles:
 
 
 @rdkit_tool()
-def mol_to_sdf(pmol: PickledMol, filename=None) -> EncodedFile:
+def mol_to_sdf(pmol: PickledMol, filename: Union[str, None] = None) -> EncodedFile:
     """
     Writes a pickled RDKit Mol object to an SDF file.
 
     Args:
         pmol: The pickled and base64-encoded RDKit Mol object.
+        filename: Optional filename for the SDF file. If not provided, a name will be generated based on the SMILES string.
     Returns:
         A base64 encoded contents of an SDF file.
     """
@@ -55,7 +57,11 @@ def mol_to_sdf(pmol: PickledMol, filename=None) -> EncodedFile:
         filename = f"{Chem.MolToSmiles(mol)}.sdf"
     if not filename.endswith('.sdf'):
         filename += '.sdf'
-    return encode_file_contents(sdf_string)
+
+    with tempfile.NamedTemporaryFile(suffix=".sdf") as temp_sdf_file:
+        temp_sdf_file.write(sdf_string.encode('utf-8'))
+        temp_sdf_file.flush()
+        return encode_file_contents(temp_sdf_file.name)
 
 
 @rdkit_tool()
@@ -83,12 +89,13 @@ def pdb_to_mol(pdb_path: Union[str, Path]) -> PickledMol:
 
 
 @rdkit_tool()
-def mol_to_pdb(pmol: PickledMol, filename=None) -> EncodedFile:
+def mol_to_pdb(pmol: PickledMol, filename: Union[str, None] = None) -> EncodedFile:
     """
     Converts a pickled RDKit Mol object to a PDB file.
 
     Args:
         pmol: The pickled and base64-encoded RDKit Mol object.
+        filename: Optional filename for the PDB file.
     Returns:
        A base64 encoded contents of an PDB file.
     """
@@ -102,7 +109,10 @@ def mol_to_pdb(pmol: PickledMol, filename=None) -> EncodedFile:
         filename = f"{Chem.MolToSmiles(mol)}.pdb"
     if not filename.endswith('.pdb'):
         filename += '.pdb'
-    return encode_file_contents(pdb_string)
+    with tempfile.NamedTemporaryFile(suffix=".pdb") as temp_pdb_file:
+        temp_pdb_file.write(pdb_string.encode('utf-8'))
+        temp_pdb_file.flush()
+        return encode_file_contents(temp_pdb_file.name)
 
 
 @rdkit_tool()
