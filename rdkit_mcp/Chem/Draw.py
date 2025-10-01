@@ -26,7 +26,7 @@ def MolToFile(pmol: PickledMol, filename: str, width: int = 300, height: int = 3
 
     if not filename.endswith('.png'):
         filename += '.png'
-    
+
     with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
         Draw.MolToFile(mol, tmp_file, size=(width, height))
         return encode_file_contents(tmp_file.name)

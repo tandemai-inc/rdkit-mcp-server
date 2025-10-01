@@ -23,6 +23,7 @@ parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose
 
 mcp = FastMCP("RDKit-MCP Server")
 
+
 async def main():
     """Main function to run the MCP server."""
     args, _ = parser.parse_known_args()
