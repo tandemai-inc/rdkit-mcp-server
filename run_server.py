@@ -7,6 +7,7 @@ from mcp.server.fastmcp import FastMCP
 from rdkit_mcp.register_tools import register_tools
 from rdkit_mcp.settings import ToolSettings
 
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(name)s - %(message)s'
