@@ -2,11 +2,11 @@ import asyncio
 import argparse
 import logging
 import yaml
+from mcp.server.fastmcp import FastMCP
 
 from rdkit_mcp.register_tools import register_tools
 from rdkit_mcp.settings import ToolSettings
 
-from rdkit_mcp.app import app
 
 logging.basicConfig(
     level=logging.INFO,
@@ -21,6 +21,7 @@ parser.add_argument("--host", type=str, help="Host to run the server on", defaul
 parser.add_argument("--settings", type=str, help="Path to YAML settings file", default=None)
 parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose (debug) logging")
 
+mcp = FastMCP("RDKit-MCP Server")
 
 async def main():
     """Main function to run the MCP server."""
@@ -44,18 +45,18 @@ async def main():
     allow_list = settings.ALLOW_LIST
     block_list = settings.BLOCK_LIST
     logger.info("Registering tools with MCP server...")
-    await register_tools(app, allow_list=allow_list, block_list=block_list)
+    await register_tools(mcp, allow_list=allow_list, block_list=block_list)
 
     # Start server
     logger.info(f"Starting RDKit MCP Server with transport: {transport}")
     if transport == "sse":
         logger.info(f"Server running on {args.host}:{args.port} using SSE transport.")
-        app.settings.host = args.host
-        app.settings.port = args.port
-        await app.run_sse_async()
+        mcp.settings.host = args.host
+        mcp.settings.port = args.port
+        await mcp.run_sse_async()
     elif transport == "stdio":
         logger.info("Server running using stdio transport.")
-        await app.run_stdio_async()
+        await mcp.run_stdio_async()
 
 
 if __name__ == "__main__":
