@@ -89,6 +89,23 @@ def pdb_to_mol(pdb_path: Union[str, Path]) -> PickledMol:
 
 
 @rdkit_tool()
+def pdb_contents_to_mol(pdb_contents: str) -> PickledMol:
+    """
+    Converts the contents of a PDB file to a pickled RDKit Mol object.
+
+    Args:
+        pdb_contents: The contents of the PDB file.
+    Returns:
+        A base64 encoded pickled RDKit Mol object.
+    """
+    mol = Chem.MolFromPDBBlock(pdb_contents)
+    if mol is None:
+        raise ToolError(f"Failed to read molecule from PDB contents.")
+    encoded_mol = encode_mol(mol)
+    return encoded_mol
+
+
+@rdkit_tool()
 def mol_to_pdb(pmol: PickledMol, filename: Union[str, None] = None) -> EncodedFile:
     """
     Converts a pickled RDKit Mol object to a PDB file.
@@ -136,5 +153,22 @@ def sdf_to_mol(sdf_path: Union[str, Path]) -> PickledMol:
     if mol is None:
         raise ToolError(f"Failed to read any valid molecule from SDF file: {sdf_path}")
 
+    encoded_mol = encode_mol(mol)
+    return encoded_mol
+
+
+@rdkit_tool()
+def sdf_contents_to_mol(sdf_contents: str) -> PickledMol:
+    """
+    Converts the contents of an SDF file to a pickled RDKit Mol object.
+
+    Args:
+        sdf_contents: The contents of the SDF file.
+    Returns:
+        A base64 encoded pickled RDKit Mol object.
+    """
+    mol = Chem.MolFromSDMolBlock(sdf_contents)
+    if mol is None:
+        raise ToolError(f"Failed to read molecule from SDF contents.")
     encoded_mol = encode_mol(mol)
     return encoded_mol
