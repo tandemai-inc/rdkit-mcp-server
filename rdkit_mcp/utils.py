@@ -69,19 +69,22 @@ def encode_mol(mol: Chem.Mol) -> PickledMol:
     return encoded_mol
 
 
-def encode_file_contents(file_path: Path) -> EncodedFile:
+def encode_file_contents(file_path: Path, filename=None) -> EncodedFile:
     """
     Encode a file into a base64 encoded string.
 
     Args:
         file_path (Path): The path to the file to encode.
+        filename (str, optional): A custom filename to use in the EncodedFileModel. Defaults to the name of the file at file_path.
 
     Returns:
         str: Base64 encoded string of the file contents.
     """
     with open(file_path, "rb") as f:
         file_data = f.read()
-    filename = Path(file_path).name
+
+    if filename is None:
+        filename = Path(file_path).name
     encoded_file_contents = base64.b64encode(file_data).decode('utf-8')
     encoded_file = EncodedFileModel(
         filename=filename,

@@ -29,7 +29,7 @@ def MolToFile(pmol: PickledMol, filename: str, width: int = 300, height: int = 3
 
     with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
         Draw.MolToFile(mol, tmp_file, size=(width, height))
-        return encode_file_contents(tmp_file.name)
+        return encode_file_contents(tmp_file.name, filename=filename)
 
 
 @rdkit_tool(description=Draw.MolsMatrixToGridImage.__doc__)
@@ -69,7 +69,7 @@ def MolsMatrixToGridImage(
         returnPNG=returnPNG)
     with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
         img.save(tmp_file.name, format="PNG")
-        return encode_file_contents(tmp_file.name)
+        return encode_file_contents(tmp_file.name, filename=filename)
 
 
 @rdkit_tool(description=Draw.MolToImage.__doc__)
@@ -119,4 +119,4 @@ def MolToImage(
     )
     with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
         img.save(tmp_file.name, format="PNG")
-        return encode_file_contents(tmp_file.name)
+        return encode_file_contents(tmp_file.name, filename=filename)

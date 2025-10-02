@@ -62,7 +62,7 @@ def mol_to_sdf(pmol: PickledMol, filename: Union[str, None] = None) -> EncodedFi
     with tempfile.NamedTemporaryFile(suffix=".sdf") as temp_sdf_file:
         temp_sdf_file.write(sdf_string.encode('utf-8'))
         temp_sdf_file.flush()
-        return encode_file_contents(temp_sdf_file.name)
+        return encode_file_contents(temp_sdf_file.name, filename=filename)
 
 
 @rdkit_tool()
@@ -130,7 +130,7 @@ def mol_to_pdb(pmol: PickledMol, filename: Union[str, None] = None) -> EncodedFi
     with tempfile.NamedTemporaryFile(suffix=".pdb") as temp_pdb_file:
         temp_pdb_file.write(pdb_string.encode('utf-8'))
         temp_pdb_file.flush()
-        return encode_file_contents(temp_pdb_file.name)
+        return encode_file_contents(temp_pdb_file.name, filename=filename)
 
 
 @rdkit_tool()
