@@ -1,3 +1,4 @@
+from io import StringIO
 import logging
 import tempfile
 from typing import Union
@@ -167,7 +168,8 @@ def sdf_contents_to_mol(sdf_contents: str) -> PickledMol:
     Returns:
         A base64 encoded pickled RDKit Mol object.
     """
-    mol = Chem.MolFromSDMolBlock(sdf_contents)
+    supplier = Chem.SDMolSupplier(StringIO(sdf_contents))
+    mol = next((m for m in supplier if m is not None), None)
     if mol is None:
         raise ToolError(f"Failed to read molecule from SDF contents.")
     encoded_mol = encode_mol(mol)
