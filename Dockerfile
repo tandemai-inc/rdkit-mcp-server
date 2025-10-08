@@ -6,7 +6,7 @@ ARG APP_PORT=8000
 WORKDIR /app
 
 # Install git
-RUN apt-get -y update && apt-get install -y git
+RUN apt-get -y update && apt-get install -y git libxrender1
 
 COPY rdkit-mcp-server/ /app/rdkit-mcp-server/
 
