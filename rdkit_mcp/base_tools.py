@@ -179,14 +179,3 @@ def sdf_contents_to_mol(sdf_contents: str) -> PickledMol:
         raise ToolError(f"Failed to read molecule from SDF contents.")
     encoded_mol = encode_mol(mol)
     return encoded_mol
-
-
-@rdkit_tool()
-def encode_string(input_string: str) -> str:
-    """
-    Encodes a string as a base64 encoded string.
-
-    Args:
-        input_string: The input string to encode.
-    """
-    return base64.b64encode(input_string.encode('utf-8')).decode('utf-8')
