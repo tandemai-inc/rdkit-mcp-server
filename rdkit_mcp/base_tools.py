@@ -1,14 +1,14 @@
+import base64
 from io import BytesIO
 import logging
-import tempfile
 from typing import Union
 from mcp.server.fastmcp.exceptions import ToolError
 from pathlib import Path
 from rdkit import Chem
 
 from .decorators import rdkit_tool
-from .types import PickledMol, Smiles, EncodedFile
-from .utils import encode_mol, decode_mol, encode_file_contents
+from .types import PickledMol, Smiles
+from .utils import encode_mol, decode_mol
 
 logger = logging.getLogger(__name__)
 
@@ -38,31 +38,33 @@ def mol_to_smiles(pmol: PickledMol) -> Smiles:
 
 
 @rdkit_tool()
-def mol_to_sdf(pmol: PickledMol, filename: Union[str, None] = None) -> EncodedFile:
+def mol_to_sdf(pmol: PickledMol, file_dir: Union[str, Path], filename: Union[str, None] = None) -> str:
     """
-    Writes a pickled RDKit Mol object to an SDF file.
+    Writes a pickled RDKit Mol object to an SDF file and returns its base64-encoded contents.
 
     Args:
         pmol: The pickled and base64-encoded RDKit Mol object.
-        filename: Optional filename for the SDF file. If not provided, a name will be generated based on the SMILES string.
+        file_dir: Directory where the SDF file will be saved. If not provided, a temporary file is used.
+        filename: Optional filename for the SDF file. If not provided, a name will be generated based on the SMILES string. Must end with .sdf
     Returns:
-        A base64 encoded contents of an SDF file.
+        Full filepath to the saved SDF File
     """
     mol = decode_mol(pmol)
     if mol is None:
         raise ToolError("Failed to decode the pickled RDKit Mol object.")
 
-    sdf_string = Chem.MolToMolBlock(mol)
+    if not file_dir:
+        raise ToolError("file_dir must be provided and cannot be None.")
 
+    file_dir = Path(file_dir)
     if filename is None:
         filename = f"{Chem.MolToSmiles(mol)}.sdf"
     if not filename.endswith('.sdf'):
         filename += '.sdf'
-
-    with tempfile.NamedTemporaryFile(suffix=".sdf") as temp_sdf_file:
-        temp_sdf_file.write(sdf_string.encode('utf-8'))
-        temp_sdf_file.flush()
-        return encode_file_contents(temp_sdf_file.name, filename=filename)
+    file_path = file_dir / filename
+    with Chem.SDWriter(str(file_path)) as writer:
+        writer.write(mol)
+    return str(file_path)
 
 
 @rdkit_tool()
@@ -107,7 +109,7 @@ def pdb_contents_to_mol(pdb_contents: str) -> PickledMol:
 
 
 @rdkit_tool()
-def mol_to_pdb(pmol: PickledMol, filename: Union[str, None] = None) -> EncodedFile:
+def mol_to_pdb(pmol: PickledMol, file_dir: Union[str, Path], filename: Union[str, None] = None) -> str:
     """
     Converts a pickled RDKit Mol object to a PDB file.
 
@@ -120,17 +122,19 @@ def mol_to_pdb(pmol: PickledMol, filename: Union[str, None] = None) -> EncodedFi
     mol = decode_mol(pmol)
     if mol is None:
         raise ToolError("Failed to decode the pickled RDKit Mol object.")
-
-    pdb_string = Chem.MolToPDBBlock(mol)
-
+    if not file_dir:
+        raise ToolError("file_dir must be provided and cannot be None.")
+    
     if filename is None:
         filename = f"{Chem.MolToSmiles(mol)}.pdb"
     if not filename.endswith('.pdb'):
         filename += '.pdb'
-    with tempfile.NamedTemporaryFile(suffix=".pdb") as temp_pdb_file:
-        temp_pdb_file.write(pdb_string.encode('utf-8'))
-        temp_pdb_file.flush()
-        return encode_file_contents(temp_pdb_file.name, filename=filename)
+
+    filepath = Path(file_dir) / filename
+
+    with Chem.PDBWriter(str(filepath)) as writer:
+        writer.write(mol)
+    return str(filepath)
 
 
 @rdkit_tool()

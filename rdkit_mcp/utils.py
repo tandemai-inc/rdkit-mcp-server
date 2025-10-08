@@ -1,11 +1,10 @@
 import base64
 import logging
 import pickle
-from anyio import Path
 from rdkit import Chem
 from typing import Callable
 
-from .types import EncodedFileModel, PickledMol, EncodedFile
+from .types import PickledMol
 
 
 logger = logging.getLogger(__name__)
@@ -67,41 +66,3 @@ def encode_mol(mol: Chem.Mol) -> PickledMol:
     pkl_mol_data = pickle.dumps(mol)
     encoded_mol = base64.b64encode(pkl_mol_data).decode('utf-8')
     return encoded_mol
-
-
-def encode_file_contents(file_path: Path, filename=None) -> EncodedFile:
-    """
-    Encode a file into a base64 encoded string.
-
-    Args:
-        file_path (Path): The path to the file to encode.
-        filename (str, optional): A custom filename to use in the EncodedFileModel. Defaults to the name of the file at file_path.
-
-    Returns:
-        str: Base64 encoded string of the file contents.
-    """
-    with open(file_path, "rb") as f:
-        file_data = f.read()
-
-    if filename is None:
-        filename = Path(file_path).name
-    encoded_file_contents = base64.b64encode(file_data).decode('utf-8')
-    encoded_file = EncodedFileModel(
-        filename=filename,
-        content=encoded_file_contents
-    )
-    return encoded_file
-
-
-def decode_file_contents(b64_file_contents: str) -> str:
-    """
-    Decode a base64 encoded file.
-
-    Args:
-        b64_file_contents (str): The base64 encoded file contents.
-
-    Returns:
-        str: Contents of the file as a string.
-    """
-    file_data: bytes = base64.b64decode(b64_file_contents)
-    return file_data.decode('utf-8')
