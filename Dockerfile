@@ -8,9 +8,12 @@ WORKDIR /app
 # Install git
 RUN apt-get -y update && apt-get install -y git libxrender1
 
-COPY rdkit-mcp-server/ /app/rdkit-mcp-server/
+COPY pyproject.toml .
+COPY README.md .
+COPY LICENSE .
 
-WORKDIR /app/rdkit-mcp-server
+COPY . .
+
 RUN pip install .
 
 EXPOSE ${APP_PORT}
