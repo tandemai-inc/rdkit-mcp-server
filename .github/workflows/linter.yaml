@@ -1,0 +1,46 @@
+name: linter
+on:
+  pull_request:
+    branches:
+      - master
+permissions:
+    contents: write
+jobs:
+  autopep8:
+    # Check if the PR is not from a fork
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.head_ref }}
+
+      - id: changed_files
+        uses: jitterbit/get-changed-files@v1
+
+      - name: Get changed python files
+        id: changed_python_files
+        run: |
+          changed_python_files=""
+          for changed_file in ${{ steps.changed_files.outputs.all }}; do
+            if [[ "${changed_file}" == *.py ]]; then
+                  changed_python_files+=" ${changed_file}"
+            fi
+          done
+          echo "Changed Python Files: ${changed_python_files}"
+          echo "file_list=$changed_python_files" >> $GITHUB_OUTPUT
+
+      - name: autopep8
+        if: ${{ steps.changed_python_files.outputs.file_list != '' }}
+        id: autopep8
+        uses: peter-evans/autopep8@v1
+        with:
+          args: --exit-code --recursive --in-place --ignore E501 ${{ steps.changed_python_files.outputs.file_list}}
+      - name: Commit autopep8 changes
+        if: steps.autopep8.outputs.exit-code == 2
+        run: |
+          git config --global user.name 'Gitbot'
+          git config --global user.email 'gitbot@tandemai.com'
+          git commit -am "Automated autopep8 fixes"
+          git push
