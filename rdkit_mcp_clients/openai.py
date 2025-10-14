@@ -48,6 +48,7 @@ def write_file(filepath: FilePath, file_content: str) -> str:
         f.write(decoded_content)
     return filepath
 
+
 def create_agent(mcp_server: MCPServer = None, model: str = None) -> Agent:
     """Create an agent with the specified MCP server and model."""
     mcp_servers = []

@@ -124,7 +124,7 @@ def mol_to_pdb(pmol: PickledMol, file_dir: Union[str, Path], filename: Union[str
         raise ToolError("Failed to decode the pickled RDKit Mol object.")
     if not file_dir:
         raise ToolError("file_dir must be provided and cannot be None.")
-    
+
     if filename is None:
         filename = f"{Chem.MolToSmiles(mol)}.pdb"
     if not filename.endswith('.pdb'):
