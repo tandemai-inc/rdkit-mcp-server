@@ -33,7 +33,7 @@ jobs:
           sudo apt-get install -y jq
 
       - name: Run Promptfoo evals
-        run: promptfoo eval --config evals/promptfooconfig.yaml --filter-providers "^gpt-4o-mini$"
+        run: promptfoo eval --config evals/promptfooconfig.yaml --filter-providers "^gpt-4o-mini$" --share
         continue-on-error: true
         env:
           PYTHONPATH: ${{ github.workspace }}:${{ env.PYTHONPATH }}
@@ -64,10 +64,11 @@ jobs:
           FAILS="$(jq -r '.results.stats.failures' promptfoo-results.json)"
           ERRORS="$(jq -r '.results.stats.errors' promptfoo-results.json)"
 
+          shareableUrl="$(jq -r '.shareableUrl' promptfoo-results.json)"
+
           echo "passes=${PASSES}" >> $GITHUB_OUTPUT
           echo "fails=${FAILS}" >> $GITHUB_OUTPUT
           echo "errors=${ERRORS}" >> $GITHUB_OUTPUT
-
           # Compose comment body
           {
             echo "body<<EOF"
@@ -77,6 +78,8 @@ jobs:
             echo "- ✅ **Successes:** ${PASSES}"
             echo "- ❌ **Failures:** ${FAILS}"
             echo "- 😩 **Errors:** ${ERRORS}"
+
+            echo "- 🔗 [View Results](${shareableUrl})"
             echo "EOF"
           } >> $GITHUB_OUTPUT
 
