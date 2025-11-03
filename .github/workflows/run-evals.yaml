@@ -46,21 +46,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # Get list and persist for debugging
-          LIST_JSON="$(promptfoo list evals)"
-          echo "${LIST_JSON}" > promptfoo-evals-list.json
-
-          # If the list is empty, bail out gracefully
-          if [ "$(echo "${LIST_JSON}" | jq 'length')" -eq 0 ]; then
-            echo "No evals found in promptfoo list output"
-            echo "id=" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          # Take the most recent item (last element). Format is [["eval-...","..."], ...]
-          ID="$(echo "${LIST_JSON}" | jq -r '.[-1][0]')"
-          echo "Latest eval id: ${ID}"
-
+          echo $(promptfoo list evals --ids-only) | awk '{print $1}'
           echo "id=${ID}" >> $GITHUB_OUTPUT
 
       - name: Export latest eval to JSON
@@ -72,7 +58,7 @@ jobs:
           set -euo pipefail
           ID="${{ steps.latest_eval.outputs.id }}"
           # Export JSON to file (capture stdout)
-          promptfoo export "${ID}" > promptfoo-results.json
+          promptfoo export eval "${ID}" > promptfoo-results.json
 
           # Pull stats
           PASSES="$(jq -r '.stats.successes' promptfoo-results.json)"
