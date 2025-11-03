@@ -85,13 +85,13 @@ jobs:
         if: github.event_name == 'pull_request'
         with:
           script: |
-            const body = `${{ steps.export_eval.outputs.body }}`;
-            echo $body;
+            const commentBody = `${{ steps.export_eval.outputs.body }}`;
+            echo $commentBody;
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              body
+              body: $commentBody,
             });
 
 permissions:
