@@ -1,0 +1,104 @@
+name: Run Promptfoo Evals
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened] # Run on PR open/update/reopen
+  workflow_dispatch:
+jobs:
+  run-evals:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install application
+        run: pip install .
+        env:
+          PYTHONPATH: ${{ github.workspace }}:${{ env.PYTHONPATH }}
+
+      - name: Start application in background
+        run: nohup python run_server.py > nohup.txt 2>&1 &
+        env:
+          PYTHONPATH: ${{ github.workspace }}:${{ env.PYTHONPATH }}
+
+      - name: Install Promptfoo and jq
+        run: |
+          npm install -g promptfoo
+          sudo apt-get update -y
+          sudo apt-get install -y jq
+
+      - name: Run Promptfoo evals
+        run: promptfoo eval --config evals/promptfooconfig.yaml --filter-providers "^gpt-4o-mini$" --share
+        continue-on-error: true
+        env:
+          PYTHONPATH: ${{ github.workspace }}:${{ env.PYTHONPATH }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+      - name: Get latest eval id
+        id: latest_eval
+        working-directory: evals
+        shell: bash
+        run: |
+          set -euo pipefail
+          EVAL_ID=$(echo $(promptfoo list evals --ids-only) | awk '{print $1}')
+          echo "eval_id=${EVAL_ID}" >> $GITHUB_OUTPUT
+
+      - name: Export latest eval to JSON
+        id: export_eval
+        if: ${{ steps.latest_eval.outputs.eval_id != '' }}
+        working-directory: evals
+        shell: bash
+        run: |
+          set -euo pipefail
+          ID="${{ steps.latest_eval.outputs.eval_id }}"
+          # Export JSON to file (capture stdout)
+          promptfoo export eval "${ID}" > promptfoo-results.json
+
+          # Pull stats
+          PASSES="$(jq -r '.results.stats.successes' promptfoo-results.json)"
+          FAILS="$(jq -r '.results.stats.failures' promptfoo-results.json)"
+          ERRORS="$(jq -r '.results.stats.errors' promptfoo-results.json)"
+
+          promptfoo export eval "${ID}" > promptfoo-results.json
+
+          shareableUrl=https://github.com/${{github.repository}}/actions/runs/${{ github.run_id }}
+
+          echo "passes=${PASSES}" >> $GITHUB_OUTPUT
+          echo "fails=${FAILS}" >> $GITHUB_OUTPUT
+          echo "errors=${ERRORS}" >> $GITHUB_OUTPUT
+          # Compose comment body
+          {
+            echo "body<<EOF"
+            echo "### 📊 Promptfoo Evals"
+            echo ""
+            echo "- **Eval ID:** ${ID}"
+            echo "- ✅ **Successes:** ${PASSES}"
+            echo "- ❌ **Failures:** ${FAILS}"
+            echo "- 😩 **Errors:** ${ERRORS}"
+            echo ""
+            echo "🔗 [View Workflow Run for Details](${shareableUrl})"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+      - name: Comment results on PR
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        env:
+          BODY: ${{ steps.export_eval.outputs.body }}
+        with:
+          script: |
+            const body = process.env.BODY;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: body,
+            });
+
+permissions:
+  pull-requests: write
