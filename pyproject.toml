@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "rdkit-mcp-server"
-version = "0.1.2"
+version = "0.2.0"
 description = "MCP Server providing RDKit cheminformatics tools."
 readme = "README.md"
 requires-python = ">=3.8"
@@ -37,4 +37,4 @@ Repository = "https://github.com/tandem-ai-inc/rdkit-mcp-server"
 rdkit-mcp-server = "rdkit_mcp_server.__main__:main" # If we want a console script
 
 [tool.hatch.build.targets.wheel]
-packages = ["rdkit_mcp"]
+packages = ["rdkit_mcp", "rdkit_mcp_clients"]
