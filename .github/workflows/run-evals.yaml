@@ -75,8 +75,6 @@ jobs:
             echo "- **Eval ID:** \`${ID}\`"
             echo "- ✅ **Successes:** ${PASSES}"
             echo "- ❌ **Failures:** ${FAILS}"
-            echo ""
-            echo "_Artifacts:_ \`promptfoo-results.json\`, \`promptfoo-evals-list.json\`"
             echo "EOF"
           } >> $GITHUB_OUTPUT
 
