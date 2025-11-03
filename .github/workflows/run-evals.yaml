@@ -50,7 +50,11 @@ jobs:
           LIST_JSON="$(promptfoo list evals)"
           echo "${LIST_JSON}" > promptfoo-evals-list.json
 
-          # If the list is empty, bail out gracefully
+          # If LIST_JSON is empty, set to empty array
+          if [ -z "${LIST_JSON}" ]; then
+            LIST_JSON="[]"
+          fi
+
           if [ "$(echo "${LIST_JSON}" | jq 'length')" -eq 0 ]; then
             echo "No evals found in promptfoo list output"
             echo "id=" >> $GITHUB_OUTPUT
