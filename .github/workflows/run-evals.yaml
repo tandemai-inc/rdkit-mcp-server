@@ -64,7 +64,9 @@ jobs:
           FAILS="$(jq -r '.results.stats.failures' promptfoo-results.json)"
           ERRORS="$(jq -r '.results.stats.errors' promptfoo-results.json)"
 
-          shareableUrl="$(jq -r '.shareableUrl' promptfoo-results.json)"
+          promptfoo export eval "${ID}" > promptfoo-results.json
+
+          shareableUrl=https://github.com/${{github.repository}}/actions/runs/${{ github.run_id }})
 
           echo "passes=${PASSES}" >> $GITHUB_OUTPUT
           echo "fails=${FAILS}" >> $GITHUB_OUTPUT
@@ -79,7 +81,7 @@ jobs:
             echo "- ❌ **Failures:** ${FAILS}"
             echo "- 😩 **Errors:** ${ERRORS}"
             echo ""
-            echo "🔗 [View Results](${shareableUrl})"
+            echo "🔗 [View Workflow Run for Details](${shareableUrl})"
             echo "EOF"
           } >> $GITHUB_OUTPUT
 
