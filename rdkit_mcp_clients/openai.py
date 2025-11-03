@@ -9,7 +9,6 @@ from agents.model_settings import ModelSettings
 
 from agents.tool import function_tool
 
-from pydantic import FilePath
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +37,7 @@ def read_file(filepath: str) -> str:
         "Returns the absolute path to the written file."
     )
 )
-def write_file(filepath: FilePath, file_content: str) -> str:
+def write_file(filepath: str, file_content: str) -> str:
     try:
         decoded_content = file_content
     except Exception as e:
