@@ -61,8 +61,8 @@ jobs:
           promptfoo export eval "${ID}" > promptfoo-results.json
 
           # Pull stats
-          PASSES="$(jq -r '.stats.successes' promptfoo-results.json)"
-          FAILS="$(jq -r '.stats.failures' promptfoo-results.json)"
+          PASSES="$(jq -r '.results.stats.successes' promptfoo-results.json)"
+          FAILS="$(jq -r '.results.stats.failures' promptfoo-results.json)"
 
           echo "passes=${PASSES}" >> $GITHUB_OUTPUT
           echo "fails=${FAILS}" >> $GITHUB_OUTPUT
