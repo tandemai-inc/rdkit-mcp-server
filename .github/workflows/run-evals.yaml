@@ -32,7 +32,6 @@ jobs:
           sudo apt-get update -y
           sudo apt-get install -y jq
 
-
       - name: Run Promptfoo evals
         run: promptfoo eval --config evals/promptfooconfig.yaml --filter-providers "^gpt-4o-mini$"
         continue-on-error: true
@@ -63,18 +62,21 @@ jobs:
           # Pull stats
           PASSES="$(jq -r '.results.stats.successes' promptfoo-results.json)"
           FAILS="$(jq -r '.results.stats.failures' promptfoo-results.json)"
+          ERRORS="$(jq -r '.results.stats.errors' promptfoo-results.json)"
 
           echo "passes=${PASSES}" >> $GITHUB_OUTPUT
           echo "fails=${FAILS}" >> $GITHUB_OUTPUT
+          echo "errors=${ERRORS}" >> $GITHUB_OUTPUT
 
           # Compose comment body
           {
             echo "body<<EOF"
             echo "### 📊 Promptfoo Evals"
             echo ""
-            echo "- **Eval ID:** \`${ID}\`"
+            echo "- **Eval ID:** ${ID}"
             echo "- ✅ **Successes:** ${PASSES}"
             echo "- ❌ **Failures:** ${FAILS}"
+            echo "- 😩 **Errors:** ${ERRORS}"
             echo "EOF"
           } >> $GITHUB_OUTPUT
 
