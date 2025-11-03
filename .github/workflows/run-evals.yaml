@@ -47,16 +47,16 @@ jobs:
         run: |
           set -euo pipefail
           EVAL_ID=$(echo $(promptfoo list evals --ids-only) | awk '{print $1}')
-          echo "id=${EVAL_ID}" >> $GITHUB_OUTPUT
+          echo "eval_id=${EVAL_ID}" >> $GITHUB_OUTPUT
 
       - name: Export latest eval to JSON
         id: export_eval
-        if: ${{ steps.latest_eval.outputs.id != '' }}
+        if: ${{ steps.latest_eval.outputs.eval_id != '' }}
         working-directory: evals
         shell: bash
         run: |
           set -euo pipefail
-          ID="${{ steps.latest_eval.outputs.id }}"
+          ID="${{ steps.latest_eval.outputs.eval_id }}"
           # Export JSON to file (capture stdout)
           promptfoo export eval "${ID}" > promptfoo-results.json
 
@@ -69,7 +69,7 @@ jobs:
 
           # Compose comment body
           {
-            echo "body<<'EOF'"
+            echo "body<<EOF"
             echo "### 📊 Promptfoo Evals"
             echo ""
             echo "- **Eval ID:** \`${ID}\`"
