@@ -46,8 +46,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo $(promptfoo list evals --ids-only) | awk '{print $1}'
-          echo "id=${ID}" >> $GITHUB_OUTPUT
+          EVAL_ID=$(echo $(promptfoo list evals --ids-only) | awk '{print $1}')
+          echo "id=${EVAL_ID}" >> $GITHUB_OUTPUT
 
       - name: Export latest eval to JSON
         id: export_eval
