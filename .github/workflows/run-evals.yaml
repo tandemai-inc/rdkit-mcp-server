@@ -86,6 +86,7 @@ jobs:
         with:
           script: |
             const body = `${{ toJSON(steps.export_eval.outputs.body) }}`;
+            echo $body;
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
