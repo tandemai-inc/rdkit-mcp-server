@@ -78,8 +78,8 @@ jobs:
             echo "- ✅ **Successes:** ${PASSES}"
             echo "- ❌ **Failures:** ${FAILS}"
             echo "- 😩 **Errors:** ${ERRORS}"
-
-            echo "- 🔗 [View Results](${shareableUrl})"
+            echo ""
+            echo "🔗 [View Results](${shareableUrl})"
             echo "EOF"
           } >> $GITHUB_OUTPUT
 
