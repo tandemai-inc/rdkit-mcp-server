@@ -66,7 +66,7 @@ jobs:
 
           promptfoo export eval "${ID}" > promptfoo-results.json
 
-          shareableUrl=https://github.com/${{github.repository}}/actions/runs/${{ github.run_id }})
+          shareableUrl=https://github.com/${{github.repository}}/actions/runs/${{ github.run_id }}
 
           echo "passes=${PASSES}" >> $GITHUB_OUTPUT
           echo "fails=${FAILS}" >> $GITHUB_OUTPUT
