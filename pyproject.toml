@@ -7,7 +7,7 @@ name = "rdkit-mcp-server"
 version = "0.2.0"
 description = "MCP Server providing RDKit cheminformatics tools."
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license = { file = "LICENSE" } # Optional: Add a license file if desired
 authors = [
     { name = "Fred Parsons", email = "frederick.parsons@tandemai.com" },
