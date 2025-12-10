@@ -3,6 +3,7 @@ import argparse
 import logging
 import yaml
 from mcp.server.fastmcp import FastMCP
+from mcp.server.transport_security import TransportSecuritySettings
 
 from rdkit_mcp.register_tools import register_tools
 from rdkit_mcp.settings import ToolSettings
@@ -47,6 +48,16 @@ async def main():
     block_list = settings.BLOCK_LIST
     logger.info("Registering tools with MCP server...")
     await register_tools(mcp, allow_list=allow_list, block_list=block_list)
+
+    # Configure transport security to allow Docker internal hostnames
+    mcp.settings.transport_security = TransportSecuritySettings(
+        allowed_hosts=[
+            f"rdkit-mcp:{args.port}",
+            f"localhost:{args.port}",
+            f"127.0.0.1:{args.port}",
+            f"0.0.0.0:{args.port}",
+        ]
+    )
 
     # Start server
     logger.info(f"Starting RDKit MCP Server with transport: {transport}")
