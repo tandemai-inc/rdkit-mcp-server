@@ -6,6 +6,7 @@ from rdkit.Chem import Descriptors
 from mcp.server.fastmcp.exceptions import ToolError
 from ..decorators import rdkit_tool
 from ..types import Smiles
+
 logger = logging.getLogger(__name__)
 
 
@@ -18,7 +19,7 @@ def ExactMolWt(smiles: Smiles) -> float:
     - smiles (str): The SMILES string of the molecule.
 
     Returns:
-    - dict: A dictionary containing the exact molecular weight or an error message.
+    - float: The exact molecular weight.
     """
     try:
         mol = Chem.MolFromSmiles(smiles)
@@ -31,7 +32,7 @@ def ExactMolWt(smiles: Smiles) -> float:
 
 
 @rdkit_tool()
-def FpDensityMorgan1(smiles: Smiles) -> str:
+def FpDensityMorgan1(smiles: Smiles) -> float:
     """
     Calculates the fingerprint density using Morgan fingerprints of radius 1.
 
@@ -88,7 +89,7 @@ def FpDensityMorgan3(smiles: Smiles) -> float:
         if not mol:
             raise ToolError("Invalid SMILES string")
         density = Descriptors.FpDensityMorgan3(mol)
-        return {"FpDensityMorgan3": density}
+        return density
     except Exception as e:
         raise ToolError(f"Error calculating FpDensityMorgan3: {str(e)}")
 
@@ -102,20 +103,20 @@ def HeavyAtomMolWt(smiles: Smiles) -> float:
     - smiles (str): The SMILES string of the molecule.
 
     Returns:
-    - dict: A dictionary containing the heavy atom molecular weight or an error message.
+    - float: A float containing the heavy atom molecular weight.
     """
     try:
         mol = Chem.MolFromSmiles(smiles)
         if not mol:
             raise ToolError("Invalid SMILES string")
         weight = Descriptors.HeavyAtomMolWt(mol)
-        return {"HeavyAtomMolWt": weight}
+        return weight
     except Exception as e:
         raise ToolError(f"Error calculating HeavyAtomMolWt: {str(e)}")
 
 
 @rdkit_tool()
-def MaxAbsPartialCharge(smiles: Smiles) -> dict:
+def MaxAbsPartialCharge(smiles: Smiles) -> float:
     """
     Calculates the maximum absolute partial charge of a molecule.
 
@@ -123,14 +124,14 @@ def MaxAbsPartialCharge(smiles: Smiles) -> dict:
     - smiles (str): The SMILES string of the molecule.
 
     Returns:
-    - dict: A dictionary containing the maximum absolute partial charge or an error message.
+    - float: The maximum absolute partial charge.
     """
     try:
         mol = Chem.MolFromSmiles(smiles)
         if not mol:
             raise ToolError("Invalid SMILES string")
         charge = Descriptors.MaxAbsPartialCharge(mol)
-        return {"MaxAbsPartialCharge": charge}
+        return charge
     except Exception as e:
         raise ToolError(f"Error calculating MaxAbsPartialCharge: {str(e)}")
 
@@ -144,14 +145,14 @@ def MaxPartialCharge(smiles: Smiles) -> float:
     - smiles (str): The SMILES string of the molecule.
 
     Returns:
-    - dict: A dictionary containing the maximum partial charge or an error message.
+    - float: The maximum partial charge.
     """
     try:
         mol = Chem.MolFromSmiles(smiles)
         if not mol:
             raise ToolError("Invalid SMILES string")
         charge = Descriptors.MaxPartialCharge(mol)
-        return {"MaxPartialCharge": charge}
+        return charge
     except Exception as e:
         raise ToolError(f"Error calculating MaxPartialCharge: {str(e)}")
 
@@ -165,7 +166,7 @@ def MinAbsPartialCharge(smiles: Smiles) -> float:
     - smiles (str): The SMILES string of the molecule.
 
     Returns:
-    - dict: A dictionary containing the minimum absolute partial charge or an error message.
+    - list: A dictionary containing the minimum absolute partial charge.
     """
     try:
         mol = Chem.MolFromSmiles(smiles)
@@ -186,7 +187,7 @@ def MinPartialCharge(smiles: Smiles) -> float:
     - smiles (str): The SMILES string of the molecule.
 
     Returns:
-    - dict: A dictionary containing the minimum partial charge or an error message.
+    - float: The minimum partial charge.
     """
     try:
         mol = Chem.MolFromSmiles(smiles)
