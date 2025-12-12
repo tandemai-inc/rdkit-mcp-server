@@ -6,6 +6,7 @@ from mcp.server.fastmcp.exceptions import ToolError
 from typing import List
 from ..decorators import rdkit_tool
 from ..types import Smiles, MolFragments
+
 logger = logging.getLogger(__name__)
 
 
@@ -14,7 +15,7 @@ def FragmentMol(
     smiles: Smiles,
     maxCuts: int = 3,
     maxCutBonds: int = 20,
-    pattern: str = '[#6+0;!$(*=,#[!#6])]!@!=!#[*]'
+    pattern: str = "[#6+0;!$(*=,#[!#6])]!@!=!#[*]",
 ) -> List[MolFragments]:
     """Does the fragmentation necessary for an MMPA analysis.
 
@@ -25,7 +26,12 @@ def FragmentMol(
     - pattern (str): An rSMARTS string defining the bond-breaking SMARTS pattern to use.
 
     Returns:
-    - tuple: A tuple containing the fragments as RDKit Mol objects.
+    - list[MolFragments]: A list of fragment pairs. Each pair is a 2-tuple
+      `(core_smiles, side_chain_smiles)`, where:
+        - `core_smiles` is either a SMILES string of the common scaffold or `None`
+          if no core could be defined,
+        - `side_chain_smiles` is always a valid SMILES string containing one or
+          more wildcard atoms (e.g., `[*:1]`) indicating attachment points.
 
     """
     mol = Chem.MolFromSmiles(smiles)
@@ -46,13 +52,11 @@ def FragmentMol(
         raise ToolError("Fragmentation failed")
     logger.debug(f"Fragmentation produced {len(frags)} fragments")
     output = []
-    for frag_tup in frags:
-        inner_list = []
-        for item in frag_tup:
-            if isinstance(item, Chem.Mol):
-                inner_list.append(Chem.MolToSmiles(item))
-            else:
-                inner_list.append(item)
-        output.append(inner_list)
+    for core, side in frags:
+        inner_tuple = (
+            Chem.MolToSmiles(core) if isinstance(core, Chem.Mol) else None,
+            Chem.MolToSmiles(side),
+        )
+        output.append(inner_tuple)
     logger.debug(f"Fragmentation output: {output}")
     return output
