@@ -36,11 +36,11 @@ def FragmentMol(
     """
     mol = Chem.MolFromSmiles(smiles)
     if not mol:
-        raise ToolError("Invalid SMILES string")
+        raise ToolError(f"Invalid SMILES string {smiles}")
 
     pattern_mol = Chem.MolFromSmarts(pattern)
     if not pattern_mol:
-        raise ToolError("Invalid pattern SMARTS")
+        raise ToolError(f"Invalid pattern SMARTS {pattern}")
 
     try:
         frags = rdMMPA.FragmentMol(
