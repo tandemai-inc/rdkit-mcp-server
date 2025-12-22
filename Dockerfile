@@ -1,5 +1,5 @@
 # Use an official Python image as the base
-FROM python:3.10-slim
+FROM public.ecr.aws/docker/library/python:3.10-slim
 
 ARG APP_PORT=8000
 
