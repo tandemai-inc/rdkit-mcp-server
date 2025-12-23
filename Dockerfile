@@ -2,16 +2,22 @@
 FROM public.ecr.aws/docker/library/python:3.10-slim
 
 ARG APP_PORT=8000
+ENV DEBIAN_FRONTEND=noninteractive
 
 WORKDIR /app
 
-# Install git
-RUN apt-get -y update && apt-get install -y git libxrender1
+# Set up mirrors
+RUN sed -i 's|http://deb.debian.org/debian|https://mirrors.aliyun.com/debian|g' /etc/apt/sources.list.d/debian.sources && \
+    sed -i 's|http://deb.debian.org/debian-security|https://mirrors.aliyun.com/debian-security|g' /etc/apt/sources.list.d/debian.sources
+RUN apt-get -y update && apt-get install -y libxrender1 libgl1 libsm6 libxext6 ca-certificates
 
 COPY README.md .
 COPY LICENSE .
 COPY pyproject.toml .
-RUN pip install .
+
+RUN pip install --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+RUN pip install --no-cache-dir --extra-index-url https://rdkit.org/pip --only-binary=all --retries 5 --timeout 120 .
 
 COPY . .
 
