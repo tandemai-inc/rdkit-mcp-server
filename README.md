@@ -61,9 +61,7 @@ python list_tools.py [--settings settings.yaml]
 
 The `evals` directory contains a test suite for evaluating RDKit MCP tool outputs and agent responses using [pydantic-evals](https://ai.pydantic.dev/evals/).
 
-### Install Promptfoo
-
-First, install Promptfoo globally using npm:
+### Install Dependencies
 
 ```bash
 pip install ".[evals]"
@@ -89,20 +87,6 @@ Options:
 - `--verbose` - Show detailed output including inputs and outputs
 - `--filter <name>` - Run only cases matching the name
 - `--output-json results.json` - Export results to JSON
-
-### Test Cases
-
-The evaluation suite includes 7 test cases:
-
-| Case | Description |
-|------|-------------|
-| molecular_weight | Calculate molecular weight from SMILES |
-| rotatable_bonds | Count rotatable bonds |
-| pyridine_detection | Detect pyridine rings in molecules |
-| hydrogen_bond_donors_acceptors | Count H-bond donors/acceptors |
-| molecular_similarity | Compare molecular similarity |
-| atom_highlighting | Render molecule with atom highlighted |
-| substructure_highlighting | Render molecule with substructure highlighted |
 
 Each test uses LLM-based evaluation (LLMJudge) to assess whether the agent correctly used the RDKit tools and produced accurate results.
 
