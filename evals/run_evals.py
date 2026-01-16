@@ -4,6 +4,7 @@
 import argparse
 import json
 import sys
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
@@ -34,9 +35,23 @@ def main() -> None:
         action="store_true",
         help="Print detailed output",
     )
+    parser.add_argument(
+        "--model",
+        type=str,
+        default="openai:gpt-4o",
+        help="Model to use for evaluation tasks (default: openai:gpt-4o)",
+    )
     args = parser.parse_args()
 
     dataset = rdkit_eval_dataset
+
+    # Apply model override to all cases
+    updated_cases = []
+    for case in dataset.cases:
+        updated_inputs = replace(case.inputs, model=args.model)
+        updated_case = replace(case, inputs=updated_inputs)
+        updated_cases.append(updated_case)
+    dataset = Dataset(name=dataset.name, cases=updated_cases, evaluators=dataset.evaluators)
 
     # Optional filtering
     if args.filter:
