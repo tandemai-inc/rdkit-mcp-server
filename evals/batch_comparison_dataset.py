@@ -24,7 +24,7 @@ def load_smiles_from_csv(csv_path: str | Path) -> list[str]:
 
 
 # Modify DATASET_SIZE to change the number of SMILES used in the dataset
-DATASET_SIZE = 250
+DATASET_SIZE = 500
 CSV_PATH = Path(__file__).parent / "data" / "SMILES.csv"
 SMILES_FROM_CSV = load_smiles_from_csv(CSV_PATH)[:DATASET_SIZE]
 
@@ -41,7 +41,6 @@ case_sync_molwt = Case(
         prompt=(
             f"Calculate the molecular weight for each of these {SMILES_COUNT} SMILES by calling the MolWt tool once for each molecule. "
             f"Do NOT use the batch_map tool - call MolWt individually for each SMILES. "
-            f"IMPORTANT: Due to API limits, you can only make up to 128 tool calls per message. "
             f"Response format:\n"
             f"- Don't print smiles and mol weights.\n"
             f"- Confirm the number of molecular weights calculated\n"

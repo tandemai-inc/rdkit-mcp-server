@@ -2,6 +2,7 @@
 """CLI entry point for running RDKit MCP evaluations."""
 
 import argparse
+import asyncio
 import json
 import os
 import sys
@@ -17,7 +18,7 @@ from pydantic_evals import Dataset
 
 from evals.rdkit_dataset import rdkit_eval_dataset
 from evals.batch_comparison_dataset import batch_comparison_dataset
-from evals.task import run_task_sync
+from evals.task import run_task_async
 
 AVAILABLE_DATASETS = {
     "rdkit": rdkit_eval_dataset,
@@ -25,7 +26,7 @@ AVAILABLE_DATASETS = {
 }
 
 
-def main() -> None:
+async def main() -> None:
     # Ensure outputs directory exists
     outputs_dir = Path(os.getcwd()) / "outputs"
     outputs_dir.mkdir(parents=True, exist_ok=True)
@@ -84,7 +85,7 @@ def main() -> None:
 
     # Run evaluation
     print(f"Running {len(dataset.cases)} evaluation case(s)...")
-    report = dataset.evaluate_sync(run_task_sync)
+    report = await dataset.evaluate(run_task_async)
 
     # Print results
     if args.verbose:
@@ -147,4 +148,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
