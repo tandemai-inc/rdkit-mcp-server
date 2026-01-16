@@ -5,7 +5,7 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any
 
-from pydantic_ai import Agent
+from pydantic_ai import Agent, RunContext
 from pydantic_ai.mcp import MCPServerSSE
 from pydantic_ai.messages import ModelResponse
 from pydantic_ai.exceptions import UnexpectedModelBehavior
@@ -24,6 +24,13 @@ AGENT_INSTRUCTIONS = (
 
 
 @dataclass
+class EvalDeps:
+    """Dependencies injected into the agent run context."""
+
+    smiles_list: list[str] = field(default_factory=list)
+
+
+@dataclass
 class ToolCall:
     """A single tool call made during task execution."""
 
@@ -39,6 +46,7 @@ class TaskInput:
     prompt: str
     model: str = "openai:gpt-4o"
     use_mcp: bool = True
+    context: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -74,17 +82,34 @@ async def run_task_async(inputs: TaskInput) -> TaskOutput:
     """Execute a prompt against the RDKit MCP server via pydantic-ai Agent."""
     server = MCPServerSSE(MCP_URL)
 
+    # Build deps from context
+    deps = EvalDeps(smiles_list=inputs.context.get("smiles_list", []))
+
     if inputs.use_mcp:
-        agent = Agent(
+        agent: Agent[EvalDeps, str] = Agent(
             inputs.model,
             system_prompt=AGENT_INSTRUCTIONS,
             toolsets=[server],
+            deps_type=EvalDeps,
         )
     else:
         agent = Agent(
             inputs.model,
             system_prompt=AGENT_INSTRUCTIONS,
+            deps_type=EvalDeps,
         )
+
+    # Register local tool if SMILES provided in context
+    if deps.smiles_list:
+
+        @agent.tool
+        async def get_smiles_from_context(ctx: RunContext[EvalDeps]) -> list[str]:
+            """Retrieve the SMILES list from the evaluation context.
+
+            Returns:
+                List of SMILES strings loaded for this evaluation.
+            """
+            return ctx.deps.smiles_list
 
     retry_attempts = 5
     last_error: Exception | None = None
@@ -92,7 +117,7 @@ async def run_task_async(inputs: TaskInput) -> TaskOutput:
     async with agent:
         for i in range(retry_attempts):
             try:
-                result = await agent.run(inputs.prompt)
+                result = await agent.run(inputs.prompt, deps=deps)
                 tool_calls = _extract_tool_calls(result.all_messages())
                 return TaskOutput(text=str(result.output), tool_calls=tool_calls)
             except UnexpectedModelBehavior as e:

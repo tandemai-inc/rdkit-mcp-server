@@ -24,12 +24,9 @@ def load_smiles_from_csv(csv_path: str | Path) -> list[str]:
 
 
 # Modify DATASET_SIZE to change the number of SMILES used in the dataset
-DATASET_SIZE = 500
+DATASET_SIZE = 100
 CSV_PATH = Path(__file__).parent / "data" / "SMILES.csv"
 SMILES_FROM_CSV = load_smiles_from_csv(CSV_PATH)[:DATASET_SIZE]
-
-# Build the SMILES list as a comma-separated string for the prompts
-SMILES_LIST_STR = ", ".join(SMILES_FROM_CSV)
 
 # Number of SMILES loaded from CSV
 SMILES_COUNT = len(SMILES_FROM_CSV)
@@ -39,24 +36,24 @@ case_sync_molwt = Case(
     name="sync_molwt_big_dataset",
     inputs=TaskInput(
         prompt=(
-            f"Calculate the molecular weight for each of these {SMILES_COUNT} SMILES by calling the MolWt tool once for each molecule. "
+            f"Calculate the molecular weight for each of {SMILES_COUNT} SMILES by calling the MolWt tool once for each molecule. "
+            f"First, call get_smiles_from_context() to retrieve the SMILES list. "
             f"Do NOT use the batch_map tool - call MolWt individually for each SMILES. "
             f"Response format:\n"
             f"- Don't print smiles and mol weights.\n"
-            f"- Confirm the number of molecular weights calculated\n"
-            f"Here are the SMILES: {SMILES_LIST_STR}. "
-        )
+            f"- Confirm the number of molecular weights calculated"
+        ),
+        context={"smiles_list": SMILES_FROM_CSV},
     ),
     expected_output=f"{SMILES_COUNT} molecular weights calculated",
     metadata={
-        "smiles_list": SMILES_FROM_CSV,
         "category": "batch_comparison",
         "method": "synchronous",
     },
     evaluators=[
         LLMJudge(
             rubric=(
-                f"The output must  state that mol weights for {SMILES_COUNT} molecules were calculated. "
+                f"The output must state that {SMILES_COUNT} mol weights were calculated. "
             ),
             include_input=True,
             include_expected_output=True,
@@ -71,26 +68,23 @@ case_sync_molwt = Case(
     ],
 )
 
-# Build the inputs list for batch_map format
-BATCH_INPUTS_STR = str([{"smiles": s} for s in SMILES_FROM_CSV])
-
 # Case 2: Batch MolWt using batch_map with high concurrency
 case_batch_molwt = Case(
     name="batch_molwt_big_dataset",
     inputs=TaskInput(
         prompt=(
             f"Use the batch_map tool to calculate the molecular weight of {SMILES_COUNT} molecules. "
-            f"Use tool_name='MolWt' and pass the inputs as a list of dictionaries with 'smiles' keys. "
+            f"First, call get_smiles_from_context() to retrieve the SMILES list. "
+            f"Then pass those SMILES to batch_map with tool_name='MolWt' and inputs as a list of dictionaries with 'smiles' keys. "
             f"Response format:\n"
             f"- Don't print smiles and mol weights.\n"
             f"- Return the number of molecular weights calculated\n"
-            f"- Provide a list of each batch_map call, including batch size and concurrency.\n"
-            f"Here are the SMILES: {SMILES_LIST_STR}."
-        )
+            f"- Provide a list of each batch_map call, including batch size and concurrency."
+        ),
+        context={"smiles_list": SMILES_FROM_CSV},
     ),
     expected_output=f"{SMILES_COUNT} molecular weights calculated via batch_map with concurrency=100",
     metadata={
-        "smiles_list": SMILES_FROM_CSV,
         "category": "batch_comparison",
         "method": "batch_async",
     },
