@@ -3,7 +3,7 @@
 from pydantic_evals import Case, Dataset
 from pydantic_evals.evaluators import LLMJudge
 
-from evals.evaluators import UsedToolEvaluator
+from evals.evaluators import ImageJudgeEvaluator, UsedToolEvaluator
 from evals.task import TaskInput
 
 # Case 1: Molecular Weight
@@ -122,7 +122,10 @@ case_substructure_highlight = Case(
         LLMJudge(
             rubric="The final output should render an image with the amide substructure highlighted in the molecule CC(=O)NC1=CC=CC=C1.",
             include_input=True,
-        )
+        ),
+        ImageJudgeEvaluator(
+            rubric="The image shows a molecule with the amide functional group (C(=O)N, carbonyl bonded to nitrogen) clearly highlighted in a distinct color. The highlighting should visually distinguish the amide substructure from the rest of the molecule.",
+        ),
     ],
 )
 
@@ -170,4 +173,5 @@ rdkit_eval_dataset = Dataset(
         case_substructure_highlight,
         case_batch_molecular_weight,
     ],
+    
 )
