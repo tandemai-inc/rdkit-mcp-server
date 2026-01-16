@@ -109,6 +109,8 @@ def main() -> None:
             case_results.append({
                 "name": case_result.name,
                 "passed": passed,
+                "task_duration": case_result.task_duration,
+                "total_duration": case_result.total_duration,
                 "evaluations": evaluations,
             })
 
