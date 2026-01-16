@@ -1,4 +1,3 @@
-import base64
 from io import BytesIO
 import logging
 from typing import Union
