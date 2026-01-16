@@ -15,7 +15,7 @@ if __name__ == "__main__" and __package__ is None:
 
 from pydantic_evals import Dataset
 
-from evals.dataset import rdkit_eval_dataset
+from evals.rdkit_dataset import rdkit_eval_dataset
 from evals.batch_comparison_dataset import batch_comparison_dataset
 from evals.task import run_task_sync
 

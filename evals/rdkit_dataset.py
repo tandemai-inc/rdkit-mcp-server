@@ -178,7 +178,7 @@ case_batch_molecular_weight = Case(
 
 # Assemble the dataset
 rdkit_eval_dataset = Dataset(
-    name="rdkit_mcp_evals",
+    name="rdkit_eval_dataset",
     cases=[
         case_molecular_weight,
         case_rotatable_bonds,
