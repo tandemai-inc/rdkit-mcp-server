@@ -1,18 +1,11 @@
-from typing import Any, List, Optional
-from pydantic import BaseModel, Field
+from typing import Any, Dict, List, Optional
+from pydantic import BaseModel
 import asyncio
 
-# Assuming FastMCP-ish patterns; adapt names to your MCP lib
-from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp import Context
 
-mcp = FastMCP("chem-tools")
+from .decorators import rdkit_tool
 
-class BatchMapRequest(BaseModel):
-    tool_name: str = Field(..., description="Name of the MCP tool to call for each input")
-    inputs: List[Any] = Field(..., description="List of inputs to map over")
-    concurrency: int = Field(10, ge=1, le=100, description="Max concurrent calls")
-    fail_fast: bool = Field(False, description="Stop on first error")
-    include_input: bool = Field(True, description="Include original input in each result item")
 
 class BatchItemResult(BaseModel):
     ok: bool
@@ -20,36 +13,58 @@ class BatchItemResult(BaseModel):
     output: Optional[Any] = None
     error: Optional[str] = None
 
+
 class BatchMapResponse(BaseModel):
     tool_name: str
     results: List[BatchItemResult]
 
-@mcp.tool()
-async def batch_map(req: BatchMapRequest) -> BatchMapResponse:
-    """
-    Run a single-input MCP tool over a list of inputs.
-    """
-    # Resolve the tool function by name from the MCP registry.
-    # How you do this depends on your MCP framework.
-    tool_fn = mcp.tools.get(req.tool_name)  # <-- adapt if your registry differs
-    if tool_fn is None:
-        raise ValueError(f"Unknown tool: {req.tool_name}")
 
-    sem = asyncio.Semaphore(req.concurrency)
+@rdkit_tool()
+async def batch_map(
+    tool_name: str,
+    inputs: List[Dict[str, Any]],
+    ctx: Context,
+    concurrency: int = 10,
+    fail_fast: bool = False,
+    include_input: bool = True,
+) -> BatchMapResponse:
+    """
+    Run a single MCP tool over a list of inputs in batch. Use this tool when you need to
+    apply the same operation to multiple molecules efficiently in a single call.
 
-    async def run_one(x: Any) -> BatchItemResult:
+    Example: To calculate molecular weight for 3 molecules, call batch_map with:
+        tool_name="MolWt"
+        inputs=[{"smiles": "CCO"}, {"smiles": "CC(=O)O"}, {"smiles": "C1=CC=CC=C1"}]
+
+    Args:
+        tool_name: Name of the MCP tool to call for each input (e.g., "MolWt", "NumRotatableBonds")
+        inputs: List of argument dictionaries to map over (each dict is passed as tool arguments)
+        ctx: MCP context (automatically injected)
+        concurrency: Max concurrent calls (1-100, default 10)
+        fail_fast: Stop on first error (default False)
+        include_input: Include original input in each result item (default True)
+
+    Returns:
+        BatchMapResponse with results for each input
+    """
+    if not 1 <= concurrency <= 100:
+        raise ValueError("concurrency must be between 1 and 100")
+
+    sem = asyncio.Semaphore(concurrency)
+
+    async def run_one(x: Dict[str, Any]) -> BatchItemResult:
         async with sem:
             try:
-                out = await tool_fn(x)  # assumes tool signature tool(input) -> output
-                return BatchItemResult(ok=True, input=x if req.include_input else None, output=out)
+                out = await ctx.fastmcp.call_tool(tool_name, x)
+                return BatchItemResult(ok=True, input=x if include_input else None, output=out)
             except Exception as e:
-                return BatchItemResult(ok=False, input=x if req.include_input else None, error=str(e))
+                return BatchItemResult(ok=False, input=x if include_input else None, error=str(e))
 
     results: List[BatchItemResult] = []
-    for coro in asyncio.as_completed([run_one(x) for x in req.inputs]):
+    for coro in asyncio.as_completed([run_one(x) for x in inputs]):
         item = await coro
         results.append(item)
-        if req.fail_fast and not item.ok:
+        if fail_fast and not item.ok:
             break
 
-    return BatchMapResponse(tool_name=req.tool_name, results=results)
+    return BatchMapResponse(tool_name=tool_name, results=results)

@@ -3,6 +3,7 @@
 from pydantic_evals import Case, Dataset
 from pydantic_evals.evaluators import LLMJudge
 
+from evals.evaluators import UsedToolEvaluator
 from evals.task import TaskInput
 
 # Case 1: Molecular Weight
@@ -125,6 +126,37 @@ case_substructure_highlight = Case(
     ],
 )
 
+# Case 8: Batch Molecular Weight Calculation
+case_batch_molecular_weight = Case(
+    name="batch_molecular_weight",
+    inputs=TaskInput(
+        prompt=(
+            "Use the batch_map tool to calculate the molecular weight of the following 3 molecules in a single batch call: "
+            "CCO (ethanol), CC(=O)O (acetic acid), and C1=CC=CC=C1 (benzene). "
+            "Report the molecular weight for each molecule."
+            "Report all tool calls made with inputs and outputs"
+            "I expect the batch_map tool to be called"
+        )
+    ),
+    expected_output="Ethanol: 46.069, Acetic acid: 60.052, Benzene: 78.114",
+    metadata={
+        "smiles_list": ["CCO", "CC(=O)O", "C1=CC=CC=C1"],
+        "category": "batch",
+    },
+    evaluators=[
+        LLMJudge(
+            rubric=(
+                "The output must report molecular weights for all 3 molecules. "
+                "Expected approximate values: ethanol ~46 g/mol, acetic acid ~60 g/mol, benzene ~78 g/mol. "
+                "Small rounding differences are acceptable."
+            ),
+            include_input=True,
+            include_expected_output=True,
+        ),
+        UsedToolEvaluator(tool_name="batch_map"),
+    ],
+)
+
 # Assemble the dataset
 rdkit_eval_dataset = Dataset(
     name="rdkit_mcp_evals",
@@ -136,5 +168,6 @@ rdkit_eval_dataset = Dataset(
         case_similarity,
         case_atom_highlight,
         case_substructure_highlight,
+        case_batch_molecular_weight,
     ],
 )
