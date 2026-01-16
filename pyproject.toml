@@ -29,6 +29,12 @@ dependencies = [
     "pyyaml"
 ]
 
+[project.optional-dependencies]
+evals = [
+    "pydantic-evals>=0.1.0",
+    "pydantic-ai[openai,mcp]>=0.1.0",
+]
+
 [project.urls]
 Homepage = "https://github.com/tandem-ai-inc/rdkit-mcp-server"
 Repository = "https://github.com/tandem-ai-inc/rdkit-mcp-server"
