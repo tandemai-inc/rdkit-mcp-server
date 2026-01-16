@@ -16,7 +16,13 @@ if __name__ == "__main__" and __package__ is None:
 from pydantic_evals import Dataset
 
 from evals.dataset import rdkit_eval_dataset
+from evals.batch_comparison_dataset import batch_comparison_dataset
 from evals.task import run_task_sync
+
+AVAILABLE_DATASETS = {
+    "rdkit": rdkit_eval_dataset,
+    "batch_comparison": batch_comparison_dataset,
+}
 
 
 def main() -> None:
@@ -46,9 +52,16 @@ def main() -> None:
         default="openai:gpt-4o",
         help="Model to use for evaluation tasks (default: openai:gpt-4o)",
     )
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        choices=list(AVAILABLE_DATASETS.keys()),
+        default="rdkit",
+        help=f"Dataset to run (choices: {', '.join(AVAILABLE_DATASETS.keys())}, default: rdkit)",
+    )
     args = parser.parse_args()
 
-    dataset = rdkit_eval_dataset
+    dataset = AVAILABLE_DATASETS[args.dataset]
 
     # Apply model override to all cases
     updated_cases = []
