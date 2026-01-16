@@ -3,6 +3,7 @@
 
 import argparse
 import json
+import os
 import sys
 from dataclasses import replace
 from pathlib import Path
@@ -19,6 +20,10 @@ from evals.task import run_task_sync
 
 
 def main() -> None:
+    # Ensure outputs directory exists
+    outputs_dir = Path(os.getcwd()) / "outputs"
+    outputs_dir.mkdir(parents=True, exist_ok=True)
+
     parser = argparse.ArgumentParser(description="Run RDKit MCP Evals")
     parser.add_argument(
         "--output-json",
