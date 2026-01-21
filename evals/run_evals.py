@@ -18,11 +18,13 @@ from pydantic_evals import Dataset
 
 from evals.rdkit_dataset import rdkit_eval_dataset
 from evals.batch_comparison_dataset import batch_comparison_dataset
+from evals.compute_descriptors_dataset import compute_descriptors_eval_dataset
 from evals.task import run_task_async
 
 AVAILABLE_DATASETS = {
     "rdkit": rdkit_eval_dataset,
     "batch_comparison": batch_comparison_dataset,
+    "descriptors": compute_descriptors_eval_dataset,
 }
 
 

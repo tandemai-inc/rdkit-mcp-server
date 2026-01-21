@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Literal
 from pydantic import Field
 from rdkit import Chem
 
@@ -265,3 +265,92 @@ def CalcOxidationNumbers(smiles: Smiles) -> float:
     """Calculate the oxidation numbers for a molecule given its SMILES representation."""
     mol = Chem.MolFromSmiles(smiles)
     return _CalcOxidationNumbers(mol)
+
+
+# Names gathered from  rdkit.Chem.rdMolDescriptors.Properties()
+DescriptorNames = Annotated[
+    Literal[
+        "exactmw", "amw", "lipinskiHBA", "lipinskiHBD", "NumRotatableBonds",
+        "NumHBD", "NumHBA", "NumHeavyAtoms", "NumAtoms", "NumHeteroatoms",
+        "NumAmideBonds", "FractionCSP3", "NumRings", "NumAromaticRings",
+        "NumAliphaticRings", "NumSaturatedRings", "NumHeterocycles",
+        "NumAromaticHeterocycles", "NumSaturatedHeterocycles",
+        "NumAliphaticHeterocycles", "NumSpiroAtoms", "NumBridgeheadAtoms",
+        "NumAtomStereoCenters", "NumUnspecifiedAtomStereoCenters",
+        "labuteASA", "tpsa", "CrippenClogP", "CrippenMR", "chi0v", "chi1v",
+        "chi2v", "chi3v", "chi2v", "chi3v", "chi4v", "kappa1", "kappa2",
+        "kappa3", "labuteASA", "tpsa", "CrippenClogP", "CrippenMR"
+        ],
+        Field(description="Supported RDKit molecular property descriptor names."),
+    ]
+
+
+@rdkit_tool()
+def compute_descriptors(
+    smiles_list: Annotated[list[Smiles], Field(description="A list of SMILES strings representing ligands.")],
+    descriptor_names: Annotated[list[DescriptorNames], Field(description="A list of RDKit molecular property names to compute")]
+) -> list[list[float]]:
+    """
+    Compute RDKit molecular property descriptors for a collection of ligands.
+
+    Each input SMILES string is parsed into an RDKit Mol object and all requested
+    descriptors are computed in a single C++ call per molecule using
+    ``rdMolDescriptors.Properties`` for efficiency.
+
+    Parameters
+    ----------
+    smiles_list : list of str
+        A list of SMILES strings representing ligands.
+
+        - Each element must be a valid SMILES string accepted by
+          ``Chem.MolFromSmiles``.
+        - Invalid SMILES strings are silently skipped and do not appear in
+          the output.
+
+    descriptor_names : list of str
+        A list of RDKit molecular property names to compute.
+
+        - Each name must be supported by ``rdMolDescriptors.Properties``.
+        - Property names are case-sensitive.
+        - All descriptors are returned as scalar numeric values (floats).
+        - Available property names include: exactmw, amw, NumHeavyAtoms, NumHBD,
+          NumHBA, NumRotatableBonds, NumRings, NumAromaticRings, NumAliphaticRings,
+          tpsa, CrippenClogP, CrippenMR, and more.
+
+    Returns
+    -------
+    rows : list of list of float
+        A list of descriptor rows, one per successfully parsed ligand.
+
+        - Each inner list has length ``len(descriptor_names)``.
+        - Descriptor values are returned in the same order as ``descriptor_names``.
+        - Output order corresponds to the input order of valid SMILES only
+          (invalid entries are omitted).
+
+    Notes
+    -----
+    - Each ligand is parsed and sanitised exactly once.
+    - All descriptors for a ligand are computed in a single call to minimise
+      Python overhead.
+    - This function does not perform multiprocessing, caching, or NaN filling.
+    - No NumPy arrays are created; output is returned as plain Python lists.
+
+    Raises
+    ------
+    ValueError
+        If ``descriptor_names`` contains a name not supported by
+        ``Chem.rdMolDescriptors.Properties``.
+    """
+
+    props = Chem.rdMolDescriptors.Properties(descriptor_names)
+
+    rows = []
+
+    for smiles in smiles_list:
+        mol = Chem.MolFromSmiles(smiles)
+        if mol is None:
+            continue
+        # Compute all descriptors in one call, convert to plain Python list
+        rows.append(list(props.ComputeProperties(mol)))
+
+    return rows
