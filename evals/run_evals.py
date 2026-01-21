@@ -4,6 +4,7 @@
 import argparse
 import asyncio
 import json
+import logging
 import os
 import sys
 from dataclasses import replace
@@ -17,15 +18,27 @@ if __name__ == "__main__" and __package__ is None:
 from pydantic_evals import Dataset
 
 from evals.rdkit_dataset import rdkit_eval_dataset
-from evals.batch_comparison_dataset import batch_comparison_dataset
+from evals.batch_comparison_dataset import create_batch_comparison_dataset, DEFAULT_BATCH_SIZE
 from evals.compute_descriptors_dataset import compute_descriptors_eval_dataset
 from evals.task import run_task_async
 
+logger = logging.getLogger(__name__)
+
 AVAILABLE_DATASETS = {
     "rdkit": rdkit_eval_dataset,
-    "batch_comparison": batch_comparison_dataset,
+    "batch_comparison": None,  # Created dynamically with batch_size
     "descriptors": compute_descriptors_eval_dataset,
 }
+
+AVAILABLE_MODELS = [
+    "openai:gpt-4o",
+    "openai:gpt-4o-mini",
+    "openai:gpt-4-turbo",
+    "anthropic:claude-sonnet-4-20250514",
+    "anthropic:claude-3-5-sonnet-20241022",
+    "deepseek:deepseek-chat",
+    "deepseek:deepseek-reasoner",
+]
 
 
 async def main() -> None:
@@ -52,8 +65,9 @@ async def main() -> None:
     parser.add_argument(
         "--model",
         type=str,
+        choices=AVAILABLE_MODELS,
         default="openai:gpt-4o",
-        help="Model to use for evaluation tasks (default: openai:gpt-4o)",
+        help=f"Model to use for evaluation tasks (choices: {', '.join(AVAILABLE_MODELS)}, default: openai:gpt-4o)",
     )
     parser.add_argument(
         "--dataset",
@@ -62,9 +76,26 @@ async def main() -> None:
         default="rdkit",
         help=f"Dataset to run (choices: {', '.join(AVAILABLE_DATASETS.keys())}, default: rdkit)",
     )
+    parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=DEFAULT_BATCH_SIZE,
+        help=f"Batch size for batch_comparison dataset (default: {DEFAULT_BATCH_SIZE})",
+    )
     args = parser.parse_args()
 
-    dataset = AVAILABLE_DATASETS[args.dataset]
+    # Warn if --batch-size is used with a dataset other than batch_comparison
+    if args.batch_size != DEFAULT_BATCH_SIZE and args.dataset != "batch_comparison":
+        logger.warning(
+            f"--batch-size is only used with the batch_comparison dataset; "
+            f"ignoring value {args.batch_size} for dataset '{args.dataset}'"
+        )
+
+    # Get or create dataset
+    if args.dataset == "batch_comparison":
+        dataset = create_batch_comparison_dataset(args.batch_size)
+    else:
+        dataset = AVAILABLE_DATASETS[args.dataset]
 
     # Apply model override to all cases
     updated_cases = []
