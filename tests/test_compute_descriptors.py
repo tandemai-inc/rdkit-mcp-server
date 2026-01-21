@@ -5,14 +5,13 @@ This module tests the compute_descriptors function which computes
 RDKit molecular property descriptors for a collection of ligands using
 the efficient rdMolDescriptors.Properties API.
 """
+from rdkit_mcp.Chem.rdMolDescriptors import compute_descriptors
+import pytest
 import sys
 from pathlib import Path
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
-
-import pytest
-from rdkit_mcp.Chem.rdMolDescriptors import compute_descriptors
 
 
 # Test molecules with known descriptor values
