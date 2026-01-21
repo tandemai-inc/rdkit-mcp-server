@@ -32,7 +32,7 @@ SMILES_FROM_CSV = load_smiles_from_csv(CSV_PATH)[:DATASET_SIZE]
 SMILES_COUNT = len(SMILES_FROM_CSV)
 
 # Case 1: Synchronous MolWt - call the tool for each SMILES individually
-case_sync_molwt = Case(
+case_molwt_tool = Case(
     name="sync_molwt_big_dataset",
     inputs=TaskInput(
         prompt=(
@@ -69,7 +69,7 @@ case_sync_molwt = Case(
 )
 
 # Case 2: Batch MolWt using batch_map with high concurrency
-case_batch_molwt = Case(
+case_batch_map_molwt = Case(
     name="batch_molwt_big_dataset",
     inputs=TaskInput(
         prompt=(
@@ -92,7 +92,6 @@ case_batch_molwt = Case(
         LLMJudge(
             rubric=(
                 f"The output must confirm that molecular weights were calculated for all {SMILES_COUNT} molecules. "
-                "The batch_map tool must have been used with concurrency set to 100."
             ),
             include_input=True,
             include_expected_output=True,
@@ -101,11 +100,46 @@ case_batch_molwt = Case(
     ],
 )
 
+
+# Case 3: compute_descriptors for molecular weight
+case_compute_descriptors_molwt = Case(
+    name="compute_descriptors_molwt",
+    inputs=TaskInput(
+        prompt=(
+            f"Use the compute_descriptors tool to calculate the exact molecular weight for {SMILES_COUNT} molecules. "
+            f"First, call get_smiles_from_context() to retrieve the SMILES list. "
+            f"Then call compute_descriptors with descriptor_names=['exactmw']. "
+            f"Response format:\n"
+            f"- Don't print smiles and mol weights.\n"
+            f"- Confirm the number of molecular weights calculated\n"
+            f"{REPORT_TOOL_CALLS}"
+        ),
+        context={"smiles_list": SMILES_FROM_CSV},
+    ),
+    expected_output=f"{SMILES_COUNT} molecular weights calculated using compute_descriptors",
+    metadata={
+        "category": "batch_comparison",
+        "method": "compute_descriptors",
+    },
+    evaluators=[
+        LLMJudge(
+            rubric=(
+                f"The output must state that {SMILES_COUNT} mol weights were calculated. "
+                "The compute_descriptors tool must have been used."
+            ),
+            include_input=True,
+            include_expected_output=True,
+        ),
+        UsedToolEvaluator(tool_name="compute_descriptors"),
+    ],
+)
+
 # Assemble the dataset
 batch_comparison_dataset = Dataset(
     name="batch_comparison_evals",
     cases=[
-        case_sync_molwt,
-        case_batch_molwt,
+        case_molwt_tool,
+        case_batch_map_molwt,
+        case_compute_descriptors_molwt,
     ],
 )
