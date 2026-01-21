@@ -267,22 +267,46 @@ def CalcOxidationNumbers(smiles: Smiles) -> float:
     return _CalcOxidationNumbers(mol)
 
 
-# Names gathered from  rdkit.Chem.rdMolDescriptors.Properties()
+# Names gathered from rdkit.Chem.rdMolDescriptors.Properties()
 DescriptorNames = Annotated[
-    Literal[
-        "exactmw", "amw", "lipinskiHBA", "lipinskiHBD", "NumRotatableBonds",
-        "NumHBD", "NumHBA", "NumHeavyAtoms", "NumAtoms", "NumHeteroatoms",
-        "NumAmideBonds", "FractionCSP3", "NumRings", "NumAromaticRings",
-        "NumAliphaticRings", "NumSaturatedRings", "NumHeterocycles",
-        "NumAromaticHeterocycles", "NumSaturatedHeterocycles",
-        "NumAliphaticHeterocycles", "NumSpiroAtoms", "NumBridgeheadAtoms",
-        "NumAtomStereoCenters", "NumUnspecifiedAtomStereoCenters",
-        "labuteASA", "tpsa", "CrippenClogP", "CrippenMR", "chi0v", "chi1v",
-        "chi2v", "chi3v", "chi2v", "chi3v", "chi4v", "kappa1", "kappa2",
-        "kappa3", "labuteASA", "tpsa", "CrippenClogP", "CrippenMR"
-        ],
-        Field(description="Supported RDKit molecular property descriptor names."),
-    ]
+    Annotated[Literal["exactmw"], Field(description="Exact molecular weight (monoisotopic mass)")]
+    | Annotated[Literal["amw"], Field(description="Average molecular weight")]
+    | Annotated[Literal["lipinskiHBA"], Field(description="Hydrogen bond acceptors (Lipinski definition: N + O count)")]
+    | Annotated[Literal["lipinskiHBD"], Field(description="Hydrogen bond donors (Lipinski definition: NH + OH count)")]
+    | Annotated[Literal["NumRotatableBonds"], Field(description="Number of rotatable bonds (excludes terminal bonds)")]
+    | Annotated[Literal["NumHBD"], Field(description="Number of hydrogen bond donors")]
+    | Annotated[Literal["NumHBA"], Field(description="Number of hydrogen bond acceptors")]
+    | Annotated[Literal["NumHeavyAtoms"], Field(description="Number of non-hydrogen atoms")]
+    | Annotated[Literal["NumAtoms"], Field(description="Total number of atoms including hydrogens")]
+    | Annotated[Literal["NumHeteroatoms"], Field(description="Number of non-carbon, non-hydrogen atoms")]
+    | Annotated[Literal["NumAmideBonds"], Field(description="Number of amide bonds (C(=O)-N)")]
+    | Annotated[Literal["FractionCSP3"], Field(description="Fraction of sp3 hybridized carbons")]
+    | Annotated[Literal["NumRings"], Field(description="Total number of rings (SSSR count)")]
+    | Annotated[Literal["NumAromaticRings"], Field(description="Number of aromatic rings")]
+    | Annotated[Literal["NumAliphaticRings"], Field(description="Number of aliphatic (non-aromatic) rings")]
+    | Annotated[Literal["NumSaturatedRings"], Field(description="Number of saturated rings (no double bonds)")]
+    | Annotated[Literal["NumHeterocycles"], Field(description="Number of rings containing heteroatoms")]
+    | Annotated[Literal["NumAromaticHeterocycles"], Field(description="Number of aromatic rings with heteroatoms")]
+    | Annotated[Literal["NumSaturatedHeterocycles"], Field(description="Number of saturated rings with heteroatoms")]
+    | Annotated[Literal["NumAliphaticHeterocycles"], Field(description="Number of aliphatic rings with heteroatoms")]
+    | Annotated[Literal["NumSpiroAtoms"], Field(description="Number of spiro atoms (shared between two rings)")]
+    | Annotated[Literal["NumBridgeheadAtoms"], Field(description="Number of bridgehead atoms in fused ring systems")]
+    | Annotated[Literal["NumAtomStereoCenters"], Field(description="Number of atomic stereocenters (chiral centers)")]
+    | Annotated[Literal["NumUnspecifiedAtomStereoCenters"], Field(description="Number of stereocenters with undefined stereochemistry")]
+    | Annotated[Literal["labuteASA"], Field(description="Labute's approximate surface area")]
+    | Annotated[Literal["tpsa"], Field(description="Topological polar surface area")]
+    | Annotated[Literal["CrippenClogP"], Field(description="Wildman-Crippen LogP (lipophilicity estimate)")]
+    | Annotated[Literal["CrippenMR"], Field(description="Wildman-Crippen molar refractivity")]
+    | Annotated[Literal["chi0v"], Field(description="Chi0v molecular connectivity index (valence, order 0)")]
+    | Annotated[Literal["chi1v"], Field(description="Chi1v molecular connectivity index (valence, order 1)")]
+    | Annotated[Literal["chi2v"], Field(description="Chi2v molecular connectivity index (valence, order 2)")]
+    | Annotated[Literal["chi3v"], Field(description="Chi3v molecular connectivity index (valence, order 3)")]
+    | Annotated[Literal["chi4v"], Field(description="Chi4v molecular connectivity index (valence, order 4)")]
+    | Annotated[Literal["kappa1"], Field(description="Kappa1 shape index (encodes atom count & branching)")]
+    | Annotated[Literal["kappa2"], Field(description="Kappa2 shape index (encodes path/branching complexity)")]
+    | Annotated[Literal["kappa3"], Field(description="Kappa3 shape index (encodes higher-order shape features)")],
+    Field(description="Supported RDKit molecular property descriptor names."),
+]
 
 
 @rdkit_tool()
