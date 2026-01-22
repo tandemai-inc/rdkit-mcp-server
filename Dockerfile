@@ -3,6 +3,7 @@ FROM public.ecr.aws/docker/library/python:3.10-slim
 
 ARG APP_PORT=8000
 ENV DEBIAN_FRONTEND=noninteractive
+ARG CN_BUILD=false
 
 WORKDIR /app
 
@@ -15,9 +16,9 @@ COPY README.md .
 COPY LICENSE .
 COPY pyproject.toml .
 
-RUN pip install --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple
+RUN if [ "$CN_BUILD" = "true" ]; then pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple; fi
+RUN pip install .
 
-RUN pip install --no-cache-dir --extra-index-url https://rdkit.org/pip --only-binary=all --retries 5 --timeout 120 .
 
 COPY . .
 
