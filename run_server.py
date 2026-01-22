@@ -3,7 +3,6 @@ import argparse
 import logging
 import yaml
 from mcp.server.fastmcp import FastMCP
-from mcp.server.transport_security import TransportSecuritySettings
 
 from rdkit_mcp.register_tools import register_tools
 from rdkit_mcp.settings import ToolSettings
@@ -48,11 +47,6 @@ async def main():
     block_list = settings.BLOCK_LIST
     logger.info("Registering tools with MCP server...")
     await register_tools(mcp, allow_list=allow_list, block_list=block_list)
-
-    # Disable DNS rebinding protection for Docker networking
-    mcp.settings.transport_security = TransportSecuritySettings(
-        enable_dns_rebinding_protection=False
-    )
 
     # Start server
     logger.info(f"Starting RDKit MCP Server with transport: {transport}")
