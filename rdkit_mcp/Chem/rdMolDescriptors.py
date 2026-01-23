@@ -321,43 +321,10 @@ def compute_descriptors(
     descriptors are computed in a single C++ call per molecule using
     ``rdMolDescriptors.Properties`` for efficiency.
 
-    Parameters
-    ----------
-    smiles_list : list of str
-        A list of SMILES strings representing ligands.
-
-        - Each element must be a valid SMILES string accepted by
-          ``Chem.MolFromSmiles``.
-        - Invalid SMILES strings are silently skipped and do not appear in
-          the output.
-
-    descriptor_names : list of str
-        A list of RDKit molecular property names to compute.
-
-        - Each name must be supported by ``rdMolDescriptors.Properties``.
-        - Property names are case-sensitive.
-        - All descriptors are returned as scalar numeric values (floats).
-        - Available property names include: exactmw, amw, NumHeavyAtoms, NumHBD,
-          NumHBA, NumRotatableBonds, NumRings, NumAromaticRings, NumAliphaticRings,
-          tpsa, CrippenClogP, CrippenMR, and more.
-
-    Returns
-    -------
-    rows : list of list of float
-        A list of descriptor rows, one per successfully parsed ligand.
-
-        - Each inner list has length ``len(descriptor_names)``.
-        - Descriptor values are returned in the same order as ``descriptor_names``.
-        - Output order corresponds to the input order of valid SMILES only
-          (invalid entries are omitted).
-
     Notes
     -----
     - Each ligand is parsed and sanitised exactly once.
-    - All descriptors for a ligand are computed in a single call to minimise
-      Python overhead.
     - This function does not perform multiprocessing, caching, or NaN filling.
-    - No NumPy arrays are created; output is returned as plain Python lists.
 
     Raises
     ------
