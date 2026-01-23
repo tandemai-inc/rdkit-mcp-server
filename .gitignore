@@ -3,7 +3,6 @@ __pycache__
 outputs
 .vscode
 node_modules
-promptfoo-errors.log
 .DS_Store
 !settings.example.yaml
 settings*.yaml

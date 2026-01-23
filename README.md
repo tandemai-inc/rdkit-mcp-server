@@ -16,7 +16,7 @@ RDKit MCP Server is an open-source MCP server that enables language models to in
   * [Start the Server](#start-the-server)
   * [CLI Client](#cli-client)
 * [Available Tools](#available-tools)
-* [Evaluating with Promptfoo](#evaluating-with-promptfoo)
+* [Evaluations](#evaluations)
 * [Contributing](#contributing)
 
 
@@ -57,40 +57,38 @@ List all available RDKit tools exposed by the server:
 python list_tools.py [--settings settings.yaml]
 ```
 
-## Evaluating with Promptfoo
+## Evaluations
 
-We have provided examples configurations for using [Promptfoo](https://promptfoo.dev/) to evaluate the quality of RDKit tool outputs and agent responses against various models. The `evals` directory contains example configs and test cases.
+The `evals` directory contains a test suite for evaluating RDKit MCP tool outputs and agent responses using [pydantic-evals](https://ai.pydantic.dev/evals/).
 
-### Install Promptfoo
-
-First, install Promptfoo globally using npm:
+### Install Dependencies
 
 ```bash
-npm install -g promptfoo
+pip install ".[evals]"
 ```
 
-### Install RDKit mcp server
-```bash
-pip install .
-```
+### Start the MCP Server
 
-### Run Evaluation
-
-To run an evaluation using the config in the `evals` directory:
+In one terminal, start the server:
 
 ```bash
-cd evals
-promptfoo eval
+python run_server.py
 ```
 
-This will execute the tests defined in `evals/promptfooconfig.yaml` and report the results. You can customize the config and add your own test cases as needed.
+### Run Evaluations
 
-The test results can be viewed using
+In another terminal, run the evaluation suite:
+
 ```bash
-promptfoo view
+python evals/run_evals.py
 ```
 
-For more details, see the [Promptfoo documentation](https://promptfoo.dev/docs/).
+Options:
+- `--verbose` - Show detailed output including inputs and outputs
+- `--filter <name>` - Run only cases matching the name
+- `--output-json results.json` - Export results to JSON
+
+Each test uses LLM-based evaluation (LLMJudge) to assess whether the agent correctly used the RDKit tools and produced accurate results.
 
 ## Contributing
 

@@ -1,20 +1,14 @@
 import asyncio
 import logging
-import openai
-import time
 
-from agents import Agent, Runner, gen_trace_id, trace
-from agents.mcp import MCPServer, MCPServerSse
-from agents.model_settings import ModelSettings
-
-from agents.tool import function_tool
+from pydantic_ai import Agent, RunContext
+from pydantic_ai.mcp import MCPServerSSE
+from pydantic_ai.exceptions import UnexpectedModelBehavior
 
 
 logger = logging.getLogger(__name__)
 
 MCP_URL = "http://localhost:8000/sse"
-MCP_NAME = "RDKIT MCP Server"
-OPENAI_TRACE_URL = "https://platform.openai.com/traces/trace?trace_id={}"
 
 AGENT_INSTRUCTIONS = (
     "You are an agent that aids scientists working in the field of chemistry. "
@@ -25,62 +19,54 @@ AGENT_INSTRUCTIONS = (
 )
 
 
-@function_tool(description_override="Reads the contents of a file at the given absolute file path.")
-def read_file(filepath: str) -> str:
-    with open(filepath, "r") as f:
-        return f.read()
-
-
-@function_tool(
-    description_override=(
-        "Writes file_contents to the specified filepath. "
-        "Returns the absolute path to the written file."
-    )
-)
-def write_file(filepath: str, file_content: str) -> str:
-    try:
-        decoded_content = file_content
-    except Exception as e:
-        raise ValueError(f"Failed to decode file content: {e}")
-
-    with open(filepath, "wb") as f:
-        f.write(decoded_content)
-    return filepath
-
-
-def create_agent(mcp_server: MCPServer = None, model: str = None) -> Agent:
+def create_agent(mcp_url: str = None, model: str = None) -> Agent:
     """Create an agent with the specified MCP server and model."""
-    mcp_servers = []
-    if mcp_server:
-        mcp_servers.append(mcp_server)
+    toolsets = []
+    if mcp_url:
+        toolsets.append(MCPServerSSE(mcp_url))
 
-    agent = Agent(
-        name="RDKIT Agent",
-        instructions=AGENT_INSTRUCTIONS,
-        mcp_servers=mcp_servers,
-        model_settings=ModelSettings(tool_choice="auto"),
-        model=model
+    # Format model string for pydantic-ai (requires provider prefix)
+    model_str = model or "gpt-4o"
+    if not model_str.startswith("openai:"):
+        model_str = f"openai:{model_str}"
+
+    agent: Agent[None, str] = Agent(
+        model_str,
+        system_prompt=AGENT_INSTRUCTIONS,
+        toolsets=toolsets,
     )
-    agent.tools.append(read_file)
-    agent.tools.append(write_file)
+
+    # Register local tools
+    @agent.tool
+    async def read_file(ctx: RunContext[None], filepath: str) -> str:
+        """Reads the contents of a file at the given absolute file path."""
+        with open(filepath, "r") as f:
+            return f.read()
+
+    @agent.tool
+    async def write_file(ctx: RunContext[None], filepath: str, file_content: str) -> str:
+        """Writes file_contents to the specified filepath. Returns the absolute path to the written file."""
+        with open(filepath, "w") as f:
+            f.write(file_content)
+        return filepath
+
     return agent
 
 
-async def main(prompt: str = None, model: str = "4o-mini"):
+async def main(prompt: str = None, model: str = "gpt-4o-mini"):
     prompt = prompt or ""
 
-    async with MCPServerSse(
-        name=MCP_NAME,
-        params={"url": MCP_URL},
-    ) as server:
-        agent = create_agent(mcp_server=server, model=model)
+    agent = create_agent(mcp_url=MCP_URL, model=model)
 
-        conversation_history = []
+    conversation_history = []
+
+    async with agent:
         while True:
             if not prompt:
                 prompt = input("Enter a prompt or 'exit': ")
             if prompt.lower().strip() == "exit":
                 break
+
             # Append user's message to history
             conversation_history.append({"role": "user", "content": prompt})
 
@@ -89,25 +75,39 @@ async def main(prompt: str = None, model: str = "4o-mini"):
                 [f"{msg['role']}: {msg['content']}" for msg in conversation_history]
             )
 
-            trace_id = gen_trace_id()
-            with trace(workflow_name=prompt, trace_id=trace_id):
-                print(f"View trace: {OPENAI_TRACE_URL.format(trace_id)}\n")
-                retry_attempts = 5
-                result = None
-                for i in range(retry_attempts):
-                    try:
-                        result: Runner = await Runner.run(starting_agent=agent, input=full_prompt)
-                        break
-                    except openai.RateLimitError:
+            retry_attempts = 5
+            result = None
+            last_error = None
+
+            for i in range(retry_attempts):
+                try:
+                    result = await agent.run(full_prompt)
+                    break
+                except UnexpectedModelBehavior as e:
+                    last_error = e
+                    wait = 2 ** (i + 5)
+                    logger.error(f"Model error. Retrying in {wait} seconds...")
+                    await asyncio.sleep(wait)
+                except Exception as e:
+                    # Check if it's a rate limit error
+                    if "rate" in str(e).lower() or "429" in str(e):
+                        last_error = e
                         wait = 2 ** (i + 5)
                         logger.error(f"Rate limit hit. Retrying in {wait} seconds...")
-                        time.sleep(wait)
+                        await asyncio.sleep(wait)
+                    else:
+                        raise
 
-                if result:
-                    print(f"\n{result.final_output}\n")
-                    # Add assistant's response to history
-                    conversation_history.append({"role": "assistant", "content": result.final_output})
-                prompt = ""
+            if result:
+                output = str(result.output)
+                print(f"\n{output}\n")
+                # Add assistant's response to history
+                conversation_history.append({"role": "assistant", "content": output})
+            elif last_error:
+                print(f"\nError after {retry_attempts} retries: {last_error}\n")
+
+            prompt = ""
+
 
 if __name__ == "__main__":
     asyncio.run(main())
