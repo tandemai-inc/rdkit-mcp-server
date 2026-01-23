@@ -1,10 +1,10 @@
 # Specify tool names or modules to allow (specifying module allow all tools within)
-allow_list:
+ALLOW_LIST:
   - ExactMolWt
   - rdkit_mcp.Chem.Descriptors
 
 # Specify tool names or modules to block (specifying module block all tools within)
-block_list:
+BLOCK_LIST:
   - ExactMolWt
   - rdkit_mcp.Chem.Descriptors
 
