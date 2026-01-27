@@ -5,6 +5,12 @@ from pydantic import Field
 Smiles = Annotated[
     str, Field(description="SMILES string representating a molecule's structure")
 ]
+Smarts = Annotated[
+    str,
+    Field(
+        description="SMARTS (SMiles ARbitrary Target Specification) string representing a substructure pattern for matching molecular fragments"
+    ),
+]
 MolFragments = Annotated[
     tuple[Smiles | None, Smiles],
     Field(
