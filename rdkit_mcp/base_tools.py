@@ -6,7 +6,7 @@ from pathlib import Path
 from rdkit import Chem
 
 from .decorators import rdkit_tool
-from .types import PickledMol, Smiles
+from .types import PickledMol, Smarts, Smiles
 from .utils import encode_mol, decode_mol
 
 logger = logging.getLogger(__name__)
@@ -20,6 +20,18 @@ def smiles_to_mol(smiles: Smiles) -> PickledMol:
     mol = Chem.MolFromSmiles(smiles)
     if mol is None:
         raise ToolError(f"Invalid or unparsable SMILES string: {smiles}")
+    encoded_mol = encode_mol(mol)
+    return encoded_mol
+
+
+@rdkit_tool()
+def smarts_to_mol(smarts: Smarts) -> PickledMol:
+    """
+    Converts a SMARTS string into a base 64 encoded pickled RDKit Mol object.
+    """
+    mol = Chem.MolFromSmarts(smarts)
+    if mol is None:
+        raise ToolError(f"Invalid or unparsable SMARTS string: {smarts}")
     encoded_mol = encode_mol(mol)
     return encoded_mol
 

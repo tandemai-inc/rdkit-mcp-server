@@ -5,7 +5,7 @@ from rdkit.Chem import rdMMPA
 from mcp.server.fastmcp.exceptions import ToolError
 from typing import List
 from ..decorators import rdkit_tool
-from ..types import Smiles, MolFragments
+from ..types import Smarts, Smiles, MolFragments
 
 logger = logging.getLogger(__name__)
 
@@ -15,15 +15,15 @@ def FragmentMol(
     smiles: Smiles,
     maxCuts: int = 3,
     maxCutBonds: int = 20,
-    pattern: str = "[#6+0;!$(*=,#[!#6])]!@!=!#[*]",
+    pattern: Smarts = "[#6+0;!$(*=,#[!#6])]!@!=!#[*]",
 ) -> List[MolFragments]:
     """Does the fragmentation necessary for an MMPA analysis.
 
     Parameters:
-    - smiles (str): The SMILES string of the molecule to be fragmented.
+    - smiles (Smiles): The SMILES string of the molecule to be fragmented.
     - maxCuts (int): Maximum number of cuts to make in the molecule.
     - maxCutBonds (int): Maximum number of bonds to cut.
-    - pattern (str): An rSMARTS string defining the bond-breaking SMARTS pattern to use.
+    - pattern (Smarts): An rSMARTS string defining the bond-breaking SMARTS pattern to use.
 
     Returns:
     - list[MolFragments]: A list of fragment pairs. Each pair is a 2-tuple
