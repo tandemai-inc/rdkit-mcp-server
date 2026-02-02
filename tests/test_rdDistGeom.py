@@ -1,12 +1,18 @@
 """
 Test suite for rdDistGeom module.
 
-This module tests the EmbedMolecule function which uses distance geometry
-to generate 3D coordinates for molecules.
+This module tests the EmbedMolecule and EmbedMultipleConfs functions which use
+distance geometry to generate 3D coordinates for molecules.
 """
 import pytest
 from rdkit import Chem
-from rdkit_mcp.Chem.rdDistGeom import EmbedMolecule, EmbedMoleculeResult, EmbedParameters
+from rdkit_mcp.Chem.rdDistGeom import (
+    EmbedMolecule,
+    EmbedMoleculeResult,
+    EmbedMultipleConfs,
+    EmbedMultipleConfsResult,
+    EmbedParameters
+)
 from rdkit_mcp.base_tools import smiles_to_mol
 from rdkit_mcp.utils import decode_mol
 
@@ -501,3 +507,247 @@ class TestEmbedMoleculeAdvancedParameters:
         assert result.conf_id >= 0
         mol = decode_mol(result.mol)
         assert mol.GetNumConformers() == 1
+
+
+class TestEmbedMultipleConfsBasic:
+    """Basic functionality tests for EmbedMultipleConfs."""
+
+    def test_simple_multiple_confs(self):
+        """Test generating multiple conformations for a simple molecule."""
+        smiles = "CCCCCC"  # Hexane (flexible molecule)
+        p_mol = smiles_to_mol(smiles)
+
+        result = EmbedMultipleConfs(p_mol, numConfs=5)
+
+        # Should return an EmbedMultipleConfsResult
+        assert isinstance(result, EmbedMultipleConfsResult)
+        assert hasattr(result, "conf_ids")
+        assert hasattr(result, "num_confs")
+        assert hasattr(result, "mol")
+
+        # Should have generated conformations
+        assert result.num_confs > 0
+        assert len(result.conf_ids) == result.num_confs
+
+        # Verify the molecule has the conformations
+        mol = decode_mol(result.mol)
+        assert mol.GetNumConformers() == result.num_confs
+
+    def test_default_num_confs(self):
+        """Test that default numConfs (10) works."""
+        smiles = "CCCC"
+        p_mol = smiles_to_mol(smiles)
+
+        result = EmbedMultipleConfs(p_mol)
+
+        # Should generate up to 10 conformations
+        assert result.num_confs > 0
+        mol = decode_mol(result.mol)
+        assert mol.GetNumConformers() == result.num_confs
+
+    def test_with_random_seed(self):
+        """Test reproducibility with random seed."""
+        smiles = "CCCCC"
+        p_mol1 = smiles_to_mol(smiles)
+        p_mol2 = smiles_to_mol(smiles)
+
+        params = EmbedParameters(randomSeed=42)
+        result1 = EmbedMultipleConfs(p_mol1, numConfs=5, params=params)
+        result2 = EmbedMultipleConfs(p_mol2, numConfs=5, params=params)
+
+        # Should generate same number of conformations
+        assert result1.num_confs == result2.num_confs
+
+        # Coordinates should be identical
+        mol1 = decode_mol(result1.mol)
+        mol2 = decode_mol(result2.mol)
+
+        for conf_idx in range(result1.num_confs):
+            conf1 = mol1.GetConformer(result1.conf_ids[conf_idx])
+            conf2 = mol2.GetConformer(result2.conf_ids[conf_idx])
+
+            for atom_idx in range(mol1.GetNumAtoms()):
+                pos1 = conf1.GetAtomPosition(atom_idx)
+                pos2 = conf2.GetAtomPosition(atom_idx)
+                assert abs(pos1.x - pos2.x) < 1e-6
+                assert abs(pos1.y - pos2.y) < 1e-6
+                assert abs(pos1.z - pos2.z) < 1e-6
+
+    def test_drug_like_molecule(self):
+        """Test multiple conformations for a drug-like molecule."""
+        smiles = "CC(C)CC1=CC=C(C=C1)C(C)C(=O)O"  # Ibuprofen
+        p_mol = smiles_to_mol(smiles)
+
+        result = EmbedMultipleConfs(p_mol, numConfs=10)
+
+        assert result.num_confs > 0
+        assert len(result.conf_ids) == result.num_confs
+
+        mol = decode_mol(result.mol)
+        assert mol.GetNumConformers() == result.num_confs
+
+
+class TestEmbedMultipleConfsPruning:
+    """Tests for conformer pruning functionality."""
+
+    def test_pruning_with_threshold(self):
+        """Test that pruning reduces number of conformations."""
+        smiles = "CCCCCCCC"  # Octane (very flexible)
+        p_mol1 = smiles_to_mol(smiles)
+        p_mol2 = smiles_to_mol(smiles)
+
+        # Without pruning
+        params_no_prune = EmbedParameters(randomSeed=123, pruneRmsThresh=-1.0)
+        result_no_prune = EmbedMultipleConfs(p_mol1, numConfs=20, params=params_no_prune)
+
+        # With aggressive pruning
+        params_prune = EmbedParameters(randomSeed=123, pruneRmsThresh=2.0)
+        result_prune = EmbedMultipleConfs(p_mol2, numConfs=20, params=params_prune)
+
+        # Pruning should result in fewer conformations
+        assert result_prune.num_confs <= result_no_prune.num_confs
+
+    def test_pruning_heavy_atoms_only(self):
+        """Test pruning using only heavy atoms for RMSD."""
+        smiles = "CCCCCC"
+        p_mol = smiles_to_mol(smiles)
+
+        params = EmbedParameters(
+            randomSeed=42,
+            pruneRmsThresh=1.0,
+            onlyHeavyAtomsForRMS=True
+        )
+        result = EmbedMultipleConfs(p_mol, numConfs=10, params=params)
+
+        assert result.num_confs > 0
+        # All conformations should be at least 1.0 Angstrom apart (heavy atoms)
+
+    def test_pruning_with_symmetry(self):
+        """Test pruning with molecular symmetry."""
+        smiles = "c1ccccc1"  # Benzene (symmetric)
+        p_mol = smiles_to_mol(smiles)
+
+        params = EmbedParameters(
+            randomSeed=42,
+            pruneRmsThresh=0.5,
+            useSymmetryForPruning=True
+        )
+        result = EmbedMultipleConfs(p_mol, numConfs=10, params=params)
+
+        assert result.num_confs > 0
+
+
+class TestEmbedMultipleConfsParameters:
+    """Tests for various parameters with multiple conformations."""
+
+    def test_clear_confs_true(self):
+        """Test that clearConfs=True removes existing conformations."""
+        smiles = "CCCC"
+        p_mol = smiles_to_mol(smiles)
+
+        # First embedding
+        params1 = EmbedParameters(randomSeed=1)
+        result1 = EmbedMultipleConfs(p_mol, numConfs=3, params=params1)
+
+        # Second embedding with clearConfs=True (default)
+        params2 = EmbedParameters(randomSeed=2, clearConfs=True)
+        result2 = EmbedMultipleConfs(result1.mol, numConfs=5, params=params2)
+
+        mol = decode_mol(result2.mol)
+        # Should only have conformations from second embedding
+        assert mol.GetNumConformers() == result2.num_confs
+
+    def test_clear_confs_false(self):
+        """Test that clearConfs=False preserves existing conformations."""
+        smiles = "CCCC"
+        p_mol = smiles_to_mol(smiles)
+
+        # First embedding
+        params1 = EmbedParameters(randomSeed=1)
+        result1 = EmbedMultipleConfs(p_mol, numConfs=3, params=params1)
+
+        # Second embedding with clearConfs=False
+        params2 = EmbedParameters(randomSeed=2, clearConfs=False)
+        result2 = EmbedMultipleConfs(result1.mol, numConfs=5, params=params2)
+
+        mol = decode_mol(result2.mol)
+        # Should have conformations from both embeddings
+        assert mol.GetNumConformers() >= result1.num_confs + result2.num_confs
+
+    def test_with_threading(self):
+        """Test multi-threaded conformer generation."""
+        smiles = "CCCCCCCC"
+        p_mol = smiles_to_mol(smiles)
+
+        params = EmbedParameters(randomSeed=42, numThreads=2)
+        result = EmbedMultipleConfs(p_mol, numConfs=20, params=params)
+
+        assert result.num_confs > 0
+        assert len(result.conf_ids) == result.num_confs
+
+    def test_enforce_chirality(self):
+        """Test multiple conformations with chirality enforcement."""
+        smiles = "C[C@H](O)CC"  # Chiral molecule
+        p_mol = smiles_to_mol(smiles)
+
+        params = EmbedParameters(randomSeed=42, enforceChirality=True)
+        result = EmbedMultipleConfs(p_mol, numConfs=5, params=params)
+
+        assert result.num_confs > 0
+        mol = decode_mol(result.mol)
+        assert mol.GetNumConformers() == result.num_confs
+
+    def test_macrocycle_multiple_confs(self):
+        """Test multiple conformations for a macrocycle."""
+        smiles = "C1CCCCCCCCCCC1"  # 12-membered ring
+        p_mol = smiles_to_mol(smiles)
+
+        params = EmbedParameters(
+            randomSeed=42,
+            useMacrocycleTorsions=True,
+            useMacrocycle14config=True
+        )
+        result = EmbedMultipleConfs(p_mol, numConfs=10, params=params)
+
+        assert result.num_confs > 0
+
+
+class TestEmbedMultipleConfsEdgeCases:
+    """Edge case tests for EmbedMultipleConfs."""
+
+    def test_single_conf(self):
+        """Test generating just one conformation."""
+        smiles = "CCCC"
+        p_mol = smiles_to_mol(smiles)
+
+        result = EmbedMultipleConfs(p_mol, numConfs=1)
+
+        assert result.num_confs == 1
+        assert len(result.conf_ids) == 1
+
+        mol = decode_mol(result.mol)
+        assert mol.GetNumConformers() == 1
+
+    def test_many_confs(self):
+        """Test generating many conformations."""
+        smiles = "CCCCCC"  # Flexible molecule
+        p_mol = smiles_to_mol(smiles)
+
+        result = EmbedMultipleConfs(p_mol, numConfs=50)
+
+        assert result.num_confs > 0
+        assert len(result.conf_ids) == result.num_confs
+
+        mol = decode_mol(result.mol)
+        assert mol.GetNumConformers() == result.num_confs
+
+    def test_rigid_molecule(self):
+        """Test multiple conformations for a rigid molecule."""
+        smiles = "c1ccccc1"  # Benzene (very rigid)
+        p_mol = smiles_to_mol(smiles)
+
+        params = EmbedParameters(randomSeed=42)
+        result = EmbedMultipleConfs(p_mol, numConfs=10, params=params)
+
+        # Even rigid molecules should generate requested conformations
+        assert result.num_confs > 0

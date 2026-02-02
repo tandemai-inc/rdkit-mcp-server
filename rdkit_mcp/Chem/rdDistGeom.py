@@ -200,6 +200,26 @@ class EmbedMoleculeResult(BaseModel):
     )
 
 
+class EmbedMultipleConfsResult(BaseModel):
+    """Result from embedding multiple conformations of a molecule.
+
+    Attributes:
+        conf_ids: List of IDs for the new conformations added to the molecule.
+                  Empty list if embedding fails completely.
+        num_confs: Number of conformations successfully embedded.
+        mol: The modified molecule with embedded 3D coordinates (pickled).
+    """
+    conf_ids: list[int] = Field(
+        description="List of conformation IDs added to the molecule"
+    )
+    num_confs: int = Field(
+        description="Number of conformations successfully embedded"
+    )
+    mol: PickledMol = Field(
+        description="The molecule with embedded 3D coordinates for all conformations"
+    )
+
+
 @rdkit_tool(description=_rdDistGeom.EmbedMolecule.__doc__)
 def EmbedMolecule(
     p_mol: PickledMol,
@@ -231,5 +251,47 @@ def EmbedMolecule(
 
     return EmbedMoleculeResult(
         conf_id=conf_id,
+        mol=encode_mol(mol)
+    )
+
+
+@rdkit_tool(description=_rdDistGeom.EmbedMultipleConfs.__doc__)
+def EmbedMultipleConfs(
+    p_mol: PickledMol,
+    numConfs: int = 10,
+    params: EmbedParameters = None
+) -> EmbedMultipleConfsResult:
+    """
+    Use distance geometry to obtain multiple sets of coordinates for a molecule.
+
+    ARGUMENTS:
+        p_mol: the pickled molecule of interest
+        numConfs: the number of conformers to generate (default: 10)
+        params: EmbedParameters object controlling the embedding behavior.
+            If not provided, default parameters will be used.
+            Note: pruneRmsThresh in params controls conformer diversity - only conformations
+            at least this distance apart (RMSD in Angstroms) will be retained.
+
+    RETURNS:
+        EmbedMultipleConfsResult with:
+            - conf_ids: List of conformation IDs added to the molecule
+            - num_confs: Number of conformations successfully embedded
+            - mol: The modified molecule with all embedded conformations (pickled)
+    """
+    mol: Mol = decode_mol(p_mol)
+
+    # Use default parameters if none provided
+    if params is None:
+        params = EmbedParameters()
+
+    # Convert Pydantic parameters to RDKit parameters
+    rdkit_params: _rdDistGeom.EmbedParameters = params.to_rdkit_params()
+
+    # Embed multiple conformations
+    conf_ids = _rdDistGeom.EmbedMultipleConfs(mol, numConfs, rdkit_params)
+
+    return EmbedMultipleConfsResult(
+        conf_ids=list(conf_ids),
+        num_confs=len(conf_ids),
         mol=encode_mol(mol)
     )
