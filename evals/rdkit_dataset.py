@@ -176,6 +176,46 @@ case_batch_molecular_weight = Case(
     ],
 )
 
+# Case 9: SMILES to 3D SDF
+case_smiles_to_3d_sdf = Case(
+    name="smiles_to_3d_sdf",
+    inputs=TaskInput(
+        prompt=(
+            "Convert this SMILES string to an SDF file with 3D coordinates: CC(C)CC1=CC=C(C=C1)C(C)C(=O)O (ibuprofen). "
+            "Use the EmbedMolecule tool to generate the 3D coordinates. "
+            f"Write the SDF file to {os.path.join(os.getcwd(), 'outputs', 'ibuprofen_3d.sdf')} using the write_file tool. "
+            f"{REPORT_TOOL_CALLS}"
+        )
+    ),
+    expected_output="SDF file with 3D coordinates for ibuprofen",
+    metadata={
+        "smiles": "CC(C)CC1=CC=C(C=C1)C(C)C(=O)O",
+        "category": "3d_structure",
+    },
+    evaluators=[
+        LLMJudge(
+            rubric=(
+                "The response should confirm that: "
+                "(1) The SMILES was converted to a molecule, "
+                "(2) 3D coordinates were generated using EmbedMolecule or similar embedding tool, "
+                "(3) The molecule was written to an SDF file with 3D coordinates. "
+                "The output should mention successful embedding and file creation."
+            ),
+            include_input=True,
+            include_expected_output=True,
+        ),
+        UsedToolEvaluator(tool_name="EmbedMolecule"),
+        LLMJudge(
+            rubric=(
+                "The SDF file should contain valid 3D coordinates. "
+                "The response should indicate that coordinates were embedded successfully "
+                "and the file was written to the specified location."
+            ),
+            include_input=True,
+        ),
+    ],
+)
+
 # Assemble the dataset
 rdkit_eval_dataset = Dataset(
     name="rdkit_eval_dataset",
@@ -188,6 +228,7 @@ rdkit_eval_dataset = Dataset(
         case_atom_highlight,
         case_substructure_highlight,
         case_batch_molecular_weight,
+        case_smiles_to_3d_sdf,
     ],
 
 )
