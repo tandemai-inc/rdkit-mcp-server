@@ -150,6 +150,39 @@ class EmbedParameters(BaseModel):
         description="Dictionary mapping atom IDs to fixed coordinates (x, y, z)"
     )
 
+    def to_rdkit_params(self, method: str = "ETKDGv3"):
+        """Convert this Pydantic model to an RDKit EmbedParameters object.
+
+        Args:
+            method: The RDKit parameter initialization method to use.
+                    Currently supports: "ETKDGv3" (default)
+                    Future support could include: "ETKDGv2", "ETKDG", "KDG", "srETKDGv3", etc.
+
+        Returns:
+            Configured RDKit EmbedParameters object
+        """
+        # Create the appropriate RDKit params object
+        if method == "ETKDGv3":
+            rdkit_params = _rdDistGeom.ETKDGv3()
+        else:
+            raise ValueError(f"Unsupported method: {method}. Currently only 'ETKDGv3' is supported.")
+
+        # Set all parameters from this Pydantic model
+        params_dict = self.model_dump()
+        coord_map = params_dict.pop('coordMap', None)
+
+        for param_name, param_value in params_dict.items():
+            if hasattr(rdkit_params, param_name):
+                setattr(rdkit_params, param_name, param_value)
+            else:
+                logger.warning(f"Parameter '{param_name}' not found on RDKit EmbedParameters object")
+
+        # Set coordMap if provided (requires special method)
+        if coord_map:
+            rdkit_params.SetCoordMap(coord_map)
+
+        return rdkit_params
+
 
 class EmbedMoleculeResult(BaseModel):
     """Result from embedding a molecule with 3D coordinates.
@@ -191,22 +224,8 @@ def EmbedMolecule(
     if params is None:
         params = EmbedParameters()
 
-    # Create RDKit EmbedParameters object
-    rdkit_params = _rdDistGeom.ETKDGv3()
-
-    # Set all parameters from our Pydantic model
-    params_dict = params.model_dump()
-    coord_map = params_dict.pop('coordMap', None)
-
-    for param_name, param_value in params_dict.items():
-        if hasattr(rdkit_params, param_name):
-            setattr(rdkit_params, param_name, param_value)
-        else:
-            logger.warning(f"Parameter '{param_name}' not found on RDKit EmbedParameters object")
-
-    # Set coordMap if provided (requires special method)
-    if coord_map:
-        rdkit_params.SetCoordMap(coord_map)
+    # Convert Pydantic parameters to RDKit parameters
+    rdkit_params: _rdDistGeom.EmbedParameters = params.to_rdkit_params()
 
     conf_id = _rdDistGeom.EmbedMolecule(mol, rdkit_params)
 
