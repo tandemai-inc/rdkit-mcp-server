@@ -53,6 +53,9 @@ def decode_mol(b64_pickled_mol: str) -> Chem.Mol:
     return mol
 
 
+MAX_ENCODED_MOL_SIZE = 100000
+
+
 def encode_mol(mol: Chem.Mol) -> PickledMol:
     """
     Encode an RDKit Mol object into a base64 encoded pickled string.
@@ -62,7 +65,17 @@ def encode_mol(mol: Chem.Mol) -> PickledMol:
 
     Returns:
         str: Base64 encoded string of the pickled RDKit Mol object.
+
+    Raises:
+        ValueError: If encoded molecule exceeds MAX_ENCODED_MOL_SIZE.
     """
     pkl_mol_data = pickle.dumps(mol)
     encoded_mol = base64.b64encode(pkl_mol_data).decode('utf-8')
+
+    if len(encoded_mol) > MAX_ENCODED_MOL_SIZE:
+        raise ValueError(
+            f"Molecule too large ({len(encoded_mol):,} chars). "
+            f"For image generation, use MolToImage/MolToFile with pdb_path or sdf_path directly."
+        )
+
     return encoded_mol

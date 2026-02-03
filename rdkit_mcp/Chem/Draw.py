@@ -15,11 +15,56 @@ from rdkit_mcp.utils import decode_mol
 logger = logging.getLogger(__name__)
 
 
+def _get_mol_from_inputs(
+    pmol: PickledMol = None,
+    pdb_path: Union[str, Path] = None,
+    sdf_path: Union[str, Path] = None,
+) -> Chem.Mol:
+    """Load a molecule from either a PickledMol, PDB file, or SDF file."""
+    inputs_provided = sum(x is not None for x in [pmol, pdb_path, sdf_path])
+
+    if inputs_provided == 0:
+        raise ToolError("Must provide one of: pmol, pdb_path, or sdf_path")
+    if inputs_provided > 1:
+        raise ToolError("Provide only one of: pmol, pdb_path, or sdf_path")
+
+    if pmol is not None:
+        mol = decode_mol(pmol)
+        if mol is None:
+            raise ToolError("Failed to decode pickled molecule")
+        return mol
+
+    if pdb_path is not None:
+        pdb_path = Path(pdb_path)
+        if not pdb_path.exists():
+            raise ToolError(f"PDB file does not exist: {pdb_path}")
+        mol = Chem.MolFromPDBFile(str(pdb_path))
+        if mol is None:
+            raise ToolError(f"Failed to read molecule from PDB file: {pdb_path}")
+        return mol
+
+    if sdf_path is not None:
+        sdf_path = Path(sdf_path)
+        if not sdf_path.exists():
+            raise ToolError(f"SDF file does not exist: {sdf_path}")
+        suppl = Chem.SDMolSupplier(str(sdf_path))
+        mol = next((m for m in suppl if m is not None), None)
+        if mol is None:
+            raise ToolError(f"Failed to read molecule from SDF file: {sdf_path}")
+        return mol
+
+
 @rdkit_tool(description=Draw.MolToFile.__doc__)
-def MolToFile(pmol: PickledMol, file_dir: Union[str, Path], filename: str, width: int = 300, height: int = 300) -> str:
-    mol: Chem.Mol = decode_mol(pmol)
-    if mol is None:
-        raise ToolError(f"Invalid or unparsable SMILES string: {smiles}")
+def MolToFile(
+    file_dir: Union[str, Path],
+    filename: str,
+    pmol: Annotated[PickledMol, "Use only if you already have a PickledMol from a previous tool call"] = None,
+    pdb_path: Annotated[Union[str, Path], "Path to PDB file - use this instead of calling pdb_to_mol first"] = None,
+    sdf_path: Annotated[Union[str, Path], "Path to SDF file - use this instead of calling sdf_to_mol first"] = None,
+    width: int = 300,
+    height: int = 300,
+) -> str:
+    mol = _get_mol_from_inputs(pmol=pmol, pdb_path=pdb_path, sdf_path=sdf_path)
 
     if not filename.endswith('.png'):
         filename += '.png'
@@ -73,13 +118,14 @@ def MolsMatrixToGridImage(
 
 @rdkit_tool(description=Draw.MolToImage.__doc__)
 def MolToImage(
-    pmol: PickledMol,
+    file_dir: Union[str, Path],
+    pmol: Annotated[PickledMol, "Base64 encoded pickled mol (use for small molecules)"] = None,
+    pdb_path: Annotated[Union[str, Path], "Path to PDB file (use for large proteins)"] = None,
+    sdf_path: Annotated[Union[str, Path], "Path to SDF file"] = None,
     size: list[int, int] = [300, 300],
     kekulize: bool = True,
     wedgeBonds: bool = True,
     fitImage: bool = False,
-    # options=None,
-    file_dir: Union[str, Path] = None,
     filename: Annotated[str, "output filename"] = None,
     highlightAtoms: Annotated[list[int], "List of atom ids to highlight in image"] = None,
     highlightBonds: Annotated[list[int], "List of bond ids to highlight in image"] = None,
@@ -100,9 +146,8 @@ def MolToImage(
 
     if filename is None:
         filename = f"mol_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
-    mol: Chem.Mol = decode_mol(pmol)
-    if mol is None:
-        raise ToolError(f"Invalid or unparsable SMILES string: {smiles}")
+
+    mol = _get_mol_from_inputs(pmol=pmol, pdb_path=pdb_path, sdf_path=sdf_path)
 
     img = Draw.MolToImage(
         mol,
@@ -110,11 +155,9 @@ def MolToImage(
         kekulize=kekulize,
         wedgeBonds=wedgeBonds,
         fitImage=fitImage,
-        # options=options,
         highlightAtoms=highlightAtoms,
         highlightBonds=highlightBonds,
         highlightColor=highlightColor,
-        # **kwargs
     )
     filepath = Path(file_dir) / filename
     img.save(filepath, format="PNG")
