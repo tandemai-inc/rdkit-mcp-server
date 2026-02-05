@@ -30,7 +30,7 @@ def optimal_concurrency(n_items: int, max_concurrency: int = 50) -> int:
         return min(max_concurrency, n_items)
 
 
-def resolve_tool_name(tool_name: str, ctx: Context) -> str:
+async def resolve_tool_name(tool_name: str, ctx: Context) -> str:
     """
     Resolve a potentially prefixed tool name to the actual tool name on the MCP server.
 
@@ -47,7 +47,7 @@ def resolve_tool_name(tool_name: str, ctx: Context) -> str:
     Raises:
         ValueError: If tool is not found
     """
-    available_tools = ctx.fastmcp.list_tools()
+    available_tools = await ctx.fastmcp.list_tools()
     tool_names_set = {t.name for t in available_tools}
 
     # If exact match exists, use it
@@ -118,7 +118,7 @@ async def batch_map(
         raise ValueError("concurrency must be between 1 and 100")
 
     # Resolve tool name (strip prefix if needed, handle ambiguity)
-    actual_tool_name = resolve_tool_name(tool_name, ctx)
+    actual_tool_name = await resolve_tool_name(tool_name, ctx)
 
     sem = asyncio.Semaphore(concurrency)
 
