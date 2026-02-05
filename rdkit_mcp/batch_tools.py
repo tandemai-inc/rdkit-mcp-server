@@ -30,6 +30,81 @@ def optimal_concurrency(n_items: int, max_concurrency: int = 50) -> int:
         return min(max_concurrency, n_items)
 
 
+async def resolve_tool_name(tool_name: str, ctx: Context, sample_input: Optional[Dict[str, Any]] = None) -> str:
+    """
+    Resolve a potentially prefixed tool name to the actual tool name on the MCP server.
+
+    The tool_name might come with a prefix (e.g., "rdkit_smiles_to_mol") but
+    the FastMCP server only knows the unprefixed name (e.g., "smiles_to_mol").
+    This function handles disambiguation when multiple tools match.
+
+    Args:
+        tool_name: The tool name (possibly with prefix)
+        ctx: MCP context for accessing available tools
+        sample_input: Optional sample input dict to help disambiguate based on parameters
+
+    Returns:
+        The actual tool name on the MCP server
+
+    Raises:
+        ValueError: If tool is not found or ambiguous matches cannot be resolved
+    """
+    available_tools = await ctx.fastmcp.list_tools()
+    tool_names_set = {t.name for t in available_tools}
+    tools_by_name = {t.name: t for t in available_tools}
+
+    # If exact match exists, use it
+    if tool_name in tool_names_set:
+        return tool_name
+
+    # Find all tools that the provided tool_name ends with
+    matching_tools = [
+        known_tool for known_tool in tool_names_set
+        if tool_name.endswith(known_tool)
+    ]
+
+    if len(matching_tools) == 0:
+        raise ValueError(f"Tool '{tool_name}' not found. Available tools: {sorted(tool_names_set)}")
+    elif len(matching_tools) == 1:
+        return matching_tools[0]
+
+    # Multiple matches - disambiguate by checking parameters
+    input_params = set(sample_input.keys()) if sample_input else set()
+
+    best_match = None
+    best_match_score = -1
+
+    for candidate_tool_name in matching_tools:
+        tool_info = tools_by_name[candidate_tool_name]
+        # Get required parameters from the tool's input schema
+        tool_params = set()
+        if hasattr(tool_info, 'inputSchema') and tool_info.inputSchema:
+            schema = tool_info.inputSchema
+            if isinstance(schema, dict) and 'properties' in schema:
+                tool_params = set(schema['properties'].keys())
+
+        # Score based on parameter overlap and name length
+        if tool_params and input_params:
+            overlap = len(input_params & tool_params)
+            # Prefer longer tool names (more specific) as tiebreaker
+            score = (overlap, len(candidate_tool_name))
+        else:
+            # No schema info or no input params, prefer longer name (more specific match)
+            score = (0, len(candidate_tool_name))
+
+        if score > best_match_score:
+            best_match_score = score
+            best_match = candidate_tool_name
+
+    if best_match:
+        return best_match
+
+    raise ValueError(
+        f"Ambiguous tool name '{tool_name}'. Multiple matches found: {matching_tools}. "
+        f"Cannot disambiguate based on parameters."
+    )
+
+
 class BatchItemResult(BaseModel):
     ok: bool
     input: Optional[Any] = None
@@ -78,12 +153,16 @@ async def batch_map(
     elif not 1 <= concurrency <= 100:
         raise ValueError("concurrency must be between 1 and 100")
 
+    # Resolve tool name (strip prefix if needed, handle ambiguity)
+    sample_input = inputs[0] if inputs else None
+    actual_tool_name = await resolve_tool_name(tool_name, ctx, sample_input)
+
     sem = asyncio.Semaphore(concurrency)
 
     async def run_one(x: Dict[str, Any]) -> BatchItemResult:
         async with sem:
             try:
-                out = await ctx.fastmcp.call_tool(tool_name, x)
+                out = await ctx.fastmcp.call_tool(actual_tool_name, x)
                 return BatchItemResult(ok=True, input=x if include_input else None, output=out)
             except Exception as e:
                 return BatchItemResult(ok=False, input=x if include_input else None, error=str(e))
