@@ -1,5 +1,6 @@
 # Use an official Python image as the base
-FROM public.ecr.aws/docker/library/python:3.10-slim
+ARG BASE_IMAGE=python:3.10-slim
+FROM ${BASE_IMAGE}
 
 ARG APP_PORT=8000
 ENV DEBIAN_FRONTEND=noninteractive

@@ -147,7 +147,16 @@ class EmbedParameters(BaseModel):
     # Coordinate Map (for fixed atom positions)
     coordMap: dict[int, tuple[float, float, float]] = Field(
         default_factory=dict,
-        description="Dictionary mapping atom IDs to fixed coordinates (x, y, z)"
+        description="Dictionary mapping atom IDs to fixed coordinates (x, y, z)",
+        json_schema_extra={
+            "type": "object",
+            "additionalProperties": {
+                "type": "array",
+                "items": {"type": "number"},
+                "minItems": 3,
+                "maxItems": 3
+            }
+        }
     )
 
     def to_rdkit_params(self, method: str = "ETKDGv3"):

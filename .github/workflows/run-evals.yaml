@@ -34,7 +34,7 @@ jobs:
 
       - name: Run pydantic-evals
         id: run_evals
-        run: python evals/run_evals.py --output-json results.json
+        run: python evals/run_evals.py --output-json results.json --model openai:gpt-4o
         env:
           PYTHONPATH: ${{ github.workspace }}:${{ env.PYTHONPATH }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
