@@ -37,7 +37,7 @@ jobs:
         run: python evals/run_evals.py --output-json results.json
         env:
           PYTHONPATH: ${{ github.workspace }}:${{ env.PYTHONPATH }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         continue-on-error: true
 
       - name: Parse results and comment on PR
