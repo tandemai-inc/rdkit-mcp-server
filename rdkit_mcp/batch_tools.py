@@ -30,6 +30,45 @@ def optimal_concurrency(n_items: int, max_concurrency: int = 50) -> int:
         return min(max_concurrency, n_items)
 
 
+def resolve_tool_name(tool_name: str, ctx: Context) -> str:
+    """
+    Resolve a potentially prefixed tool name to the actual tool name on the MCP server.
+
+    The tool_name might come with a prefix (e.g., "rdkit_smiles_to_mol") but
+    the FastMCP server only knows the unprefixed name (e.g., "smiles_to_mol").
+
+    Args:
+        tool_name: The tool name (possibly with prefix)
+        ctx: MCP context for accessing available tools
+
+    Returns:
+        The actual tool name on the MCP server
+
+    Raises:
+        ValueError: If tool is not found
+    """
+    available_tools = ctx.fastmcp.list_tools()
+    tool_names_set = {t.name for t in available_tools}
+
+    # If exact match exists, use it
+    if tool_name in tool_names_set:
+        return tool_name
+
+    # Find all tools that the provided tool_name ends with
+    matching_tools = [
+        known_tool for known_tool in tool_names_set
+        if tool_name.endswith(known_tool)
+    ]
+
+    if len(matching_tools) == 0:
+        raise ValueError(f"Tool '{tool_name}' not found. Available tools: {sorted(tool_names_set)}")
+
+    # If multiple matches, use the shortest one (most specific match)
+    # e.g., "rdkit_smiles_to_mol" matches both "smiles_to_mol" and "batch_smiles_to_mol"
+    # -> choose "smiles_to_mol" (shorter)
+    return min(matching_tools, key=len)
+
+
 class BatchItemResult(BaseModel):
     ok: bool
     input: Optional[Any] = None
@@ -78,12 +117,15 @@ async def batch_map(
     elif not 1 <= concurrency <= 100:
         raise ValueError("concurrency must be between 1 and 100")
 
+    # Resolve tool name (strip prefix if needed, handle ambiguity)
+    actual_tool_name = resolve_tool_name(tool_name, ctx)
+
     sem = asyncio.Semaphore(concurrency)
 
     async def run_one(x: Dict[str, Any]) -> BatchItemResult:
         async with sem:
             try:
-                out = await ctx.fastmcp.call_tool(tool_name, x)
+                out = await ctx.fastmcp.call_tool(actual_tool_name, x)
                 return BatchItemResult(ok=True, input=x if include_input else None, output=out)
             except Exception as e:
                 return BatchItemResult(ok=False, input=x if include_input else None, error=str(e))
