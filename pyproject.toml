@@ -20,13 +20,13 @@ classifiers = [
     "Framework :: AsyncIO",
 ]
 dependencies = [
-    "mcp>=1.23.0", # The MCP SDK
+    "mcp==1.24.0", # The MCP SDK
     "rdkit==2025.3.1",              # RDKit library (installation might need specific handling)
-    "Pillow>=11.3.0",             # For image generation with RDKit
-    "pydantic>=2.11.5",
-    "pydantic-settings>=2.9.1",
-    "pydantic-ai[openai,mcp]>=0.1.0",
-    "pyyaml"
+    "Pillow==12.0.0",             # For image generation with RDKit
+    "pydantic==2.12.3",
+    "pydantic-settings==2.9.1",
+    "pydantic-ai-slim==1.39.0",  # Core pydantic-ai without extra providers
+    "PyYAML==6.0.3"
 ]
 
 [project.optional-dependencies]
