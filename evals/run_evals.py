@@ -35,7 +35,7 @@ AVAILABLE_MODELS = [
     "openai:gpt-4o-mini",
     "openai:gpt-4-turbo",
     "deepseek:deepseek-chat",
-    "deepseek:deepseek-reasoner",
+    "deepseek:deepseek-v4-pro",
 ]
 
 
@@ -64,7 +64,7 @@ async def main() -> None:
         "--model",
         type=str,
         choices=AVAILABLE_MODELS,
-        default="deepseek:deepseek-reasoner",
+        default="deepseek:deepseek-v4-pro",
         help=f"Model to use for evaluation tasks (choices: {', '.join(AVAILABLE_MODELS)}, default: openai:gpt-4o)",
     )
     parser.add_argument(
